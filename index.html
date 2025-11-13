@@ -3,40 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0;url=login.html">
-  <title>DutySync</title>
-  <link rel="stylesheet" href="style.css">
+  <title>DutySync Loading</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom, #0f1629, #000000); /* dark blue to black */
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      background: url('images/logo.png') center center no-repeat;
+      background-size: contain;
+      animation: fade 1.5s infinite;
+    }
+
+    @keyframes fade {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h3>Welcome to DutySync</h3>
-    <h1>This Website is under development / Project Testing Only</h1>
-  </header>
-
-  <footer>
-    <p>&copy; 2025 DutySync. All rights reserved.</p>
-  </footer>
-
-  <!-- Firebase scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <div class="logo"></div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIza...",
-      authDomain: "dutysync-12345.firebaseapp.com",
-      projectId: "dutysync-12345",
-      storageBucket: "dutysync-12345.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Redirect to login.html after 3 seconds
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 3000);
   </script>
-
-  <!-- Your main JS -->
-  <script src="script.js"></script>
 </body>
 </html>

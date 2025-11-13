@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0;url=login.html">
+  <title>DutySync</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h3>Welcome to DutySync</h3>
+    <h1>This Website is under development / Project Testing Only</h1>
+  </header>
+
+  <footer>
+    <p>&copy; 2025 DutySync. All rights reserved.</p>
+  </footer>
+
+  <!-- Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIza...",
+      authDomain: "dutysync-12345.firebaseapp.com",
+      projectId: "dutysync-12345",
+      storageBucket: "dutysync-12345.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Your main JS -->
+  <script src="script.js"></script>
+</body>
+</html>
+
