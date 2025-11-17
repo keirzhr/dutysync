@@ -88,14 +88,15 @@
       </a>
     </nav>
     <div class="sidebar-footer">
-    <div class="user-avatar" id="userAvatar">--</div>
-    <div class="user-info">
-      <div class="user-name" id="userName">Loading...</div>
-      <div class="user-email" id="userEmail">Loading...</div>
-    </div>
+      <div class="user-avatar" id="userAvatar">--</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-email" id="userEmail">Loading...</div>
+      </div>
       <span class="user-arrow">›</span>
     </div>
   </aside>
+
   <!-- Main Content -->
   <main class="main-content">
     <header>
@@ -105,162 +106,21 @@
     <div class="content">
       <!-- Dashboard Section -->
       <section class="content-section active" id="dashboard">
-        <h2 class="section-title">Dashboard Overview</h2>
+        <h2 class="section-title">Dashboard</h2>
         <div class="cards-grid">
           <div class="card">
             <div class="card-title">Total Hours This Month</div>
-            <div class="card-value">168.5</div>
-            <div class="card-subtitle">Regular: 160h | OT: 8.5h</div>
+            <div class="card-value">160</div>
+            <div class="card-subtitle">+5% from last month</div>
           </div>
           <div class="card">
-            <div class="card-title">Expected Salary</div>
-            <div class="card-value">₱24,500</div>
-            <div class="card-subtitle">Based on logged hours</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Days Worked</div>
-            <div class="card-value">22</div>
-            <div class="card-subtitle">Out of 26 working days</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Pending Logs</div>
-            <div class="card-value">3</div>
-            <div class="card-subtitle">Missing time-out entries</div>
-          </div>
-        </div>
-        <div class="card">
-          <h3 style="margin-bottom: 15px;">Recent Activity</h3>
-          <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 16 - Regular Duty: 8 hours</p>
-          <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 15 - Overtime: 2 hours</p>
-          <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 14 - Night Shift: 8 hours</p>
-        </div>
-      </section>
-      <!-- All Pages Section -->
-      <section class="content-section" id="all-pages">
-        <h2 class="section-title">All Pages</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Overview of all available pages and quick access links.</p>
-        </div>
-      </section>
-      <!-- Reports Section -->
-      <section class="content-section" id="reports">
-        <h2 class="section-title">Reports</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Generate and view detailed reports of your duty hours and earnings.</p>
-        </div>
-      </section>
-      <!-- Input Duty Section -->
-      <section class="content-section" id="input-duty">
-        <h2 class="section-title">Input Duty</h2>
-        <div class="card">
-          <form>
-            <div class="form-group">
-              <label>Date</label>
-              <input type="date" required>
-            </div>
-            <div class="form-group">
-              <label>Time In</label>
-              <input type="time" required>
-            </div>
-            <div class="form-group">
-              <label>Time Out</label>
-              <input type="time" required>
-            </div>
-            <div class="form-group">
-              <label>Duty Type</label>
-              <select required>
-                <option value="">Select duty type</option>
-                <option value="regular">Regular Duty</option>
-                <option value="overtime">Overtime</option>
-                <option value="holiday">Holiday</option>
-                <option value="nightshift">Night Shift</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Notes (Optional)</label>
-              <input type="text" placeholder="Add any notes...">
-            </div>
-            <button type="submit" class="btn">Submit Duty Log</button>
-          </form>
-        </div>
-      </section>
-      <!-- View Duty Log Section -->
-      <section class="content-section" id="view-duty-log">
-        <h2 class="section-title">View Duty Log</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">View your complete duty log history with filters and search.</p>
-        </div>
-      </section>
-      <!-- Payslip Section -->
-      <section class="content-section" id="payslip">
-        <h2 class="section-title">Payslip Management</h2>
-        <div class="card">
-          <h3 style="margin-bottom: 15px;">Recent Payslips</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 20px;">View, download, or print your payslips by cutoff period.</p>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn">Nov 1-15, 2025</button>
-            <button class="btn">Oct 16-31, 2025</button>
-            <button class="btn">Oct 1-15, 2025</button>
+            <div class="card-title">Net Pay</div>
+            <div class="card-value">₱25,000</div>
+            <div class="card-subtitle">Current month</div>
           </div>
         </div>
       </section>
-      <!-- View Payslip Section -->
-      <section class="content-section" id="view-payslip">
-        <h2 class="section-title">View Payslip</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Select a cutoff period to view detailed payslip information.</p>
-        </div>
-      </section>
-      <!-- Generate Payslip Section -->
-      <section class="content-section" id="generate-payslip">
-        <h2 class="section-title">Generate Payslip</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Create a new payslip for a specific period with automatic calculations.</p>
-        </div>
-      </section>
-      <!-- Analytics Section -->
-      <section class="content-section" id="analytics">
-        <h2 class="section-title">Analytics & Insights</h2>
-        <div class="cards-grid">
-          <div class="card">
-            <div class="card-title">Average Daily Hours</div>
-            <div class="card-value">7.8</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Overtime Rate</div>
-            <div class="card-value">12%</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Perfect Attendance</div>
-            <div class="card-value">95%</div>
-          </div>
-        </div>
-        <div class="card">
-          <h3 style="margin-bottom: 15px;">Trends</h3>
-          <p style="color: var(--text-secondary);">Graphs showing hours worked, deductions, and salary trends over time will appear here.</p>
-        </div>
-      </section>
-      <!-- Total Hours Section -->
-      <section class="content-section" id="total-hours">
-        <h2 class="section-title">Total Hours</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Detailed breakdown of total hours worked across different periods.</p>
-        </div>
-      </section>
-      <!-- Net Pay Trends Section -->
-      <section class="content-section" id="net-pay-trends">
-        <h2 class="section-title">Net Pay Trends</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Visual representation of your net pay trends over time.</p>
-        </div>
-      </section>
-      <!-- Deduction Breakdown Section -->
-      <section class="content-section" id="deduction-breakdown">
-        <h2 class="section-title">Deduction Breakdown</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Detailed breakdown of all deductions from your salary.</p>
-        </div>
-      </section>
+
       <!-- Settings Section -->
       <section class="content-section" id="settings">
         <h2 class="section-title">Settings</h2>
@@ -268,114 +128,174 @@
           <h3 style="margin-bottom: 15px;">Preferences</h3>
           <div class="form-group">
             <label>Theme</label>
-            <select>
-              <option>Light Mode</option>
-              <option>Dark Mode</option>
+            <select id="themeSelector">
+              <option value="light">Light Mode</option>
+              <option value="dark">Dark Mode</option>
             </select>
           </div>
           <div class="form-group">
             <label>Current Password</label>
-            <input type="password" placeholder="Enter current password">
+            <input type="password" id="currentPassword" placeholder="Enter current password">
           </div>
           <div class="form-group">
             <label>New Password</label>
-            <input type="password" placeholder="Enter new password">
+            <input type="password" id="newPassword" placeholder="Enter new password">
           </div>
-          <button class="btn" style="margin-right: 10px;">Update Password</button>
+          <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
           <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
         </div>
       </section>
-      <!-- Help Section -->
+
+      <!-- Other sections (add your existing sections here) -->
+      <section class="content-section" id="all-pages">
+        <h2 class="section-title">All Pages</h2>
+        <div class="card"><p>All pages content here...</p></div>
+      </section>
+
+      <section class="content-section" id="reports">
+        <h2 class="section-title">Reports</h2>
+        <div class="card"><p>Reports content here...</p></div>
+      </section>
+
       <section class="content-section" id="help">
-        <h2 class="section-title">Help & Support</h2>
-        <div class="card">
-          <p style="color: var(--text-secondary);">Find answers to common questions and get support for using DutySync.</p>
-        </div>
+        <h2 class="section-title">Help</h2>
+        <div class="card"><p>Help content here...</p></div>
       </section>
     </div>
     <footer>
       <p>&copy; 2025 DutySync. All rights reserved.</p>
     </footer>
   </main>
-  <script src="script.js"></script>
+
   <script>
     // Firebase config
     const firebaseConfig = {
-        apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
-        authDomain: "dutysync-2025.firebaseapp.com",
-        projectId: "dutysync-2025",
-        storageBucket: "dutysync-2025.firebasestorage.app",
-        messagingSenderId: "512248770067",
-        appId: "1:512248770067:web:135e19274bf7e6c5bbd9e6",
-        measurementId: "G-70X2MGERZC"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "dutysync-12345.firebaseapp.com",
+      projectId: "dutysync-12345",
+      storageBucket: "dutysync-12345.appspot.com"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    
-    // Load profile on start
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Load saved theme
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('themeSelector').value = savedTheme;
+
+      // Theme selector
+      const themeSelector = document.getElementById('themeSelector');
+      themeSelector.addEventListener('change', (e) => {
+        const theme = e.target.value;
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+      });
+
+      // Sidebar toggle
+      const hamburger = document.getElementById("hamburger");
+      const sidebar = document.getElementById("sidebar");
+      hamburger.addEventListener("click", () => sidebar.classList.toggle("open"));
+
+      // Navigation with submenu support
+      const navItems = document.querySelectorAll(".nav-item");
+      const sections = document.querySelectorAll(".content-section");
+
+      navItems.forEach((item) => {
+        item.addEventListener("click", (e) => {
+          const page = item.dataset.page;
+          const parent = item.dataset.parent;
+
+          // Handle submenu toggle
+          if (parent) {
+            e.preventDefault();
+            const submenu = document.getElementById(`${parent}-submenu`);
+            const isExpanded = item.classList.contains('expanded');
+            
+            // Close all submenus
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('expanded'));
+            document.querySelectorAll('.sub-menu').forEach(s => s.classList.remove('expanded'));
+            
+            // Toggle current submenu
+            if (!isExpanded) {
+              item.classList.add('expanded');
+              if (submenu) submenu.classList.add('expanded');
+            }
+          } else if (page) {
+            // Navigate to page
+            navItems.forEach((i) => i.classList.remove("active"));
+            item.classList.add("active");
+            sections.forEach((sec) => sec.classList.remove("active"));
+            const targetSection = document.getElementById(page);
+            if (targetSection) targetSection.classList.add("active");
+          }
+        });
+      });
+
+      // Update Password
+      const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+      if (updatePasswordBtn) {
+        updatePasswordBtn.addEventListener('click', async () => {
+          const currentPassword = document.getElementById('currentPassword').value;
+          const newPassword = document.getElementById('newPassword').value;
+
+          if (!currentPassword || !newPassword) {
+            alert('Please fill in both password fields');
+            return;
+          }
+
+          if (newPassword.length < 6) {
+            alert('New password must be at least 6 characters');
+            return;
+          }
+
+          try {
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(
+              user.email,
+              currentPassword
+            );
+            
+            await user.reauthenticateWithCredential(credential);
+            await user.updatePassword(newPassword);
+            
+            alert('Password updated successfully!');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+          } catch (error) {
+            console.error('Password update error:', error);
+            if (error.code === 'auth/wrong-password') {
+              alert('Current password is incorrect');
+            } else {
+              alert('Failed to update password: ' + error.message);
+            }
+          }
+        });
       }
-      
-      try {
-        // Get Firestore data
-      const docRef = db.collection("users").doc(user.uid);
 
-      // Try cache first (instant)
-      let docSnap = await docRef.get({ source: "cache" }).catch(() => null);
-
-      // If not in cache, load from server (slower)
-      if (!docSnap || !docSnap.exists) {
-        docSnap = await docRef.get();
-      }
-
+      // Logout functionality
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          
+          if (confirm('Are you sure you want to logout?')) {
+            try {
+              // Sign out from Firebase
+              await auth.signOut();
               
-        if (docSnap.exists) {
-          const data = docSnap.data();
-          
-          // Update UI with correct field name (fullName with capital N)
-          const fullName = data.fullName || data.fullname || "User";
-          const email = data.email || user.email || "No email";
-          
-          document.getElementById("userName").textContent = fullName;
-          document.getElementById("userEmail").textContent = email;
-          
-          // Avatar (Initials)
-          const initials = fullName
-            .split(" ")
-            .map(w => w[0])
-            .join("")
-            .toUpperCase()
-            .substring(0, 2);
-          
-          document.getElementById("userAvatar").textContent = initials;
-        } else {
-          // If no Firestore data, use Firebase Auth data
-          document.getElementById("userName").textContent = user.displayName || "User";
-          document.getElementById("userEmail").textContent = user.email || "No email";
-          document.getElementById("userAvatar").textContent = "U";
-        }
-      } catch (error) {
-        console.error("Error loading user data:", error);
-        // Fallback to basic auth data
-        document.getElementById("userName").textContent = user.displayName || "User";
-        document.getElementById("userEmail").textContent = user.email || "No email";
-        document.getElementById("userAvatar").textContent = "U";
-      }
-    });
-    
-    // Logout functionality
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        await auth.signOut();
-        window.location.href = 'index.html';
-      } catch (error) {
-        console.error('Logout error:', error);
-        alert('Failed to logout. Please try again.');
+              // Clear any local storage if needed
+              localStorage.removeItem('userSession');
+              
+              // Redirect to index.html
+              window.location.href = "index.html";
+            } catch (error) {
+              console.error("Logout error:", error);
+              alert("Failed to logout: " + error.message);
+            }
+          }
+        });
       }
     });
   </script>
