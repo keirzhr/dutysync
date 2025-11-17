@@ -1,42 +1,368 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DutySync</title>
   <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h3>Welcome to DutySync</h3>
-    <h1>This Website is under development / Project Testing Only</h1>
-  </header>
-
-  <footer>
-    <p>&copy; 2025 DutySync. All rights reserved.</p>
-  </footer>
-
-  <!-- Firebase scripts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <title>DutySync - Dashboard</title>
+</head>
 
-  <script>
-    const firebaseConfig = {
-        apiKey: "AIza...",
-        authDomain: "dutysync-12345.firebaseapp.com",
-        projectId: "dutysync-12345",
-        storageBucket: "dutysync-12345.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef"
-    };
+<body>
+  <!-- Sidebar -->
+  <button class="hamburger" id="hamburger">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="images/logo.png" class="logo-img">
+      <span class="logo-text">DutySync</span>
+    </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    <nav class="nav-menu">
+      <!-- Dashboard Section -->
+      <div class="nav-section">
+        <a class="nav-item active" data-page="dashboard" data-parent="dashboard">
+          <i class="fas fa-chart-pie nav-icon"></i>
+          <span class="nav-text">Dashboard</span>
+          <span class="nav-arrow">›</span>
+        </a>
+        <div class="sub-menu" id="dashboard-submenu">
+          <a class="nav-item sub-item" data-page="all-pages">
+            <span class="nav-text">All Pages</span>
+          </a>
+          <a class="nav-item sub-item" data-page="reports">
+            <span class="nav-text">Reports</span>
+          </a>
+          <a class="nav-item sub-item" data-page="input-duty">
+            <span class="nav-text">Input Duty</span>
+          </a>
+          <a class="nav-item sub-item" data-page="view-duty-log">
+            <span class="nav-text">View Duty Log</span>
+          </a>
+        </div>
+      </div>
 
-  </script>
+      <!-- Payslip Section -->
+      <div class="nav-section">
+        <a class="nav-item" data-page="payslip" data-parent="payslip">
+          <i class="fas fa-money-bill-wave nav-icon"></i>
+          <span class="nav-text">Payslip</span>
+          <span class="nav-arrow">›</span>
+        </a>
+        <div class="sub-menu" id="payslip-submenu">
+          <a class="nav-item sub-item" data-page="view-payslip">
+            <span class="nav-text">View Payslip</span>
+          </a>
+          <a class="nav-item sub-item" data-page="generate-payslip">
+            <span class="nav-text">Generate Payslip</span>
+          </a>
+        </div>
+      </div>
 
-  <!-- Your main JS -->
-  <script src="script.js"></script>
+      <!-- Analytics Section -->
+      <div class="nav-section">
+        <a class="nav-item" data-page="analytics" data-parent="analytics">
+          <i class="fas fa-chart-line nav-icon"></i>
+          <span class="nav-text">Analytics</span>
+          <span class="nav-arrow">›</span>
+        </a>
+        <div class="sub-menu" id="analytics-submenu">
+          <a class="nav-item sub-item" data-page="total-hours">
+            <span class="nav-text">Total Hours</span>
+          </a>
+          <a class="nav-item sub-item" data-page="net-pay-trends">
+            <span class="nav-text">Net Pay Trends</span>
+          </a>
+          <a class="nav-item sub-item" data-page="deduction-breakdown">
+            <span class="nav-text">Deduction Breakdown</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <a class="nav-item" data-page="settings">
+        <i class="fas fa-cog nav-icon"></i>
+        <span class="nav-text">Settings</span>
+      </a>
+
+      <!-- Help -->
+      <a class="nav-item" data-page="help">
+        <i class="fas fa-question-circle nav-icon"></i>
+        <span class="nav-text">Help</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+    <div class="user-avatar" id="userAvatar">--</div>
+    <div class="user-info">
+      <div class="user-name" id="userName">Loading...</div>
+      <div class="user-email" id="userEmail">Loading...</div>
+    </div>
+      <span class="user-arrow">›</span>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header>
+      <h3>Welcome to DutySync</h3>
+      <h1>This Website is under development / Project Testing Only</h1>
+    </header>
+
+    <div class="content">
+      <!-- Dashboard Section -->
+      <section class="content-section active" id="dashboard">
+        <h2 class="section-title">Dashboard Overview</h2>
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-title">Total Hours This Month</div>
+            <div class="card-value">168.5</div>
+            <div class="card-subtitle">Regular: 160h | OT: 8.5h</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Expected Salary</div>
+            <div class="card-value">₱24,500</div>
+            <div class="card-subtitle">Based on logged hours</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Days Worked</div>
+            <div class="card-value">22</div>
+            <div class="card-subtitle">Out of 26 working days</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Pending Logs</div>
+            <div class="card-value">3</div>
+            <div class="card-subtitle">Missing time-out entries</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 15px;">Recent Activity</h3>
+          <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 16 - Regular Duty: 8 hours</p>
+          <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 15 - Overtime: 2 hours</p>
+          <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 14 - Night Shift: 8 hours</p>
+        </div>
+      </section>
+
+      <!-- All Pages Section -->
+      <section class="content-section" id="all-pages">
+        <h2 class="section-title">All Pages</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Overview of all available pages and quick access links.</p>
+        </div>
+      </section>
+
+      <!-- Reports Section -->
+      <section class="content-section" id="reports">
+        <h2 class="section-title">Reports</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Generate and view detailed reports of your duty hours and earnings.</p>
+        </div>
+      </section>
+
+      <!-- Input Duty Section -->
+      <section class="content-section" id="input-duty">
+        <h2 class="section-title">Input Duty</h2>
+        <div class="card">
+          <form>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" required>
+            </div>
+            <div class="form-group">
+              <label>Time In</label>
+              <input type="time" required>
+            </div>
+            <div class="form-group">
+              <label>Time Out</label>
+              <input type="time" required>
+            </div>
+            <div class="form-group">
+              <label>Duty Type</label>
+              <select required>
+                <option value="">Select duty type</option>
+                <option value="regular">Regular Duty</option>
+                <option value="overtime">Overtime</option>
+                <option value="holiday">Holiday</option>
+                <option value="nightshift">Night Shift</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Notes (Optional)</label>
+              <input type="text" placeholder="Add any notes...">
+            </div>
+            <button type="submit" class="btn">Submit Duty Log</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- View Duty Log Section -->
+      <section class="content-section" id="view-duty-log">
+        <h2 class="section-title">View Duty Log</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">View your complete duty log history with filters and search.</p>
+        </div>
+      </section>
+
+      <!-- Payslip Section -->
+      <section class="content-section" id="payslip">
+        <h2 class="section-title">Payslip Management</h2>
+        <div class="card">
+          <h3 style="margin-bottom: 15px;">Recent Payslips</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 20px;">View, download, or print your payslips by cutoff period.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn">Nov 1-15, 2025</button>
+            <button class="btn">Oct 16-31, 2025</button>
+            <button class="btn">Oct 1-15, 2025</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- View Payslip Section -->
+      <section class="content-section" id="view-payslip">
+        <h2 class="section-title">View Payslip</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Select a cutoff period to view detailed payslip information.</p>
+        </div>
+      </section>
+
+      <!-- Generate Payslip Section -->
+      <section class="content-section" id="generate-payslip">
+        <h2 class="section-title">Generate Payslip</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Create a new payslip for a specific period with automatic calculations.</p>
+        </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section class="content-section" id="analytics">
+        <h2 class="section-title">Analytics & Insights</h2>
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-title">Average Daily Hours</div>
+            <div class="card-value">7.8</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Overtime Rate</div>
+            <div class="card-value">12%</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Perfect Attendance</div>
+            <div class="card-value">95%</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 15px;">Trends</h3>
+          <p style="color: var(--text-secondary);">Graphs showing hours worked, deductions, and salary trends over time will appear here.</p>
+        </div>
+      </section>
+
+      <!-- Total Hours Section -->
+      <section class="content-section" id="total-hours">
+        <h2 class="section-title">Total Hours</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Detailed breakdown of total hours worked across different periods.</p>
+        </div>
+      </section>
+
+      <!-- Net Pay Trends Section -->
+      <section class="content-section" id="net-pay-trends">
+        <h2 class="section-title">Net Pay Trends</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Visual representation of your net pay trends over time.</p>
+        </div>
+      </section>
+
+      <!-- Deduction Breakdown Section -->
+      <section class="content-section" id="deduction-breakdown">
+        <h2 class="section-title">Deduction Breakdown</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Detailed breakdown of all deductions from your salary.</p>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section class="content-section" id="settings">
+        <h2 class="section-title">Settings</h2>
+        <div class="card">
+          <h3 style="margin-bottom: 15px;">Preferences</h3>
+          <div class="form-group">
+            <label>Theme</label>
+            <select>
+              <option>Light Mode</option>
+              <option>Dark Mode</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" placeholder="Enter new password">
+          </div>
+          <button class="btn" style="margin-right: 10px;">Update Password</button>
+          <button class="btn" style="background: #dc3545;">Logout</button>
+        </div>
+      </section>
+
+      <!-- Help Section -->
+      <section class="content-section" id="help">
+        <h2 class="section-title">Help & Support</h2>
+        <div class="card">
+          <p style="color: var(--text-secondary);">Find answers to common questions and get support for using DutySync.</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 DutySync. All rights reserved.</p>
+    </footer>
+  </main>
+    <script src="script.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+  // Your Firebase config (same as login/signup)
+  const firebaseConfig = {
+      apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
+      authDomain: "dutysync-2025.firebaseapp.com",
+      projectId: "dutysync-2025",
+      storageBucket: "dutysync-2025.firebasestorage.app",
+      messagingSenderId: "512248770067",
+      appId: "1:512248770067:web:135e19274bf7e6c5bbd9e6",
+      measurementId: "G-70X2MGERZC"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Load profile on start
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = "login.html"; // if no user, redirect to login
+      return;
+    }
+
+    // Get Firestore data
+    const docRef = db.collection("users").doc(user.uid);
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      const data = docSnap.data();
+
+      // Update UI
+      document.getElementById("userName").textContent = data.fullname;
+      document.getElementById("userEmail").textContent = data.email;
+
+      // Avatar (Initials)
+      const initials = data.fullname.split(" ").map(w => w[0]).join("").toUpperCase();
+      document.getElementById("userAvatar").textContent = initials;
+    }
+  });
+</script>
+
 </body>
 </html>
-
