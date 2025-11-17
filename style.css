@@ -45,6 +45,25 @@
   box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08); /* subtle shadow */
 }
 
+
+/* Fix sidebar layout on all screens */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Make the menu scroll instead of pushing footer down */
+.nav-menu {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Sidebar footer stays visible at the bottom */
+.sidebar-footer {
+  flex-shrink: 0;
+}
+
     
 
     .sidebar:hover:not(.locked) {
@@ -466,26 +485,21 @@
 
     /* Responsive */
     @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-           width: 240px; /* smaller */
-        transition: transform 0.3s ease;
-      }
+      /* Fix mobile sidebar height issue */
+.sidebar {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-        .user-info {
-    font-size: 14px;
-  }
+.nav-menu {
+  flex: 1;
+  overflow-y: auto;
+}
 
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-  }
-
-        .sidebar-header {
-    padding-top: 20px;
-    padding-left: 60px;
-  }
+.sidebar-footer {
+  padding: 15px;
+}
 
       .sidebar.locked {
         width: var(--sidebar-expanded);
