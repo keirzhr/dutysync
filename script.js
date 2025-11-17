@@ -16,25 +16,67 @@ const hamburger = document.getElementById("hamburger");
 const sidebar = document.getElementById("sidebar");
 const navItems = document.querySelectorAll(".nav-item");
 const sections = document.querySelectorAll(".content-section");
-const themeSelector = document.getElementById('themeSelector');
+const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+const themeCheckbox = document.getElementById('themeCheckbox');
 
-// --- Theme ---
 document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    if (themeSelector) themeSelector.value = savedTheme;
+    // --- Logout Modal ---
+    const logoutBtn = document.getElementById("logoutBtn");
+    const logoutModal = document.getElementById("logoutModal");
+    const confirmLogout = document.getElementById("confirmLogout");
+    const cancelLogout = document.getElementById("cancelLogout");
 
-    themeSelector?.addEventListener('change', e => {
-        const theme = e.target.value;
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    });
+    if (logoutBtn && logoutModal && confirmLogout && cancelLogout) {
+        logoutBtn.addEventListener("click", () => {
+            logoutModal.style.display = "flex";
+        });
+
+        cancelLogout.addEventListener("click", () => {
+            logoutModal.style.display = "none";
+        });
+
+        confirmLogout.addEventListener("click", async () => {
+            try {
+                await auth.signOut();
+                localStorage.removeItem('userSession');
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Logout error:", error);
+                alert("Failed to logout: " + error.message);
+            }
+        });
+    }
+
+    // --- Load and Toggle Theme (FIXED - No longer nested) ---
+    const themeCheckboxElement = document.getElementById('themeCheckbox');
+    
+    if (themeCheckboxElement) {
+        console.log('Theme checkbox found!'); // Debug log
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        console.log('Saved theme:', savedTheme); // Debug log
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeCheckboxElement.checked = savedTheme === 'dark';
+
+        // Toggle theme
+        themeCheckboxElement.addEventListener('change', () => {
+            const theme = themeCheckboxElement.checked ? 'dark' : 'light';
+            console.log('Switching to theme:', theme); // Debug log
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        });
+    } else {
+        console.error('Theme checkbox NOT found!'); // Debug log
+    }
 });
 
 // --- Sidebar Toggle ---
 hamburger.addEventListener("click", () => sidebar.classList.toggle("open"));
 
-// --- Close sidebar on click outside (mobile only) ---
+// --- Close sidebar on click outside ---
 document.addEventListener("click", e => {
     if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
         sidebar.classList.remove("open");
@@ -46,6 +88,27 @@ window.addEventListener("resize", () => {
     if (window.innerWidth > 768) sidebar.classList.remove("open");
 });
 
+// --- Update Breadcrumb ---
+function updateBreadcrumb(parentName, currentName) {
+    const breadcrumbParent = document.getElementById('breadcrumbParent');
+    const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
+    const breadcrumbSeparator = document.getElementById('breadcrumbSeparator');
+    
+    if (breadcrumbParent && breadcrumbCurrent && breadcrumbSeparator) {
+        breadcrumbParent.textContent = parentName;
+        breadcrumbCurrent.textContent = currentName;
+        
+        // Hide separator and current if no sub-page
+        if (!currentName) {
+            breadcrumbSeparator.style.display = 'none';
+            breadcrumbCurrent.style.display = 'none';
+        } else {
+            breadcrumbSeparator.style.display = 'inline';
+            breadcrumbCurrent.style.display = 'inline';
+        }
+    }
+}
+
 // --- Navigation ---
 navItems.forEach(item => {
     item.addEventListener("click", e => {
@@ -53,13 +116,12 @@ navItems.forEach(item => {
         const pageId = item.dataset.page;
         const parentId = item.dataset.parent;
         const isSub = item.classList.contains("sub-item");
+        const itemText = item.querySelector('.nav-text')?.textContent || pageId;
 
-        // --- Parent item with submenu ---
         if (parentId && !isSub) {
             const submenu = document.getElementById(`${parentId}-submenu`);
             const isExpanded = item.classList.contains('expanded');
 
-            // Close all other submenus
             navItems.forEach(nav => {
                 if (!nav.classList.contains("sub-item") && nav !== item) {
                     nav.classList.remove('active', 'expanded');
@@ -68,34 +130,39 @@ navItems.forEach(item => {
                 }
             });
 
-            // Toggle current submenu
             if (!isExpanded) {
                 item.classList.add('expanded');
                 submenu?.classList.add('expanded');
             }
 
-            // Set active for clicked parent
             item.classList.add("active");
-
-            // Show parent section
             sections.forEach(sec => sec.classList.remove("active"));
             document.getElementById(pageId)?.classList.add("active");
+            
+            // Update breadcrumb for parent items
+            updateBreadcrumb(itemText, '');
         }
 
-        // --- Sub-item or regular item without submenu ---
         if (isSub || !parentId) {
             if (isSub) {
                 document.querySelectorAll(".sub-item").forEach(sub => sub.classList.remove("active"));
                 item.classList.add("active");
+                
+                // Find parent name for breadcrumb
+                const parentItem = item.closest('.nav-section')?.querySelector('[data-parent]');
+                const parentText = parentItem?.querySelector('.nav-text')?.textContent || 'Dashboard';
+                updateBreadcrumb(parentText, itemText);
             } else if (!parentId) {
                 navItems.forEach(nav => nav.classList.remove("active"));
                 item.classList.add("active");
+                
+                // Update breadcrumb for standalone items (Settings, Help)
+                updateBreadcrumb(itemText, '');
             }
 
             sections.forEach(sec => sec.classList.remove("active"));
             document.getElementById(pageId)?.classList.add("active");
 
-            // Collapse sidebar on mobile only
             if (window.innerWidth <= 768) sidebar.classList.remove("open");
         }
     });
@@ -110,7 +177,6 @@ document.querySelectorAll("form").forEach(form => {
 });
 
 // --- Update Password ---
-const updatePasswordBtn = document.getElementById('updatePasswordBtn');
 updatePasswordBtn?.addEventListener('click', async () => {
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
@@ -131,21 +197,5 @@ updatePasswordBtn?.addEventListener('click', async () => {
     } catch (error) {
         console.error('Password update error:', error);
         alert(error.code === 'auth/wrong-password' ? 'Current password is incorrect' : 'Failed to update password: ' + error.message);
-    }
-});
-
-// --- Logout ---
-const logoutBtn = document.getElementById("logoutBtn");
-logoutBtn?.addEventListener("click", async e => {
-    e.preventDefault();
-    if (!confirm('Are you sure you want to logout?')) return;
-
-    try {
-        await auth.signOut();
-        localStorage.removeItem('userSession');
-        window.location.href = "index.html";
-    } catch (error) {
-        console.error("Logout error:", error);
-        alert("Failed to logout: " + error.message);
     }
 });

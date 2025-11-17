@@ -97,13 +97,25 @@
   <!-- Main Content -->
   <main class="main-content">
     <header>
-      <h3>Welcome to DutySync</h3>
-      <h1>This Website is under development / Project Testing Only</h1>
+      <div class="header-content">
+        <div class="header-left">
+          <div class="breadcrumb">
+            <span class="breadcrumb-parent" id="breadcrumbParent">Dashboard</span>
+            <span class="breadcrumb-separator" id="breadcrumbSeparator">/</span>
+            <span class="breadcrumb-current" id="breadcrumbCurrent"></span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="notification-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">3</span>
+          </button>
+        </div>
+      </div>
     </header>
     <div class="content">
       <!-- Dashboard Section -->
       <section class="content-section active" id="dashboard">
-        <h2 class="section-title">Dashboard</h2>
         <div class="cards-grid">
           <div class="card">
             <div class="card-title">Total Hours This Month</div>
@@ -118,44 +130,57 @@
         </div>
       </section>
 
-      <!-- Settings Section -->
-      <section class="content-section" id="settings">
-        <h2 class="section-title">Settings</h2>
-        <div class="card">
-          <h3 style="margin-bottom: 15px;">Preferences</h3>
-          <div class="form-group">
-            <label>Theme</label>
-            <select id="themeSelector">
-              <option value="light">Light Mode</option>
-              <option value="dark">Dark Mode</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Current Password</label>
-            <input type="password" id="currentPassword" placeholder="Enter current password">
-          </div>
-          <div class="form-group">
-            <label>New Password</label>
-            <input type="password" id="newPassword" placeholder="Enter new password">
-          </div>
-          <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
-          <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
+    <section class="content-section" id="settings">
+    <div class="card">
+      <h3 style="margin-bottom: 15px;">Preferences</h3>
+
+      <!-- Dark Mode Toggle -->
+<div class="form-group theme-toggle">
+  <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+    <span>Dark Mode</span>
+    <div class="toggle-switch">
+      <input type="checkbox" id="themeCheckbox">
+      <span class="slider round"></span>
+    </div>
+  </label>
+</div>
+
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" id="currentPassword" placeholder="Enter current password">
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="newPassword" placeholder="Enter new password">
+      </div>
+      <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
+      <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
+    </div>
+  </section>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal">
+      <div class="modal-content">
+        <h3>Logout Confirmation</h3>
+        <p>Are you sure you want to logout?</p>
+        <div class="modal-buttons">
+          <button id="confirmLogout" class="btn btn-logout">Logout</button>
+          <button id="cancelLogout" class="btn btn-cancel">Cancel</button>
         </div>
-      </section>
+      </div>
+    </div>
+
 
       <!-- Other sections (add your existing sections here) -->
       <section class="content-section" id="all-pages">
-        <h2 class="section-title">All Pages</h2>
         <div class="card"><p>All pages content here...</p></div>
       </section>
 
       <section class="content-section" id="reports">
-        <h2 class="section-title">Reports</h2>
         <div class="card"><p>Reports content here...</p></div>
       </section>
 
       <section class="content-section" id="help">
-        <h2 class="section-title">Help</h2>
         <div class="card"><p>Help content here...</p></div>
       </section>
     </div>
