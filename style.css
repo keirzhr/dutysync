@@ -241,7 +241,7 @@
 
     /* User Section */
     .sidebar-footer {
-      padding: 16px;
+      padding: 15px;
       border-top: 2px solid var(--border-color);
       display: flex;
       align-items: center;
@@ -468,9 +468,19 @@
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
-        width: var(--sidebar-expanded);
+           width: 240px; /* smaller */
         transition: transform 0.3s ease;
       }
+
+        .user-info {
+    font-size: 14px;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
 
         .sidebar-header {
     padding-top: 20px;
