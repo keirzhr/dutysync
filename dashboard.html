@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <title>DutySync - Dashboard</title>
 </head>
 <body>
@@ -167,137 +164,9 @@
     </footer>
   </main>
 
-  <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "dutysync-12345.firebaseapp.com",
-      projectId: "dutysync-12345",
-      storageBucket: "dutysync-12345.appspot.com"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // Load saved theme
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      document.getElementById('themeSelector').value = savedTheme;
-
-      // Theme selector
-      const themeSelector = document.getElementById('themeSelector');
-      themeSelector.addEventListener('change', (e) => {
-        const theme = e.target.value;
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-      });
-
-      // Sidebar toggle
-      const hamburger = document.getElementById("hamburger");
-      const sidebar = document.getElementById("sidebar");
-      hamburger.addEventListener("click", () => sidebar.classList.toggle("open"));
-
-      // Navigation with submenu support
-      const navItems = document.querySelectorAll(".nav-item");
-      const sections = document.querySelectorAll(".content-section");
-
-      navItems.forEach((item) => {
-        item.addEventListener("click", (e) => {
-          const page = item.dataset.page;
-          const parent = item.dataset.parent;
-
-          // Handle submenu toggle
-          if (parent) {
-            e.preventDefault();
-            const submenu = document.getElementById(`${parent}-submenu`);
-            const isExpanded = item.classList.contains('expanded');
-            
-            // Close all submenus
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('expanded'));
-            document.querySelectorAll('.sub-menu').forEach(s => s.classList.remove('expanded'));
-            
-            // Toggle current submenu
-            if (!isExpanded) {
-              item.classList.add('expanded');
-              if (submenu) submenu.classList.add('expanded');
-            }
-          } else if (page) {
-            // Navigate to page
-            navItems.forEach((i) => i.classList.remove("active"));
-            item.classList.add("active");
-            sections.forEach((sec) => sec.classList.remove("active"));
-            const targetSection = document.getElementById(page);
-            if (targetSection) targetSection.classList.add("active");
-          }
-        });
-      });
-
-      // Update Password
-      const updatePasswordBtn = document.getElementById('updatePasswordBtn');
-      if (updatePasswordBtn) {
-        updatePasswordBtn.addEventListener('click', async () => {
-          const currentPassword = document.getElementById('currentPassword').value;
-          const newPassword = document.getElementById('newPassword').value;
-
-          if (!currentPassword || !newPassword) {
-            alert('Please fill in both password fields');
-            return;
-          }
-
-          if (newPassword.length < 6) {
-            alert('New password must be at least 6 characters');
-            return;
-          }
-
-          try {
-            const user = auth.currentUser;
-            const credential = firebase.auth.EmailAuthProvider.credential(
-              user.email,
-              currentPassword
-            );
-            
-            await user.reauthenticateWithCredential(credential);
-            await user.updatePassword(newPassword);
-            
-            alert('Password updated successfully!');
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-          } catch (error) {
-            console.error('Password update error:', error);
-            if (error.code === 'auth/wrong-password') {
-              alert('Current password is incorrect');
-            } else {
-              alert('Failed to update password: ' + error.message);
-            }
-          }
-        });
-      }
-
-      // Logout functionality
-      const logoutBtn = document.getElementById("logoutBtn");
-      if (logoutBtn) {
-        logoutBtn.addEventListener("click", async (e) => {
-          e.preventDefault();
-          
-          if (confirm('Are you sure you want to logout?')) {
-            try {
-              // Sign out from Firebase
-              await auth.signOut();
-              
-              // Clear any local storage if needed
-              localStorage.removeItem('userSession');
-              
-              // Redirect to index.html
-              window.location.href = "index.html";
-            } catch (error) {
-              console.error("Logout error:", error);
-              alert("Failed to logout: " + error.message);
-            }
-          }
-        });
-      }
-    });
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
