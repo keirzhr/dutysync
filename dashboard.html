@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <title>DutySync - Dashboard</title>
 </head>
-
 <body>
   <!-- Sidebar -->
   <button class="hamburger" id="hamburger">☰</button>
@@ -18,7 +18,6 @@
       <img src="images/logo.png" class="logo-img">
       <span class="logo-text">DutySync</span>
     </div>
-
     <nav class="nav-menu">
       <!-- Dashboard Section -->
       <div class="nav-section">
@@ -42,7 +41,6 @@
           </a>
         </div>
       </div>
-
       <!-- Payslip Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="payslip" data-parent="payslip">
@@ -59,7 +57,6 @@
           </a>
         </div>
       </div>
-
       <!-- Analytics Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="analytics" data-parent="analytics">
@@ -79,20 +76,17 @@
           </a>
         </div>
       </div>
-
       <!-- Settings -->
       <a class="nav-item" data-page="settings">
         <i class="fas fa-cog nav-icon"></i>
         <span class="nav-text">Settings</span>
       </a>
-
       <!-- Help -->
       <a class="nav-item" data-page="help">
         <i class="fas fa-question-circle nav-icon"></i>
         <span class="nav-text">Help</span>
       </a>
     </nav>
-
     <div class="sidebar-footer">
     <div class="user-avatar" id="userAvatar">--</div>
     <div class="user-info">
@@ -102,14 +96,12 @@
       <span class="user-arrow">›</span>
     </div>
   </aside>
-
   <!-- Main Content -->
   <main class="main-content">
     <header>
       <h3>Welcome to DutySync</h3>
       <h1>This Website is under development / Project Testing Only</h1>
     </header>
-
     <div class="content">
       <!-- Dashboard Section -->
       <section class="content-section active" id="dashboard">
@@ -143,7 +135,6 @@
           <p style="color: var(--text-secondary); padding: 8px 0;">• Nov 14 - Night Shift: 8 hours</p>
         </div>
       </section>
-
       <!-- All Pages Section -->
       <section class="content-section" id="all-pages">
         <h2 class="section-title">All Pages</h2>
@@ -151,7 +142,6 @@
           <p style="color: var(--text-secondary);">Overview of all available pages and quick access links.</p>
         </div>
       </section>
-
       <!-- Reports Section -->
       <section class="content-section" id="reports">
         <h2 class="section-title">Reports</h2>
@@ -159,7 +149,6 @@
           <p style="color: var(--text-secondary);">Generate and view detailed reports of your duty hours and earnings.</p>
         </div>
       </section>
-
       <!-- Input Duty Section -->
       <section class="content-section" id="input-duty">
         <h2 class="section-title">Input Duty</h2>
@@ -195,7 +184,6 @@
           </form>
         </div>
       </section>
-
       <!-- View Duty Log Section -->
       <section class="content-section" id="view-duty-log">
         <h2 class="section-title">View Duty Log</h2>
@@ -203,7 +191,6 @@
           <p style="color: var(--text-secondary);">View your complete duty log history with filters and search.</p>
         </div>
       </section>
-
       <!-- Payslip Section -->
       <section class="content-section" id="payslip">
         <h2 class="section-title">Payslip Management</h2>
@@ -217,7 +204,6 @@
           </div>
         </div>
       </section>
-
       <!-- View Payslip Section -->
       <section class="content-section" id="view-payslip">
         <h2 class="section-title">View Payslip</h2>
@@ -225,7 +211,6 @@
           <p style="color: var(--text-secondary);">Select a cutoff period to view detailed payslip information.</p>
         </div>
       </section>
-
       <!-- Generate Payslip Section -->
       <section class="content-section" id="generate-payslip">
         <h2 class="section-title">Generate Payslip</h2>
@@ -233,7 +218,6 @@
           <p style="color: var(--text-secondary);">Create a new payslip for a specific period with automatic calculations.</p>
         </div>
       </section>
-
       <!-- Analytics Section -->
       <section class="content-section" id="analytics">
         <h2 class="section-title">Analytics & Insights</h2>
@@ -256,7 +240,6 @@
           <p style="color: var(--text-secondary);">Graphs showing hours worked, deductions, and salary trends over time will appear here.</p>
         </div>
       </section>
-
       <!-- Total Hours Section -->
       <section class="content-section" id="total-hours">
         <h2 class="section-title">Total Hours</h2>
@@ -264,7 +247,6 @@
           <p style="color: var(--text-secondary);">Detailed breakdown of total hours worked across different periods.</p>
         </div>
       </section>
-
       <!-- Net Pay Trends Section -->
       <section class="content-section" id="net-pay-trends">
         <h2 class="section-title">Net Pay Trends</h2>
@@ -272,7 +254,6 @@
           <p style="color: var(--text-secondary);">Visual representation of your net pay trends over time.</p>
         </div>
       </section>
-
       <!-- Deduction Breakdown Section -->
       <section class="content-section" id="deduction-breakdown">
         <h2 class="section-title">Deduction Breakdown</h2>
@@ -280,7 +261,6 @@
           <p style="color: var(--text-secondary);">Detailed breakdown of all deductions from your salary.</p>
         </div>
       </section>
-
       <!-- Settings Section -->
       <section class="content-section" id="settings">
         <h2 class="section-title">Settings</h2>
@@ -302,10 +282,9 @@
             <input type="password" placeholder="Enter new password">
           </div>
           <button class="btn" style="margin-right: 10px;">Update Password</button>
-          <button class="btn" style="background: #dc3545;">Logout</button>
+          <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
         </div>
       </section>
-
       <!-- Help Section -->
       <section class="content-section" id="help">
         <h2 class="section-title">Help & Support</h2>
@@ -314,55 +293,91 @@
         </div>
       </section>
     </div>
-
     <footer>
       <p>&copy; 2025 DutySync. All rights reserved.</p>
     </footer>
   </main>
-    <script src="script.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
+        authDomain: "dutysync-2025.firebaseapp.com",
+        projectId: "dutysync-2025",
+        storageBucket: "dutysync-2025.firebasestorage.app",
+        messagingSenderId: "512248770067",
+        appId: "1:512248770067:web:135e19274bf7e6c5bbd9e6",
+        measurementId: "G-70X2MGERZC"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Load profile on start
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      
+      try {
+        // Get Firestore data
+      const docRef = db.collection("users").doc(user.uid);
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+      // Try cache first (instant)
+      let docSnap = await docRef.get({ source: "cache" }).catch(() => null);
 
-<script>
-  // Your Firebase config (same as login/signup)
-  const firebaseConfig = {
-      apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
-      authDomain: "dutysync-2025.firebaseapp.com",
-      projectId: "dutysync-2025",
-      storageBucket: "dutysync-2025.firebasestorage.app",
-      messagingSenderId: "512248770067",
-      appId: "1:512248770067:web:135e19274bf7e6c5bbd9e6",
-      measurementId: "G-70X2MGERZC"
-  };
+      // If not in cache, load from server (slower)
+      if (!docSnap || !docSnap.exists) {
+        docSnap = await docRef.get();
+      }
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // Load profile on start
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      window.location.href = "login.html"; // if no user, redirect to login
-      return;
-    }
-
-    // Get Firestore data
-    const docRef = db.collection("users").doc(user.uid);
-    const docSnap = await docRef.get();
-
-    if (docSnap.exists) {
-      const data = docSnap.data();
-
-      // Update UI
-      document.getElementById("userName").textContent = data.fullname;
-      document.getElementById("userEmail").textContent = data.email;
-
-      // Avatar (Initials)
-      const initials = data.fullname.split(" ").map(w => w[0]).join("").toUpperCase();
-      document.getElementById("userAvatar").textContent = initials;
-    }
-  });
-</script>
-
+              
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          
+          // Update UI with correct field name (fullName with capital N)
+          const fullName = data.fullName || data.fullname || "User";
+          const email = data.email || user.email || "No email";
+          
+          document.getElementById("userName").textContent = fullName;
+          document.getElementById("userEmail").textContent = email;
+          
+          // Avatar (Initials)
+          const initials = fullName
+            .split(" ")
+            .map(w => w[0])
+            .join("")
+            .toUpperCase()
+            .substring(0, 2);
+          
+          document.getElementById("userAvatar").textContent = initials;
+        } else {
+          // If no Firestore data, use Firebase Auth data
+          document.getElementById("userName").textContent = user.displayName || "User";
+          document.getElementById("userEmail").textContent = user.email || "No email";
+          document.getElementById("userAvatar").textContent = "U";
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        // Fallback to basic auth data
+        document.getElementById("userName").textContent = user.displayName || "User";
+        document.getElementById("userEmail").textContent = user.email || "No email";
+        document.getElementById("userAvatar").textContent = "U";
+      }
+    });
+    
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Failed to logout. Please try again.');
+      }
+    });
+  </script>
 </body>
 </html>
