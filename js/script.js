@@ -105,28 +105,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Load and Toggle Theme ---
     const themeCheckboxElement = document.getElementById('themeCheckbox');
-    
+
     if (themeCheckboxElement) {
-        console.log('Theme checkbox found!');
-        
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        console.log('Saved theme:', savedTheme);
-        
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeCheckboxElement.checked = savedTheme === 'dark';
+        // Always default to dark
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeCheckboxElement.checked = true;
 
         // Toggle theme
         themeCheckboxElement.addEventListener('change', () => {
             const theme = themeCheckboxElement.checked ? 'dark' : 'light';
-            console.log('Switching to theme:', theme);
-            
             document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
         });
     } else {
         console.error('Theme checkbox NOT found!');
     }
+
 });
 
 // --- Sidebar Toggle ---
