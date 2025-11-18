@@ -1,11 +1,12 @@
 // --- Firebase Configuration ---
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "dutysync-12345.firebaseapp.com",
-    projectId: "dutysync-12345",
-    storageBucket: "dutysync-12345.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
+    apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
+    authDomain: "dutysync-2025.firebaseapp.com",
+    projectId: "dutysync-2025",
+    storageBucket: "dutysync-2025.appspot.com",
+    messagingSenderId: "512248770067",
+    appId: "1:512248770067:web:135e19274bf7e6c5bbd9e6",
+    measurementId: "G-70X2MGERZC"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -18,6 +19,61 @@ const navItems = document.querySelectorAll(".nav-item");
 const sections = document.querySelectorAll(".content-section");
 const updatePasswordBtn = document.getElementById('updatePasswordBtn');
 const themeCheckbox = document.getElementById('themeCheckbox');
+
+// --- Check Authentication and Load User Data ---
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        console.log('User logged in:', user.uid);
+        
+        // Fetch user data from Firestore
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                
+                // Update sidebar footer with user info
+                const userNameElement = document.getElementById('userName');
+                const userEmailElement = document.getElementById('userEmail');
+                const userAvatarElement = document.getElementById('userAvatar');
+                
+                if (userNameElement) {
+                    userNameElement.textContent = userData.fullName || 'User';
+                }
+                
+                if (userEmailElement) {
+                    userEmailElement.textContent = userData.email || user.email;
+                }
+                
+                if (userAvatarElement) {
+                    // Get first two letters of name for avatar
+                    const initials = userData.fullName 
+                        ? userData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                        : user.email.substring(0, 2).toUpperCase();
+                    userAvatarElement.textContent = initials;
+                }
+                
+                console.log('User data loaded successfully');
+            } else {
+                console.log('No user document found in Firestore');
+                // Fallback to auth email if no Firestore document
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userName').textContent = user.email.split('@')[0];
+                document.getElementById('userAvatar').textContent = user.email.substring(0, 2).toUpperCase();
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            // Fallback to auth email on error
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userName').textContent = user.email.split('@')[0];
+            document.getElementById('userAvatar').textContent = user.email.substring(0, 2).toUpperCase();
+        }
+    } else {
+        // No user logged in, redirect to login
+        console.log('No user logged in, redirecting...');
+        window.location.href = '../index.html';
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     // --- Logout Modal ---
@@ -39,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 await auth.signOut();
                 localStorage.removeItem('userSession');
-                window.location.href = "index.html";
+                window.location.href = "../index.html";
             } catch (error) {
                 console.error("Logout error:", error);
                 alert("Failed to logout: " + error.message);
@@ -47,15 +103,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- Load and Toggle Theme (FIXED - No longer nested) ---
+    // --- Load and Toggle Theme ---
     const themeCheckboxElement = document.getElementById('themeCheckbox');
     
     if (themeCheckboxElement) {
-        console.log('Theme checkbox found!'); // Debug log
+        console.log('Theme checkbox found!');
         
         // Load saved theme
         const savedTheme = localStorage.getItem('theme') || 'light';
-        console.log('Saved theme:', savedTheme); // Debug log
+        console.log('Saved theme:', savedTheme);
         
         document.documentElement.setAttribute('data-theme', savedTheme);
         themeCheckboxElement.checked = savedTheme === 'dark';
@@ -63,13 +119,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Toggle theme
         themeCheckboxElement.addEventListener('change', () => {
             const theme = themeCheckboxElement.checked ? 'dark' : 'light';
-            console.log('Switching to theme:', theme); // Debug log
+            console.log('Switching to theme:', theme);
             
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
         });
     } else {
-        console.error('Theme checkbox NOT found!'); // Debug log
+        console.error('Theme checkbox NOT found!');
     }
 });
 

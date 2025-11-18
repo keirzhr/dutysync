@@ -2,9 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DutySync - Login</title>
     <style>
@@ -32,9 +29,8 @@
             background: linear-gradient(to bottom, #0f1629, #000000);
             align-items: center;
             justify-content: center;
-            display: none; /* hidden by default */
+            display: none;
             z-index: 9999;
-
         }
 
         .loading-logo {
@@ -137,7 +133,6 @@
         color: #FFFFFF;    
         }
 
-                /* Remove white autofill background */
         input:-webkit-autofill {
             transition: background-color 9999s ease-in-out 0s;
             -webkit-text-fill-color: #ffffff !important;
@@ -147,7 +142,6 @@
             -webkit-text-fill-color: #ffffff !important;
         }
 
-        /* Force background to stay dark */
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,
@@ -155,7 +149,6 @@
             box-shadow: 0 0 0 1000px rgba(255,255,255,0.03) inset !important;
             border-color: #5A70B0 !important;
         }
-
 
         .toggle-password {
             position: absolute;
@@ -181,7 +174,6 @@
             transform: scale(1.2)
         }
 
-        /* When active / clicked */
         .toggle-password.show svg {
             stroke: #A1B5F4;
         }
@@ -327,7 +319,6 @@
                 <div class="input-wrapper">
                   <input type="password" id="password" placeholder="Enter your password" required>
                   <button type="button" class="toggle-password" onclick="togglePassword()">
-                    <!-- use inline SVG icon here -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                       <circle cx="12" cy="12" r="3"></circle>
@@ -368,17 +359,14 @@
         </div>
         
         <div class="signup-link">
-            Don't have an account? <a href="signup.html">Sign up here</a>
+            Don't have an account? <a href="pages/signup.html">Sign up here</a>
         </div>
     </div>
     
-    <script type="module">
-    // Import Firebase modules (v9+ modular SDK)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
     // Firebase config
     const firebaseConfig = {
         apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
@@ -390,11 +378,10 @@
         measurementId: "G-70X2MGERZC"
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // Initialize Firebase v8
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     // Toggle password visibility
     function togglePassword() {
@@ -410,30 +397,32 @@
         }
     }
 
-    // Attach toggle to global scope so button onclick works
     window.togglePassword = togglePassword;
 
     // Login form submit
-    const loginForm = document.getElementById("loginForm");
+    const loginForm = document.
+    
+    getElementById("loginForm");
     loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
-        // Show loading screen
         document.getElementById("loading-screen").style.display = "flex";
 
-        // Sign in with Firebase
-        signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
+        auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
             // Successful login
-            window.location.href = "dashboard.html"; // or "index.html"
+            console.log('Logged in:', userCredential.user);
+            window.location.href = "pages/dashboard.html";
         })
         .catch((error) => {
+            console.error('Login error', error);
             alert("Login failed: " + error.message);
             document.getElementById("loading-screen").style.display = "none";
         });
+
     });
     </script>
 
