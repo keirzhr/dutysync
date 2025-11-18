@@ -255,3 +255,4 @@ updatePasswordBtn?.addEventListener('click', async () => {
         alert(error.code === 'auth/wrong-password' ? 'Current password is incorrect' : 'Failed to update password: ' + error.message);
     }
 });
+
