@@ -144,6 +144,13 @@ window.addEventListener("resize", () => {
     if (window.innerWidth > 768) sidebar.classList.remove("open");
 });
 
+function setSidebarHeight() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.style.height = window.innerHeight + 'px';
+}
+window.addEventListener('resize', setSidebarHeight);
+window.addEventListener('load', setSidebarHeight);
+
 // --- Update Breadcrumb ---
 function updateBreadcrumb(parentName, currentName) {
     const breadcrumbParent = document.getElementById('breadcrumbParent');

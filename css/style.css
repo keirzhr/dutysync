@@ -53,21 +53,17 @@ body {
   position: fixed;
   left: 0;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   width: var(--sidebar-collapsed);
   background-color: var(--sidebar-bg);
   transition: width 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   z-index: 1000;
-
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* pushes footer to bottom */
-
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
   box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08);
-
-  overflow: hidden; /* keep hidden for header/footer */
 }
 
 .sidebar:hover:not(.locked) {
