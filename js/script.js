@@ -144,12 +144,22 @@ window.addEventListener("resize", () => {
     if (window.innerWidth > 768) sidebar.classList.remove("open");
 });
 
-function setSidebarHeight() {
+function setHeights() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.style.height = window.innerHeight + 'px';
+    const main = document.querySelector('.main-content');
+
+    // Set sidebar height
+    if (sidebar) sidebar.style.height = window.innerHeight + 'px';
+
+    // Set main content min-height to fill viewport
+    if (main) main.style.minHeight = window.innerHeight + 'px';
 }
-window.addEventListener('resize', setSidebarHeight);
-window.addEventListener('load', setSidebarHeight);
+
+// Run on page load
+window.addEventListener('load', setHeights);
+
+// Run on window resize
+window.addEventListener('resize', setHeights);
 
 // --- Update Breadcrumb ---
 function updateBreadcrumb(parentName, currentName) {
