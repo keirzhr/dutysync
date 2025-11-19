@@ -3,13 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DutySync - Dashboard</title>
+  
+  <!-- CSS -->
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/inputduty.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <title>DutySync - Dashboard</title>
+  
+  <style>
+    /* Calendar + Graph layout */
+    .calendar-graph-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .calendar-wrapper, .graph-wrapper {
+      flex: 1 1 300px;
+      min-width: 300px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    /* Popup Modal */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .popup-overlay.active {
+      display: flex;
+    }
+
+    .popup-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 320px;
+      max-width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .popup-form-group {
+      margin-bottom: 15px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+  </style>
 </head>
 <body>
+
   <!-- Sidebar -->
   <button class="hamburger" id="hamburger">☰</button>
   <aside class="sidebar" id="sidebar">
@@ -19,32 +78,19 @@
     </div>
     <nav class="nav-menu">
       <!-- Dashboard Section -->
-    <div class="nav-section">
-      <!-- Dashboard Parent -->
-      <a class="nav-item active" data-page="dashboard" data-parent="dashboard">
-        <i class="fas fa-chart-pie nav-icon"></i>
-        <span class="nav-text">Dashboard</span>
-        <span class="nav-arrow">›</span>
-      </a>
-
-      <!-- Dashboard Sub-menu -->
-      <div class="sub-menu" id="dashboard-submenu">
-        <a class="nav-item sub-item" data-page="all-pages">
-          <span class="nav-text">All Pages</span>
+      <div class="nav-section">
+        <a class="nav-item active" data-page="dashboard" data-parent="dashboard">
+          <i class="fas fa-chart-pie nav-icon"></i>
+          <span class="nav-text">Dashboard</span>
+          <span class="nav-arrow">›</span>
         </a>
-        <a class="nav-item sub-item" data-page="reports">
-          <span class="nav-text">Reports</span>
-        </a>
-        <a class="nav-item sub-item" data-page="input-duty">
-          <span class="nav-text">Input Duty</span>
-        </a>
-        <a class="nav-item sub-item" data-page="view-duty-log">
-          <span class="nav-text">View Duty Log</span>
-        </a>
+        <div class="sub-menu" id="dashboard-submenu">
+          <a class="nav-item sub-item" data-page="all-pages"><span class="nav-text">All Pages</span></a>
+          <a class="nav-item sub-item" data-page="reports"><span class="nav-text">Reports</span></a>
+          <a class="nav-item sub-item" data-page="input-duty"><span class="nav-text">Input Duty</span></a>
+          <a class="nav-item sub-item" data-page="view-duty-log"><span class="nav-text">View Duty Log</span></a>
+        </div>
       </div>
-    </div>
-
-      
       <!-- Payslip Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="payslip" data-parent="payslip">
@@ -53,12 +99,8 @@
           <span class="nav-arrow">›</span>
         </a>
         <div class="sub-menu" id="payslip-submenu">
-          <a class="nav-item sub-item" data-page="view-payslip">
-            <span class="nav-text">View Payslip</span>
-          </a>
-          <a class="nav-item sub-item" data-page="generate-payslip">
-            <span class="nav-text">Generate Payslip</span>
-          </a>
+          <a class="nav-item sub-item" data-page="view-payslip"><span class="nav-text">View Payslip</span></a>
+          <a class="nav-item sub-item" data-page="generate-payslip"><span class="nav-text">Generate Payslip</span></a>
         </div>
       </div>
       <!-- Analytics Section -->
@@ -69,28 +111,16 @@
           <span class="nav-arrow">›</span>
         </a>
         <div class="sub-menu" id="analytics-submenu">
-          <a class="nav-item sub-item" data-page="total-hours">
-            <span class="nav-text">Total Hours</span>
-          </a>
-          <a class="nav-item sub-item" data-page="net-pay-trends">
-            <span class="nav-text">Net Pay Trends</span>
-          </a>
-          <a class="nav-item sub-item" data-page="deduction-breakdown">
-            <span class="nav-text">Deduction Breakdown</span>
-          </a>
+          <a class="nav-item sub-item" data-page="total-hours"><span class="nav-text">Total Hours</span></a>
+          <a class="nav-item sub-item" data-page="net-pay-trends"><span class="nav-text">Net Pay Trends</span></a>
+          <a class="nav-item sub-item" data-page="deduction-breakdown"><span class="nav-text">Deduction Breakdown</span></a>
         </div>
       </div>
-      <!-- Settings -->
-      <a class="nav-item" data-page="settings">
-        <i class="fas fa-cog nav-icon"></i>
-        <span class="nav-text">Settings</span>
-      </a>
-      <!-- Help -->
-      <a class="nav-item" data-page="help">
-        <i class="fas fa-question-circle nav-icon"></i>
-        <span class="nav-text">Help</span>
-      </a>
+      <!-- Settings & Help -->
+      <a class="nav-item" data-page="settings"><i class="fas fa-cog nav-icon"></i><span class="nav-text">Settings</span></a>
+      <a class="nav-item" data-page="help"><i class="fas fa-question-circle nav-icon"></i><span class="nav-text">Help</span></a>
     </nav>
+
     <div class="sidebar-footer">
       <div class="user-avatar" id="userAvatar">--</div>
       <div class="user-info">
@@ -105,23 +135,17 @@
   <main class="main-content">
     <header>
       <div class="header-content">
-        <div class="header-left">
-          <div class="breadcrumb">
-            <span class="breadcrumb-parent" id="breadcrumbParent">Dashboard</span>
-            <span class="breadcrumb-separator" id="breadcrumbSeparator">/</span>
-            <span class="breadcrumb-current" id="breadcrumbCurrent"></span>
-          </div>
+        <div class="breadcrumb">
+          <span class="breadcrumb-parent" id="breadcrumbParent">Dashboard</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current" id="breadcrumbCurrent"></span>
         </div>
-        <div class="header-right">
-          <button class="notification-btn" id="notificationBtn">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge">3</span>
-          </button>
-        </div>
+        <button class="notification-btn" id="notificationBtn"><i class="fas fa-bell"></i><span class="notification-badge">3</span></button>
       </div>
     </header>
+
     <div class="content">
-      <!-- Dashboard Section -->
+      <!-- Dashboard Cards -->
       <section class="content-section active" id="dashboard">
         <div class="cards-grid">
           <div class="card">
@@ -138,107 +162,99 @@
       </section>
 
       <!-- Input Duty Section -->
-<!-- Replace your Input Duty Section with this updated version -->
-<!-- Input Duty Section -->
-<section class="content-section" id="input-duty">
+      <section class="content-section" id="input-duty">
+        <div class="calendar-graph-container">
+          <div class="month-switcher">
+            <button id="prevMonth">&lt;</button>
+            <div id="currentMonth">November 2025</div>
+            <button id="nextMonth">&gt;</button>
+          </div>
+          <div class="calendar-graph-wrapper">
+            <div class="calendar-wrapper">
+               <h3 class="calendar-title">Work Hours Input</h3> 
+              <div id="calendarContainer" class="calendar-grid"></div>
+            </div>
+            <div class="graph-wrapper">
+              <h3>Hours Worked</h3>
+              <canvas id="completedTimeChart"></canvas>
+            </div>
+          </div>
+        </div>
 
-  <div class="input-duty-container" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 24px;">
-    <!-- Left Panel: Work Hours Input Form -->
-    <div class="left-panel" style="flex: 1; min-width: 300px;">
-      <h3>Work Hours Input</h3>
-      <label>Date</label>
-      <input type="date" id="inputDate" value="2025-11-17">
+        <!-- Popup Modal -->
+        <div id="popupOverlay" class="popup-overlay">
+          <div id="dutyPopup" class="popup-card">
+            <h3>Add Duty</h3>
+            <div class="popup-form-group">
+              <label>Date</label>
+              <input type="date" id="popupDate" readonly>
+            </div>
+            <div class="popup-form-group">
+              <label>Time In</label>
+              <input type="time" id="popupTimeIn">
+            </div>
+            <div class="popup-form-group">
+              <label>Time Out</label>
+              <input type="time" id="popupTimeOut">
+            </div>
+            <div class="popup-form-group">
+              <label>Rate</label>
+              <select id="popupRate">
+                <option>Regular Rate</option>
+                <option>Overtime Rate</option>
+              </select>
+            </div>
+            <div class="popup-form-group">
+              <label>Overtime Hours</label>
+              <input type="number" id="popupOverTime" step="0.25">
+            </div>
+            <div class="popup-form-group">
+              <label>Special Day</label>
+              <select id="popupSpecialDay">
+                <option>None</option>
+                <option>Holiday</option>
+                <option>Rest Day</option>
+              </select>
+            </div>
+            <div class="popup-buttons">
+              <button id="savePopupDuty">Save</button>
+              <button id="cancelPopupDuty">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <label>Time In</label>
-      <input type="time" id="timeIn" placeholder="7:00am">
+      <!-- Settings Section -->
+      <section class="content-section" id="settings">
+        <div class="card">
+          <h3 style="margin-bottom: 15px;">Preferences</h3>
+          <div class="form-group theme-toggle">
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span>Dark Mode</span>
+              <div class="toggle-switch">
+                <input type="checkbox" id="themeCheckbox">
+                <span class="slider round"></span>
+              </div>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currentPassword" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new password">
+          </div>
+          <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
+          <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
+        </div>
+      </section>
 
-      <label>Time Out</label>
-      <input type="time" id="timeOut" placeholder="2:00pm">
-
-      <label>Rate</label>
-      <select id="rate">
-        <option>Regular Rate</option>
-        <option>Night Shift</option>
-      </select>
-
-      <label>Over Time</label>
-      <input type="text" id="overTime" placeholder="2:00pm to 3:00pm">
-
-      <label>Special Day</label>
-      <select id="specialDay">
-        <option>None</option>
-        <option>Holiday</option>
-      </select>
-
-      <div style="margin-top: 15px;">
-        <button class="btn" id="clearDuty" style="background: gray; margin-right: 10px;">Clear</button>
-        <button class="btn" id="saveDuty" style="background: darkgray;">Done</button>
-      </div>
+      <!-- Other Sections -->
+      <section class="content-section" id="all-pages"><div class="card"><p>All pages content here...</p></div></section>
+      <section class="content-section" id="reports"><div class="card"><p>Reports content here...</p></div></section>
+      <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section>
     </div>
-
-    <!-- Right Panel: Duty Records (Table for Desktop, Cards for Mobile) -->
-    <div class="right-panel" style="flex: 2; min-width: 400px;">
-      <h3>Duty Records</h3>
-      
-      <!-- Desktop Table View -->
-      <div class="table-wrapper">
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time In</th>
-              <th>Time Out</th>
-              <th>Rate</th>
-              <th>Over Time</th>
-              <th>Special Day</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="dutyTableBody">
-            <!-- Firebase records will populate here -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Mobile Card View -->
-      <div class="duty-cards-container" id="dutyCardsContainer">
-        <!-- Cards will be generated here -->
-      </div>
-    </div>
-  </div>
-    <div class="bottom-panel">
-    <h3>Completed Hours Graph</h3>
-    <canvas id="completedTimeChart" style="width:100%; max-width:200px; height:100px;"></canvas>
-  </div>
-</section>
-
-    <section class="content-section" id="settings">
-    <div class="card">
-      <h3 style="margin-bottom: 15px;">Preferences</h3>
-
-      <!-- Dark Mode Toggle -->
-<div class="form-group theme-toggle">
-  <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-    <span>Dark Mode</span>
-    <div class="toggle-switch">
-      <input type="checkbox" id="themeCheckbox">
-      <span class="slider round"></span>
-    </div>
-  </label>
-</div>
-
-      <div class="form-group">
-        <label>Current Password</label>
-        <input type="password" id="currentPassword" placeholder="Enter current password">
-      </div>
-      <div class="form-group">
-        <label>New Password</label>
-        <input type="password" id="newPassword" placeholder="Enter new password">
-      </div>
-      <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
-      <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
-    </div>
-  </section>
 
     <!-- Logout Modal -->
     <div id="logoutModal" class="modal">
@@ -252,29 +268,17 @@
       </div>
     </div>
 
-
-      <!-- Other sections (add your existing sections here) -->
-      <section class="content-section" id="all-pages">
-        <div class="card"><p>All pages content here...</p></div>
-      </section>
-
-      <section class="content-section" id="reports">
-        <div class="card"><p>Reports content here...</p></div>
-      </section>
-
-      <section class="content-section" id="help">
-        <div class="card"><p>Help content here...</p></div>
-      </section>
-    </div>
     <footer>
       <p>&copy; 2025 DutySync. All rights reserved.</p>
     </footer>
   </main>
 
+  <!-- Firebase + JS -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="../js/script.js"></script>
   <script src="../js/inputduty.js"></script>
+
 </body>
 </html>

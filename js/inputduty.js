@@ -1,245 +1,248 @@
-console.log("🔥 inputduty.js loaded");
+console.log("🔥 inputduty.js (Calendar) loaded");
+
+// --- Global Variables ---
+let currentDate = new Date();
+let allDuties = [];
+let completedTimeChart = null;
 
 // --- Check Auth State ---
-auth.onAuthStateChanged(user => {
-    console.log("👤 Auth user:", user ? user.uid : "NO USER LOGGED IN");
-    if (user) loadDutyRecords();
+auth.onAuthStateChanged(async user => {
+    if (user) {
+        await loadDutyRecords();
+        renderCalendar();
+        renderGraph();
+    }
 });
 
-// --- Function to calculate hours from timeIn and timeOut ---
+// --- Calculate Hours ---
 function calculateHours(timeIn, timeOut) {
     if (!timeIn || !timeOut) return 0;
     const [inH, inM] = timeIn.split(":").map(Number);
     const [outH, outM] = timeOut.split(":").map(Number);
 
-    let start = inH + inM/60;
-    let end = outH + outM/60;
+    let start = inH + inM / 60;
+    let end = outH + outM / 60;
 
-    // If end < start, assume overnight shift
     if (end < start) end += 24;
-
-    return +(end - start).toFixed(2); // round to 2 decimals
+    return +(end - start).toFixed(2);
 }
 
-// --- Function to create a duty card (mobile view) ---
-function createDutyCard(data) {
-    const card = document.createElement("div");
-    card.className = "duty-card";
-    card.dataset.id = data.id;
-    
-    const hours = calculateHours(data.timeIn, data.timeOut);
-    
-    card.innerHTML = `
-        <div class="duty-card-header">
-            <div class="duty-card-date">${data.date}</div>
-            <div class="duty-card-hours">${hours} hrs</div>
-        </div>
-        <div class="duty-card-body">
-            <div class="duty-card-field">
-                <div class="duty-card-label">Time In</div>
-                <div class="duty-card-value">${data.timeIn}</div>
-            </div>
-            <div class="duty-card-field">
-                <div class="duty-card-label">Time Out</div>
-                <div class="duty-card-value">${data.timeOut}</div>
-            </div>
-            <div class="duty-card-field">
-                <div class="duty-card-label">Rate</div>
-                <div class="duty-card-value">${data.rate}</div>
-            </div>
-        </div>
-        <div class="duty-card-details">
-            <div class="duty-card-details-toggle">
-                <i class="fas fa-chevron-down"></i>
-                <span>More Details</span>
-            </div>
-            <div class="duty-card-details-content">
-                <div class="duty-card-field">
-                    <div class="duty-card-label">Overtime</div>
-                    <div class="duty-card-value">${data.overTime || 'None'}</div>
-                </div>
-                <div class="duty-card-field">
-                    <div class="duty-card-label">Special Day</div>
-                    <div class="duty-card-value">${data.specialDay}</div>
-                </div>
-            </div>
-        </div>
-        <div class="duty-card-actions">
-            <button class="edit-btn">
-                <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="delete-btn">
-                <i class="fas fa-trash"></i> Delete
-            </button>
-        </div>
-    `;
-    
-    // Add toggle functionality for details
-    const toggle = card.querySelector(".duty-card-details-toggle");
-    const content = card.querySelector(".duty-card-details-content");
-    toggle.addEventListener("click", () => {
-        toggle.classList.toggle("expanded");
-        content.classList.toggle("show");
+// --- Month Navigation ---
+document.getElementById('prevMonth').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+    renderGraph();
+});
+
+document.getElementById('nextMonth').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+    renderGraph();
+});
+
+// --- Render Calendar ---
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    // Update header
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+
+    const container = document.getElementById('calendarContainer');
+    container.innerHTML = '';
+
+    // Day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+        const header = document.createElement('div');
+        header.className = 'calendar-day-header';
+        header.textContent = day;
+        container.appendChild(header);
     });
+
+    // Get first day and number of days
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    // Previous month days
+    for (let i = firstDay - 1; i >= 0; i--) {
+        const day = daysInPrevMonth - i;
+        const dayEl = createDayElement(day, month - 1, year, true);
+        container.appendChild(dayEl);
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayEl = createDayElement(day, month, year, false);
+        container.appendChild(dayEl);
+    }
+
+    // Next month days
+    const totalCells = container.children.length - 7;
+    const remainingCells = 42 - totalCells;
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayEl = createDayElement(day, month + 1, year, true);
+        container.appendChild(dayEl);
+    }
+}
+
+function createDayElement(day, month, year, isOtherMonth) {
+    const el = document.createElement('div');
+    el.className = 'calendar-day';
+    if (isOtherMonth) el.classList.add('other-month');
+
+    // Check if today
+    const today = new Date();
+    const actualMonth = (month % 12 + 12) % 12;
+    const actualYear = month < 0 ? year - 1 : month >= 12 ? year + 1 : year;
+
+    if (!isOtherMonth && day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+        el.classList.add('today');
+    }
+
+    // Check if has duty
+    const dateStr = `${actualYear}-${String(actualMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    if (allDuties.some(d => d.date === dateStr)) {
+        el.classList.add('has-duty');
+    }
+
+    el.textContent = day;
+
+    if (!isOtherMonth) {
+        el.addEventListener('click', () => {
+            openPopup(dateStr);
+        });
+    }
+
+    return el;
+}
+
+// --- Popup Handling ---
+function openPopup(dateStr) {
+    document.getElementById('popupDate').value = dateStr;
+    document.getElementById('popupTimeIn').value = '';
+    document.getElementById('popupTimeOut').value = '';
+    document.getElementById('popupRate').value = 'Regular Rate';
+    document.getElementById('popupOverTime').value = '';
+    document.getElementById('popupSpecialDay').value = 'None';
+
+    // Check if editing existing
+    const existing = allDuties.find(d => d.date === dateStr);
+    const buttonsContainer = document.querySelector('.popup-buttons');
     
-    return card;
+    if (existing) {
+        document.getElementById('popupTimeIn').value = existing.timeIn;
+        document.getElementById('popupTimeOut').value = existing.timeOut;
+        document.getElementById('popupRate').value = existing.rate;
+        document.getElementById('popupOverTime').value = existing.overTime;
+        document.getElementById('popupSpecialDay').value = existing.specialDay;
+        document.getElementById('dutyPopup').dataset.editId = existing.id;
+        
+        // Show Update, Delete and Cancel buttons
+        buttonsContainer.innerHTML = `
+            <button id="deletePopupDuty" class="popup-btn popup-btn-delete">Delete</button>
+            <div style="margin-left: auto; display: flex; gap: 10px;">
+                <button id="updatePopupDuty" class="popup-btn popup-btn-update">Update</button>
+                <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
+            </div>
+        `;
+        
+        document.getElementById('updatePopupDuty').addEventListener('click', saveOrUpdateDuty);
+        document.getElementById('deletePopupDuty').addEventListener('click', deleteDuty);
+        document.getElementById('cancelPopupDuty').addEventListener('click', closePopup);
+    } else {
+        delete document.getElementById('dutyPopup').dataset.editId;
+        
+        // Show Save and Cancel buttons
+        buttonsContainer.innerHTML = `
+            <button id="savePopupDuty" class="popup-btn popup-btn-save">Save</button>
+            <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
+        `;
+        
+        document.getElementById('savePopupDuty').addEventListener('click', saveOrUpdateDuty);
+        document.getElementById('cancelPopupDuty').addEventListener('click', closePopup);
+    }
+
+    document.getElementById('popupOverlay').classList.add('active');
 }
 
-// --- Function to create a table row (desktop view) ---
-function createTableRow(data) {
-    const row = document.createElement("tr");
-    row.dataset.id = data.id;
-    row.innerHTML = `
-        <td>${data.date}</td>
-        <td>${data.timeIn}</td>
-        <td>${data.timeOut}</td>
-        <td>${data.rate}</td>
-        <td>${data.overTime}</td>
-        <td>${data.specialDay}</td>
-        <td>
-            <button class="edit-btn">✏️</button>
-            <button class="delete-btn">🗑️</button>
-        </td>
-    `;
-    return row;
+function closePopup() {
+    document.getElementById('popupOverlay').classList.remove('active');
 }
 
-// --- Save Duty ---
-document.getElementById("saveDuty").addEventListener("click", async () => {
+async function saveOrUpdateDuty() {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-        alert("You must be logged in to save a duty.");
+        alert('You must be logged in');
         return;
     }
 
-    const duty = {
-        date: document.getElementById("inputDate").value,
-        timeIn: document.getElementById("timeIn").value,
-        timeOut: document.getElementById("timeOut").value,
-        rate: document.getElementById("rate").value,
-        overTime: document.getElementById("overTime").value,
-        specialDay: document.getElementById("specialDay").value,
-        user: currentUser.uid,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    const date = document.getElementById('popupDate').value;
+    const timeIn = document.getElementById('popupTimeIn').value;
+    const timeOut = document.getElementById('popupTimeOut').value;
+    const rate = document.getElementById('popupRate').value;
+    const overTime = document.getElementById('popupOverTime').value;
+    const specialDay = document.getElementById('popupSpecialDay').value;
 
-    if (!duty.date || !duty.timeIn || !duty.timeOut) {
-        alert("Date, Time In, and Time Out are required.");
+    if (!date || !timeIn || !timeOut) {
+        alert('Please fill in all required fields');
         return;
     }
 
     try {
-        const docRef = await db.collection("duties").add(duty);
-        alert("Duty saved successfully!");
+        const duty = {
+            date, timeIn, timeOut, rate, overTime, specialDay,
+            user: currentUser.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-        const dutyWithId = { id: docRef.id, ...duty };
-        
-        // Add to table (desktop)
-        const tableBody = document.getElementById("dutyTableBody");
-        const row = createTableRow(dutyWithId);
-        tableBody.prepend(row);
+        const editId = document.getElementById('dutyPopup').dataset.editId;
 
-        // Add to cards (mobile)
-        const cardsContainer = document.getElementById("dutyCardsContainer");
-        const card = createDutyCard(dutyWithId);
-        cardsContainer.prepend(card);
+        if (editId) {
+            await db.collection("duties").doc(editId).update(duty);
+            alert("Duty updated successfully!");
+        } else {
+            await db.collection("duties").add(duty);
+            alert("Duty saved successfully!");
+        }
 
-        // Update the chart immediately
-        const currentDuties = [];
-        tableBody.querySelectorAll("tr").forEach(tr => {
-            const tds = tr.querySelectorAll("td");
-            currentDuties.push({
-                date: tds[0].innerText,
-                timeIn: tds[1].innerText,
-                timeOut: tds[2].innerText
-            });
-        });
-        renderCompletedTimeGraph(currentDuties);
-
-        // Clear form
-        clearForm();
+        closePopup();
+        await loadDutyRecords();
+        renderCalendar();
+        renderGraph();
 
     } catch (error) {
         console.error("Save Error:", error);
         alert("Failed to save duty.");
     }
-});
-
-// --- Clear Form ---
-function clearForm() {
-    document.getElementById("inputDate").value = "";
-    document.getElementById("timeIn").value = "";
-    document.getElementById("timeOut").value = "";
-    document.getElementById("rate").value = "Regular Rate";
-    document.getElementById("overTime").value = "";
-    document.getElementById("specialDay").value = "None";
-    document.getElementById("saveDuty").innerText = "Done";
-    editingDocId = null;
 }
 
-document.getElementById("clearDuty").addEventListener("click", clearForm);
-
-// --- Global variable for chart instance and editing ---
-let completedTimeChart;
-let editingDocId = null;
-
-// --- Function to render the Completed Time Graph ---
-function renderCompletedTimeGraph(duties) {
-    const dates = duties.map(d => d.date);
-    const hours = duties.map(d => calculateHours(d.timeIn, d.timeOut));
-
-    const ctx = document.getElementById('completedTimeChart').getContext('2d');
-
-    if (completedTimeChart) {
-        completedTimeChart.destroy();
+async function deleteDuty() {
+    if (!confirm('Are you sure you want to delete this duty record?')) {
+        return;
     }
 
-    completedTimeChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dates,
-            datasets: [{
-                label: 'Completed Hours',
-                data: hours,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Hours'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
-                }
-            }
-        }
-    });
+    const editId = document.getElementById('dutyPopup').dataset.editId;
+    
+    if (!editId) {
+        alert('No duty record to delete');
+        return;
+    }
+
+    try {
+        await db.collection("duties").doc(editId).delete();
+        alert("Duty deleted successfully!");
+        closePopup();
+        await loadDutyRecords();
+        renderCalendar();
+        renderGraph();
+    } catch (error) {
+        console.error("Delete Error:", error);
+        alert("Failed to delete duty.");
+    }
 }
 
 // --- Load Duty Records ---
@@ -247,170 +250,66 @@ async function loadDutyRecords() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const tableBody = document.getElementById("dutyTableBody");
-    const cardsContainer = document.getElementById("dutyCardsContainer");
-    tableBody.innerHTML = "";
-    cardsContainer.innerHTML = "";
-
     try {
         const snapshot = await db.collection("duties")
             .where("user", "==", currentUser.uid)
             .get();
 
-        if (snapshot.empty) {
-            console.log("No duties found.");
-            renderCompletedTimeGraph([]);
-            return;
-        }
-
-        const duties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        duties.sort((a, b) => {
-            const tA = a.timestamp ? a.timestamp.toMillis() : 0;
-            const tB = b.timestamp ? b.timestamp.toMillis() : 0;
-            return tB - tA;
-        });
-
-        duties.forEach(data => {
-            // Add to table (desktop)
-            const row = createTableRow(data);
-            tableBody.appendChild(row);
-
-            // Add to cards (mobile)
-            const card = createDutyCard(data);
-            cardsContainer.appendChild(card);
-        });
-
-        renderCompletedTimeGraph(duties);
+        allDuties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("Duties loaded:", allDuties);
     } catch (error) {
         console.error("Load duties error:", error);
     }
 }
 
-// --- Handle edit/delete for table rows ---
-const tableBody = document.getElementById("dutyTableBody");
-tableBody.addEventListener("click", handleDutyAction);
+// --- Render Graph ---
+function renderGraph() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-// --- Handle edit/delete for cards ---
-const cardsContainer = document.getElementById("dutyCardsContainer");
-cardsContainer.addEventListener("click", handleDutyAction);
+    // Filter duties for current month
+    const monthDuties = allDuties.filter(d => {
+        const [y, m] = d.date.split('-').map(Number);
+        return y === year && m === month + 1;
+    });
 
-// --- Combined handler for both table and cards ---
-async function handleDutyAction(e) {
-    const row = e.target.closest("tr");
-    const card = e.target.closest(".duty-card");
-    const element = row || card;
-    
-    if (!element) return;
-    const docId = element.dataset.id;
-    if (!docId) return;
+    const dates = monthDuties.map(d => d.date);
+    const hours = monthDuties.map(d => calculateHours(d.timeIn, d.timeOut));
 
-    // --- Delete Duty ---
-    if (e.target.classList.contains("delete-btn") || e.target.closest(".delete-btn")) {
-        if (confirm("Are you sure you want to delete this duty?")) {
-            try {
-                await db.collection("duties").doc(docId).delete();
-                
-                // Remove from table
-                const tableRow = tableBody.querySelector(`tr[data-id="${docId}"]`);
-                if (tableRow) tableRow.remove();
-                
-                // Remove from cards
-                const dutyCard = cardsContainer.querySelector(`.duty-card[data-id="${docId}"]`);
-                if (dutyCard) dutyCard.remove();
+    const ctx = document.getElementById('completedTimeChart');
+    if (!ctx) return;
 
-                // Update chart
-                const currentDuties = [];
-                tableBody.querySelectorAll("tr").forEach(tr => {
-                    const tds = tr.querySelectorAll("td");
-                    currentDuties.push({
-                        date: tds[0].innerText,
-                        timeIn: tds[1].innerText,
-                        timeOut: tds[2].innerText
-                    });
-                });
-                renderCompletedTimeGraph(currentDuties);
-            } catch (error) {
-                console.error("Delete Error:", error);
-                alert("Failed to delete duty.");
+    const context = ctx.getContext('2d');
+
+    if (completedTimeChart) {
+        completedTimeChart.destroy();
+    }
+
+    completedTimeChart = new Chart(context, {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Hours Worked',
+                data: hours,
+                backgroundColor: 'rgba(90, 112, 176, 0.7)',
+                borderColor: 'rgba(90, 112, 176, 1)',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            },
+            plugins: {
+                legend: { display: true, position: 'top' }
             }
         }
-    }
-
-    // --- Edit Duty ---
-    if (e.target.classList.contains("edit-btn") || e.target.closest(".edit-btn")) {
-        editingDocId = docId;
-        
-        let date, timeIn, timeOut, rate, overTime, specialDay;
-        
-        if (row) {
-            // Get data from table row
-            const tds = row.querySelectorAll("td");
-            date = tds[0].innerText;
-            timeIn = tds[1].innerText;
-            timeOut = tds[2].innerText;
-            rate = tds[3].innerText;
-            overTime = tds[4].innerText;
-            specialDay = tds[5].innerText;
-        } else if (card) {
-            // Get data from card
-            date = card.querySelector(".duty-card-date").innerText;
-            const fields = card.querySelectorAll(".duty-card-value");
-            timeIn = fields[0].innerText;
-            timeOut = fields[1].innerText;
-            rate = fields[2].innerText;
-            overTime = fields[3].innerText;
-            specialDay = fields[4].innerText;
-        }
-        
-        document.getElementById("inputDate").value = date;
-        document.getElementById("timeIn").value = timeIn;
-        document.getElementById("timeOut").value = timeOut;
-        document.getElementById("rate").value = rate;
-        document.getElementById("overTime").value = overTime;
-        document.getElementById("specialDay").value = specialDay;
-        document.getElementById("saveDuty").innerText = "Update Duty";
-        
-        // Scroll to form on mobile
-        if (window.innerWidth <= 768) {
-            document.querySelector(".left-panel").scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-    }
+    });
 }
-
-// --- Update Duty ---
-document.getElementById("saveDuty").addEventListener("click", async () => {
-    if (!editingDocId) return; // This is handled by the save logic above
-    
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-        alert("You must be logged in to update a duty.");
-        return;
-    }
-
-    const updatedDuty = {
-        date: document.getElementById("inputDate").value,
-        timeIn: document.getElementById("timeIn").value,
-        timeOut: document.getElementById("timeOut").value,
-        rate: document.getElementById("rate").value,
-        overTime: document.getElementById("overTime").value,
-        specialDay: document.getElementById("specialDay").value
-    };
-
-    if (!updatedDuty.date || !updatedDuty.timeIn || !updatedDuty.timeOut) {
-        alert("Date, Time In, and Time Out are required.");
-        return;
-    }
-
-    try {
-        await db.collection("duties").doc(editingDocId).update(updatedDuty);
-        alert("Duty updated successfully!");
-        
-        // Reload all records to update both table and cards
-        await loadDutyRecords();
-        clearForm();
-        
-    } catch (error) {
-        console.error("Update Error:", error);
-        alert("Failed to update duty.");
-    }
-});
