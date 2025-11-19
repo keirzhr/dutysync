@@ -23,8 +23,131 @@ function calculateHours(timeIn, timeOut) {
     let start = inH + inM / 60;
     let end = outH + outM / 60;
 
-    if (end < start) end += 24; // past midnight
+    if (end < start) end += 24; // Overnight shift
     return +(end - start).toFixed(2);
+}
+
+// --- Error Display Utility ---
+function showError(message) {
+    const errorEl = document.getElementById('popupError');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        console.warn("Validation Error:", message);
+    }
+}
+
+function clearError() {
+    const errorEl = document.getElementById('popupError');
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
+    }
+}
+
+// --- Validation Functions ---
+function validateTimeFormat(time) {
+    const regex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+    return regex.test(time);
+}
+
+function validateTimeLogic(timeIn, timeOut) {
+    if (!validateTimeFormat(timeIn)) {
+        showError("Time In must be in HH:MM 24-hour format (e.g., 09:30)");
+        return false;
+    }
+
+    if (!validateTimeFormat(timeOut)) {
+        showError("Time Out must be in HH:MM 24-hour format (e.g., 17:30)");
+        return false;
+    }
+
+    const [inH, inM] = timeIn.split(":").map(Number);
+    const [outH, outM] = timeOut.split(":").map(Number);
+    const inMinutes = inH * 60 + inM;
+    const outMinutes = outH * 60 + outM;
+
+    // Allow both regular (same day) and overnight shifts
+    if (inMinutes === outMinutes) {
+        showError("Time Out must be different from Time In");
+        return false;
+    }
+
+    return true;
+}
+
+function validateWorkHours(timeIn, timeOut) {
+    const hours = calculateHours(timeIn, timeOut);
+
+    if (hours < 0.5) {
+        showError("Shift must be at least 30 minutes");
+        return false;
+    }
+
+    if (hours > 24) {
+        showError("Shift cannot exceed 24 hours");
+        return false;
+    }
+
+    return true;
+}
+
+function validateRequiredFields(date, timeIn, timeOut) {
+    if (!date || !date.trim()) {
+        showError("Date is required");
+        return false;
+    }
+
+    if (!timeIn || !timeIn.trim()) {
+        showError("Time In is required");
+        return false;
+    }
+
+    if (!timeOut || !timeOut.trim()) {
+        showError("Time Out is required");
+        return false;
+    }
+
+    return true;
+}
+
+function validateFutureDate(dateStr) {
+    const selectedDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+        showError("Cannot log work for future dates");
+        return false;
+    }
+
+    return true;
+}
+
+function validateDuplicateEntry(dateStr, excludeId = null) {
+    const duplicate = allDuties.find(d => d.date === dateStr && d.id !== excludeId);
+    if (duplicate) {
+        showError("A duty entry already exists for this date. Edit the existing entry instead.");
+        return false;
+    }
+    return true;
+}
+
+function validateDropdownValues(rate, dayType) {
+    const validRates = ['Regular Rate', 'Overtime Rate', 'Night Shift'];
+    const validDayTypes = ['Regular', 'Regular Holiday (130%)', 'Special Non-Working Holiday (200%)'];
+
+    if (!validRates.includes(rate)) {
+        showError("Invalid rate selection");
+        return false;
+    }
+
+    if (!validDayTypes.includes(dayType)) {
+        showError("Invalid day type selection");
+        return false;
+    }
+
+    return true;
 }
 
 // --- Month Navigation ---
@@ -116,12 +239,14 @@ function createDayElement(day, month, year, isOtherMonth) {
 
 // --- Popup Handling ---
 function openPopup(dateStr) {
+    clearError();
+    
     document.getElementById('popupDate').value = dateStr;
     document.getElementById('popupTimeIn').value = '';
     document.getElementById('popupTimeOut').value = '';
     document.getElementById('popupRate').value = 'Regular Rate';
     document.getElementById('popupOverTime').value = '';
-    document.getElementById('popupSpecialDay').value = 'None';
+    document.getElementById('popupDayType').value = 'Regular';
 
     const existing = allDuties.find(d => d.date === dateStr);
     const buttonsContainer = document.querySelector('.popup-buttons');
@@ -131,7 +256,7 @@ function openPopup(dateStr) {
         document.getElementById('popupTimeOut').value = existing.timeOut;
         document.getElementById('popupRate').value = existing.rate;
         document.getElementById('popupOverTime').value = existing.overTime;
-        document.getElementById('popupSpecialDay').value = existing.specialDay;
+        document.getElementById('popupDayType').value = existing.dayType;
         document.getElementById('dutyPopup').dataset.editId = existing.id;
 
         buttonsContainer.innerHTML = `
@@ -162,45 +287,53 @@ function openPopup(dateStr) {
 }
 
 function closePopup() {
+    clearError();
     document.getElementById('popupOverlay').classList.remove('active');
 }
 
 // --- SAVE / UPDATE DUTY ---
 async function saveOrUpdateDuty() {
+    clearError();
+    
     const currentUser = auth.currentUser;
-    if (!currentUser) return alert('You must be logged in');
+    if (!currentUser) {
+        showError("User not authenticated");
+        return;
+    }
 
     const date = document.getElementById('popupDate').value;
     const timeIn = document.getElementById('popupTimeIn').value;
     const timeOut = document.getElementById('popupTimeOut').value;
     const rate = document.getElementById('popupRate').value;
-    const overTime = document.getElementById('popupOverTime').value;
-    const specialDay = document.getElementById('popupSpecialDay').value;
+    const overTime = document.getElementById('popupOverTime').value || '0';
+    const dayType = document.getElementById('popupDayType').value;
+    const editId = document.getElementById('dutyPopup').dataset.editId;
 
-    if (!date || !timeIn || !timeOut) {
-        alert('Please fill in required fields');
-        return;
-    }
+    // Validation Chain
+    if (!validateRequiredFields(date, timeIn, timeOut)) return;
+    if (!validateTimeLogic(timeIn, timeOut)) return;
+    if (!validateWorkHours(timeIn, timeOut)) return;
+    if (!validateFutureDate(date)) return;
+    if (!validateDropdownValues(rate, dayType)) return;
+    if (!editId && !validateDuplicateEntry(date)) return;
+    if (editId && !validateDuplicateEntry(date, editId)) return;
 
-    // NEW: auto compute hours
     const hoursWorked = calculateHours(timeIn, timeOut);
 
     try {
         const duty = {
-            date, timeIn, timeOut, rate, overTime, specialDay,
+            date, timeIn, timeOut, rate, overTime, dayType,
             hours: hoursWorked,
             user: currentUser.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        const editId = document.getElementById('dutyPopup').dataset.editId;
-
         if (editId) {
             await db.collection("duties").doc(editId).update(duty);
-            alert("Duty updated successfully!");
+            console.log("Duty updated successfully");
         } else {
             await db.collection("duties").add(duty);
-            alert("Duty saved successfully!");
+            console.log("Duty saved successfully");
         }
 
         closePopup();
@@ -210,26 +343,71 @@ async function saveOrUpdateDuty() {
 
     } catch (error) {
         console.error("Save error:", error);
-        alert("Failed to save.");
+        showError("Failed to save duty. Please try again.");
     }
 }
 
 // --- Delete Duty ---
 async function deleteDuty() {
-    if (!confirm("Delete this duty?")) return;
-
     const editId = document.getElementById('dutyPopup').dataset.editId;
-    if (!editId) return;
+    if (!editId) {
+        showError("No duty record to delete");
+        return;
+    }
 
+    // Show delete confirmation modal
+    showDeleteConfirmation(() => {
+        performDelete(editId);
+    });
+}
+
+async function performDelete(editId) {
     try {
         await db.collection("duties").doc(editId).delete();
-        alert("Duty deleted!");
+        console.log("Duty deleted successfully");
         closePopup();
+        closeDeleteConfirmation();
         await loadDutyRecords();
         renderCalendar();
         renderGraph();
     } catch (error) {
         console.error("Delete error:", error);
+        showError("Failed to delete duty. Please try again.");
+    }
+}
+
+function showDeleteConfirmation(onConfirm) {
+    const modal = document.getElementById('deleteConfirmationModal');
+    if (!modal) return;
+
+    modal.classList.add('active');
+
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+
+    const handleConfirm = () => {
+        onConfirm();
+        cleanup();
+    };
+
+    const cleanup = () => {
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+    };
+
+    const handleCancel = () => {
+        closeDeleteConfirmation();
+        cleanup();
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+}
+
+function closeDeleteConfirmation() {
+    const modal = document.getElementById('deleteConfirmationModal');
+    if (modal) {
+        modal.classList.remove('active');
     }
 }
 
@@ -245,7 +423,6 @@ async function loadDutyRecords() {
 
         allDuties = snapshot.docs.map(doc => {
             const data = { id: doc.id, ...doc.data() };
-            // Recalculate hours even for old records
             data.hours = calculateHours(data.timeIn, data.timeOut);
             return data;
         });
@@ -313,6 +490,6 @@ function calculateCutoffHours(duties) {
         if (day >= 16 && day <= 31) hours_16_30 += h;
     });
 
-    document.getElementById("hours_1_15").textContent = hours_1_15 + " hrs";
-    document.getElementById("hours_16_30").textContent = hours_16_30 + " hrs";
+    document.getElementById("hours_1_15").textContent = hours_1_15.toFixed(2) + " hrs";
+    document.getElementById("hours_16_30").textContent = hours_16_30.toFixed(2) + " hrs";
 }

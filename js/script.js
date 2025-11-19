@@ -158,19 +158,18 @@ window.addEventListener('resize', setHeights);
 function updateBreadcrumb(parentName, currentName) {
     const breadcrumbParent = document.getElementById('breadcrumbParent');
     const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
-    const breadcrumbSeparator = document.getElementById('breadcrumbSeparator');
     
-    if (breadcrumbParent && breadcrumbCurrent && breadcrumbSeparator) {
+    if (breadcrumbParent) {
         breadcrumbParent.textContent = parentName;
-        breadcrumbCurrent.textContent = currentName;
-        
-        // Hide separator and current if no sub-page
-        if (!currentName) {
-            breadcrumbSeparator.style.display = 'none';
-            breadcrumbCurrent.style.display = 'none';
-        } else {
-            breadcrumbSeparator.style.display = 'inline';
+    }
+    
+    if (breadcrumbCurrent) {
+        if (currentName) {
+            breadcrumbCurrent.textContent = currentName;
             breadcrumbCurrent.style.display = 'inline';
+        } else {
+            breadcrumbCurrent.textContent = '';
+            breadcrumbCurrent.style.display = 'none';
         }
     }
 }
@@ -184,52 +183,78 @@ navItems.forEach(item => {
         const isSub = item.classList.contains("sub-item");
         const itemText = item.querySelector('.nav-text')?.textContent || pageId;
 
+        // Handle parent menu items with submenus
         if (parentId && !isSub) {
             const submenu = document.getElementById(`${parentId}-submenu`);
             const isExpanded = item.classList.contains('expanded');
 
+            // Close other parent menus
             navItems.forEach(nav => {
                 if (!nav.classList.contains("sub-item") && nav !== item) {
                     nav.classList.remove('active', 'expanded');
                     const sub = document.getElementById(`${nav.dataset.parent}-submenu`);
-                    sub?.classList.remove('expanded');
+                    if (sub) sub.classList.remove('expanded');
                 }
             });
 
-            if (!isExpanded) {
-                item.classList.add('expanded');
-                submenu?.classList.add('expanded');
-            }
+            // Always expand the submenu
+            item.classList.add('expanded');
+            if (submenu) submenu.classList.add('expanded');
 
             item.classList.add("active");
-            sections.forEach(sec => sec.classList.remove("active"));
-            document.getElementById(pageId)?.classList.add("active");
             
-            // Update breadcrumb for parent items
-            updateBreadcrumb(itemText, '');
-        }
-
-        if (isSub || !parentId) {
-            if (isSub) {
-                document.querySelectorAll(".sub-item").forEach(sub => sub.classList.remove("active"));
-                item.classList.add("active");
-                
-                // Find parent name for breadcrumb
-                const parentItem = item.closest('.nav-section')?.querySelector('[data-parent]');
-                const parentText = parentItem?.querySelector('.nav-text')?.textContent || 'Dashboard';
-                updateBreadcrumb(parentText, itemText);
-            } else if (!parentId) {
-                navItems.forEach(nav => nav.classList.remove("active"));
-                item.classList.add("active");
-                
-                // Update breadcrumb for standalone items (Settings, Help)
+            // Remove active from all sub-items
+            document.querySelectorAll(".sub-item").forEach(sub => sub.classList.remove("active"));
+            
+            // Auto-click the first sub-item if it exists
+            const firstSubItem = submenu?.querySelector('.sub-item');
+            if (firstSubItem) {
+                firstSubItem.click();
+            } else {
                 updateBreadcrumb(itemText, '');
             }
+            return;
+        }
 
+        // Handle sub-items
+        if (isSub) {
+            // Remove active from all nav items
+            navItems.forEach(nav => nav.classList.remove("active"));
+            item.classList.add("active");
+            
+            // Find parent for breadcrumb
+            const navSection = item.closest('.nav-section');
+            const parentItem = navSection?.querySelector('[data-parent]');
+            const parentText = parentItem?.querySelector('.nav-text')?.textContent || 'Dashboard';
+            
+            updateBreadcrumb(parentText, itemText);
+            
+            // Show section
             sections.forEach(sec => sec.classList.remove("active"));
-            document.getElementById(pageId)?.classList.add("active");
-
+            if (document.getElementById(pageId)) {
+                document.getElementById(pageId).classList.add("active");
+            }
+            
             if (window.innerWidth <= 768) sidebar.classList.remove("open");
+            return;
+        }
+
+        // Handle standalone items (Settings, Help, etc.)
+        if (!parentId && !isSub) {
+            // Remove active from all nav items
+            navItems.forEach(nav => nav.classList.remove("active"));
+            item.classList.add("active");
+            
+            updateBreadcrumb(itemText, '');
+            
+            // Show section
+            sections.forEach(sec => sec.classList.remove("active"));
+            if (document.getElementById(pageId)) {
+                document.getElementById(pageId).classList.add("active");
+            }
+            
+            if (window.innerWidth <= 768) sidebar.classList.remove("open");
+            return;
         }
     });
 });
@@ -265,5 +290,3 @@ updatePasswordBtn?.addEventListener('click', async () => {
         alert(error.code === 'auth/wrong-password' ? 'Current password is incorrect' : 'Failed to update password: ' + error.message);
     }
 });
-
-
