@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/inputduty.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <title>DutySync - Dashboard</title>
@@ -18,27 +19,32 @@
     </div>
     <nav class="nav-menu">
       <!-- Dashboard Section -->
-      <div class="nav-section">
-        <a class="nav-item active" data-page="dashboard" data-parent="dashboard">
-          <i class="fas fa-chart-pie nav-icon"></i>
-          <span class="nav-text">Dashboard</span>
-          <span class="nav-arrow">›</span>
+    <div class="nav-section">
+      <!-- Dashboard Parent -->
+      <a class="nav-item active" data-page="dashboard" data-parent="dashboard">
+        <i class="fas fa-chart-pie nav-icon"></i>
+        <span class="nav-text">Dashboard</span>
+        <span class="nav-arrow">›</span>
+      </a>
+
+      <!-- Dashboard Sub-menu -->
+      <div class="sub-menu" id="dashboard-submenu">
+        <a class="nav-item sub-item" data-page="all-pages">
+          <span class="nav-text">All Pages</span>
         </a>
-        <div class="sub-menu" id="dashboard-submenu">
-          <a class="nav-item sub-item" data-page="all-pages">
-            <span class="nav-text">All Pages</span>
-          </a>
-          <a class="nav-item sub-item" data-page="reports">
-            <span class="nav-text">Reports</span>
-          </a>
-          <a class="nav-item sub-item" data-page="input-duty">
-            <span class="nav-text">Input Duty</span>
-          </a>
-          <a class="nav-item sub-item" data-page="view-duty-log">
-            <span class="nav-text">View Duty Log</span>
-          </a>
-        </div>
+        <a class="nav-item sub-item" data-page="reports">
+          <span class="nav-text">Reports</span>
+        </a>
+        <a class="nav-item sub-item" data-page="input-duty">
+          <span class="nav-text">Input Duty</span>
+        </a>
+        <a class="nav-item sub-item" data-page="view-duty-log">
+          <span class="nav-text">View Duty Log</span>
+        </a>
       </div>
+    </div>
+
+      
       <!-- Payslip Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="payslip" data-parent="payslip">
@@ -131,6 +137,81 @@
         </div>
       </section>
 
+      <!-- Input Duty Section -->
+<!-- Replace your Input Duty Section with this updated version -->
+<!-- Input Duty Section -->
+<section class="content-section" id="input-duty">
+
+  <div class="input-duty-container" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 24px;">
+    <!-- Left Panel: Work Hours Input Form -->
+    <div class="left-panel" style="flex: 1; min-width: 300px;">
+      <h3>Work Hours Input</h3>
+      <label>Date</label>
+      <input type="date" id="inputDate" value="2025-11-17">
+
+      <label>Time In</label>
+      <input type="time" id="timeIn" placeholder="7:00am">
+
+      <label>Time Out</label>
+      <input type="time" id="timeOut" placeholder="2:00pm">
+
+      <label>Rate</label>
+      <select id="rate">
+        <option>Regular Rate</option>
+        <option>Night Shift</option>
+      </select>
+
+      <label>Over Time</label>
+      <input type="text" id="overTime" placeholder="2:00pm to 3:00pm">
+
+      <label>Special Day</label>
+      <select id="specialDay">
+        <option>None</option>
+        <option>Holiday</option>
+      </select>
+
+      <div style="margin-top: 15px;">
+        <button class="btn" id="clearDuty" style="background: gray; margin-right: 10px;">Clear</button>
+        <button class="btn" id="saveDuty" style="background: darkgray;">Done</button>
+      </div>
+    </div>
+
+    <!-- Right Panel: Duty Records (Table for Desktop, Cards for Mobile) -->
+    <div class="right-panel" style="flex: 2; min-width: 400px;">
+      <h3>Duty Records</h3>
+      
+      <!-- Desktop Table View -->
+      <div class="table-wrapper">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time In</th>
+              <th>Time Out</th>
+              <th>Rate</th>
+              <th>Over Time</th>
+              <th>Special Day</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="dutyTableBody">
+            <!-- Firebase records will populate here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="duty-cards-container" id="dutyCardsContainer">
+        <!-- Cards will be generated here -->
+      </div>
+    </div>
+  </div>
+    <div class="bottom-panel">
+    <h3>Completed Hours Graph</h3>
+    <canvas id="completedTimeChart" style="width:100%; max-width:200px; height:100px;"></canvas>
+  </div>
+</section>
+
     <section class="content-section" id="settings">
     <div class="card">
       <h3 style="margin-bottom: 15px;">Preferences</h3>
@@ -194,5 +275,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="../js/script.js"></script>
+  <script src="../js/inputduty.js"></script>
 </body>
 </html>

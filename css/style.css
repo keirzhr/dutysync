@@ -356,11 +356,24 @@ body {
 }
 
 /* Header */
+/* Header */
 header {
-  background-color: transparent;
+  background-color: var(--dark-bg);
   padding: 10px 32px;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   transition: background-color 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] header {
+  background-color: rgba(246, 248, 250, 0.95);
+}
+
+[data-theme="dark"] header {
+  background-color: rgba(11, 27, 58, 0.95);
 }
 
 header::after {
@@ -459,6 +472,7 @@ header::after {
 .content {
   flex: 1;
   padding: 32px;
+  overflow-x: hidden;
 }
 
 .content-section {
@@ -680,7 +694,7 @@ footer::before {
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    width: 240px;
+    width: 250px;
     transition: transform 0.3s ease;
   }
 
@@ -758,6 +772,37 @@ footer::before {
   
   .notification-btn i {
     font-size: 16px;
+  }
+
+  /* FIX: Reduce content padding on mobile */
+  .content {
+    padding: 20px 16px;
+  }
+
+  footer::before {
+    left: 16px;
+    right: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 16px 12px;
+  }
+
+  header {
+    padding: 14px 16px;
+    padding-left: 55px;
+  }
+
+  header::after {
+    left: 16px;
+    right: 16px;
+  }
+
+  footer::before {
+    left: 12px;
+    right: 12px;
   }
 }
 
