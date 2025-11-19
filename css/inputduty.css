@@ -1,19 +1,11 @@
 /* ===== CALENDAR + GRAPH LAYOUT ===== */
 .calendar-graph-container {
-  padding: 12px;
+  padding: 16px;
 }
 
 .main-content .content {
-  margin-top: 0;
-  padding-top: 0;
-}
-
-/* Calendar Title */
-.calendar-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: var(--text-primary);
+    margin-top: 0;   /* remove top margin */
+    padding-top: 0;  /* remove top padding */
 }
 
 /* Month Switcher */
@@ -21,10 +13,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   background-color: var(--card-bg);
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
   border: 1px solid var(--border-color);
 }
 
@@ -32,11 +24,11 @@
   background-color: var(--primary-color);
   color: white;
   border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   transition: all 0.2s ease;
   font-family: inherit;
 }
@@ -47,7 +39,7 @@
 }
 
 #currentMonth {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -56,57 +48,53 @@
 .calendar-graph-wrapper {
   display: flex;
   flex-direction: row;
-  gap: 16px;
+  gap: 24px;
 }
 
 /* Calendar Column */
 .calendar-wrapper {
   flex: 1;
   background-color: var(--card-bg);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 16px;
   border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
 }
 
 #calendarContainer {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  height: 420px;
+  gap: 6px;
 }
 
 .calendar-day-header {
   text-align: center;
   font-weight: 600;
   color: var(--text-secondary);
-  font-size: 11px;
-  padding: 4px;
+  font-size: 12px;
+  padding: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .calendar-day {
-
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   background-color: var(--dark-bg-alt);
   font-weight: 500;
   position: relative;
-  font-size: 12px;
+  min-height: 35px;
 }
 
 .calendar-day:hover {
   background-color: var(--hover-bg);
   border-color: var(--primary-color);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .calendar-day.other-month {
@@ -134,27 +122,23 @@
 .graph-wrapper {
   flex: 1;
   background-color: var(--card-bg);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 16px;
   border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  justify-content: flex-start;
 }
 
 .graph-wrapper h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   color: var(--text-primary);
-  flex-shrink: 0;
 }
 
 #completedTimeChart {
   max-width: 100% !important;
-  height: 420px !important;
-  flex-shrink: 0;
+  height: 280px !important;
 }
 
 /* Popup Modal */
@@ -179,383 +163,43 @@
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   width: 90%;
-  max-width: 400px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
-}
-
-#dutyPopup h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 18px;
-  color: var(--text-primary);
-}
-
-.popup-form-group {
-  margin-bottom: 14px;
-}
-
-.popup-form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.popup-form-group input,
-.popup-form-group select {
-  width: 100%;
-  padding: 8px 10px;
-  background-color: var(--dark-bg-alt);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-size: 12px;
-  transition: border-color 0.2s ease;
-  font-family: inherit;
-}
-
-.popup-form-group input:focus,
-.popup-form-group select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(90, 112, 176, 0.1);
-}
-
-.popup-form-group input[readonly] {
-  background-color: var(--hover-bg);
-  cursor: not-allowed;
-}
-
-.popup-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-
-.popup-btn {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.popup-btn-save {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: white;
-}
-
-.popup-btn-save:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(90, 112, 176, 0.3);
-}
-
-.popup-btn-update {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: white;
-}
-
-.popup-btn-update:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(90, 112, 176, 0.3);
-}
-
-.popup-btn-delete {
-  background-color: #dc3545;
-  color: white;
-}
-
-.popup-btn-delete:hover {
-  background-color: #c82333;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-.popup-btn-cancel {
-  background-color: var(--hover-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-}
-
-.popup-btn-cancel:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: var(--text-secondary);
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
   .calendar-graph-wrapper {
     flex-direction: column;
-    gap: 12px;
   }
 
   #completedTimeChart {
-    height: 380px !important;
-  }
-
-  #calendarContainer {
-    height: 380px;
-  }
-}
-
-@media (max-width: 768px) {
-  .calendar-graph-container {
-    padding: 10px;
-  }
-
-  .month-switcher {
-    padding: 8px 12px;
-    margin-bottom: 10px;
-  }
-
-  .month-switcher button {
-    width: 34px;
-    height: 34px;
-    font-size: 14px;
-  }
-
-  #currentMonth {
-    font-size: 14px;
-  }
-
-  .calendar-wrapper {
-    padding: 10px;
-  }
-
-  .calendar-title {
-    font-size: 1rem;
-  }
-
-  #calendarContainer {
-    gap: 6px;
-    height: 360px;
-  }
-
-  .calendar-day-header {
-    font-size: 10px;
-  }
-
-  .calendar-day {
-    font-size: 11px;
-  }
-
-  .graph-wrapper {
-    padding: 10px;
-  }
-
-  .graph-wrapper h3 {
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-
-  #completedTimeChart {
-    height: 360px !important;
-  }
-
-  #dutyPopup {
-    padding: 16px;
-  }
-
-  #dutyPopup h3 {
-    font-size: 16px;
-    margin-bottom: 14px;
-  }
-
-  .popup-btn {
-    padding: 7px 12px;
-    font-size: 11px;
+    height: 250px !important;
   }
 }
 
 @media (max-width: 600px) {
-  .calendar-graph-container {
-    padding: 8px;
-  }
-
   .month-switcher {
-    padding: 8px 10px;
-    margin-bottom: 10px;
-  }
-
-  .month-switcher button {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
+    padding: 10px 14px;
   }
 
   #currentMonth {
-    font-size: 13px;
-  }
-
-  .calendar-wrapper {
-    padding: 8px;
-  }
-
-  .calendar-title {
-    font-size: 0.95rem;
-    margin-bottom: 8px;
-  }
-
-  #calendarContainer {
-    gap: 5px;
-    height: 340px;
-  }
-
-  .calendar-day-header {
-    font-size: 9px;
-    padding: 3px;
+    font-size: 16px;
   }
 
   .calendar-day {
-    font-size: 10px;
-  }
-
-  .graph-wrapper {
-    padding: 8px;
-  }
-
-  .graph-wrapper h3 {
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  #completedTimeChart {
-    height: 340px !important;
+    font-size: 11px;
+    min-height: 30px;
   }
 
   #dutyPopup {
     width: 95%;
-    padding: 14px;
-  }
-
-  #dutyPopup h3 {
-    font-size: 15px;
-    margin-bottom: 12px;
-  }
-
-  .popup-form-group {
-    margin-bottom: 12px;
-  }
-
-  .popup-form-group label {
-    font-size: 11px;
-  }
-
-  .popup-form-group input,
-  .popup-form-group select {
-    padding: 7px 8px;
-    font-size: 11px;
-  }
-
-  .popup-buttons {
-    gap: 8px;
-    margin-top: 16px;
-  }
-
-  .popup-btn {
-    padding: 7px 12px;
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .calendar-graph-container {
-    padding: 6px;
-  }
-
-  .month-switcher {
-    padding: 6px 8px;
-    margin-bottom: 8px;
-  }
-
-  .month-switcher button {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
-  }
-
-  #currentMonth {
-    font-size: 12px;
-  }
-
-  .calendar-wrapper {
-    padding: 6px;
-  }
-
-  .calendar-title {
-    font-size: 0.9rem;
-    margin-bottom: 6px;
-  }
-
-  #calendarContainer {
-    gap: 4px;
-    height: 320px;
-  }
-
-  .calendar-day-header {
-    font-size: 8px;
-    padding: 2px;
-  }
-
-  .calendar-day {
-    font-size: 9px;
-  }
-
-  .graph-wrapper {
-    padding: 6px;
-  }
-
-  .graph-wrapper h3 {
-    font-size: 12px;
-    margin-bottom: 6px;
+    padding: 18px;
   }
 
   #completedTimeChart {
-    height: 320px !important;
-  }
-
-  #dutyPopup {
-    width: 98%;
-    padding: 12px;
-  }
-
-  #dutyPopup h3 {
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-
-  .popup-form-group {
-    margin-bottom: 10px;
-  }
-
-  .popup-form-group label {
-    font-size: 10px;
-  }
-
-  .popup-form-group input,
-  .popup-form-group select {
-    padding: 6px 8px;
-    font-size: 10px;
-  }
-
-  .popup-buttons {
-    gap: 6px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-
-  .popup-btn {
-    padding: 6px 10px;
-    font-size: 9px;
-    flex: 1;
-    min-width: 60px;
+    height: 220px !important;
   }
 }
