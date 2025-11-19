@@ -23,7 +23,7 @@ function calculateHours(timeIn, timeOut) {
     let start = inH + inM / 60;
     let end = outH + outM / 60;
 
-    if (end < start) end += 24;
+    if (end < start) end += 24; // past midnight
     return +(end - start).toFixed(2);
 }
 
@@ -45,16 +45,16 @@ function renderCalendar() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    // Update header
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+
     document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
 
     const container = document.getElementById('calendarContainer');
     container.innerHTML = '';
 
     // Day headers
-    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayHeaders = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     dayHeaders.forEach(day => {
         const header = document.createElement('div');
         header.className = 'calendar-day-header';
@@ -62,7 +62,6 @@ function renderCalendar() {
         container.appendChild(header);
     });
 
-    // Get first day and number of days
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
@@ -70,22 +69,20 @@ function renderCalendar() {
     // Previous month days
     for (let i = firstDay - 1; i >= 0; i--) {
         const day = daysInPrevMonth - i;
-        const dayEl = createDayElement(day, month - 1, year, true);
-        container.appendChild(dayEl);
+        container.appendChild(createDayElement(day, month - 1, year, true));
     }
 
     // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
-        const dayEl = createDayElement(day, month, year, false);
-        container.appendChild(dayEl);
+        container.appendChild(createDayElement(day, month, year, false));
     }
 
     // Next month days
     const totalCells = container.children.length - 7;
     const remainingCells = 42 - totalCells;
+
     for (let day = 1; day <= remainingCells; day++) {
-        const dayEl = createDayElement(day, month + 1, year, true);
-        container.appendChild(dayEl);
+        container.appendChild(createDayElement(day, month + 1, year, true));
     }
 }
 
@@ -94,17 +91,16 @@ function createDayElement(day, month, year, isOtherMonth) {
     el.className = 'calendar-day';
     if (isOtherMonth) el.classList.add('other-month');
 
-    // Check if today
     const today = new Date();
     const actualMonth = (month % 12 + 12) % 12;
     const actualYear = month < 0 ? year - 1 : month >= 12 ? year + 1 : year;
 
-    if (!isOtherMonth && day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+    if (!isOtherMonth && day === today.getDate() && actualMonth === today.getMonth() && actualYear === today.getFullYear()) {
         el.classList.add('today');
     }
 
-    // Check if has duty
     const dateStr = `${actualYear}-${String(actualMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
     if (allDuties.some(d => d.date === dateStr)) {
         el.classList.add('has-duty');
     }
@@ -112,9 +108,7 @@ function createDayElement(day, month, year, isOtherMonth) {
     el.textContent = day;
 
     if (!isOtherMonth) {
-        el.addEventListener('click', () => {
-            openPopup(dateStr);
-        });
+        el.addEventListener('click', () => openPopup(dateStr));
     }
 
     return el;
@@ -129,10 +123,9 @@ function openPopup(dateStr) {
     document.getElementById('popupOverTime').value = '';
     document.getElementById('popupSpecialDay').value = 'None';
 
-    // Check if editing existing
     const existing = allDuties.find(d => d.date === dateStr);
     const buttonsContainer = document.querySelector('.popup-buttons');
-    
+
     if (existing) {
         document.getElementById('popupTimeIn').value = existing.timeIn;
         document.getElementById('popupTimeOut').value = existing.timeOut;
@@ -140,8 +133,7 @@ function openPopup(dateStr) {
         document.getElementById('popupOverTime').value = existing.overTime;
         document.getElementById('popupSpecialDay').value = existing.specialDay;
         document.getElementById('dutyPopup').dataset.editId = existing.id;
-        
-        // Show Update, Delete and Cancel buttons
+
         buttonsContainer.innerHTML = `
             <button id="deletePopupDuty" class="popup-btn popup-btn-delete">Delete</button>
             <div style="margin-left: auto; display: flex; gap: 10px;">
@@ -149,19 +141,19 @@ function openPopup(dateStr) {
                 <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
             </div>
         `;
-        
+
         document.getElementById('updatePopupDuty').addEventListener('click', saveOrUpdateDuty);
         document.getElementById('deletePopupDuty').addEventListener('click', deleteDuty);
         document.getElementById('cancelPopupDuty').addEventListener('click', closePopup);
+
     } else {
         delete document.getElementById('dutyPopup').dataset.editId;
-        
-        // Show Save and Cancel buttons
+
         buttonsContainer.innerHTML = `
             <button id="savePopupDuty" class="popup-btn popup-btn-save">Save</button>
             <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
         `;
-        
+
         document.getElementById('savePopupDuty').addEventListener('click', saveOrUpdateDuty);
         document.getElementById('cancelPopupDuty').addEventListener('click', closePopup);
     }
@@ -173,12 +165,10 @@ function closePopup() {
     document.getElementById('popupOverlay').classList.remove('active');
 }
 
+// --- SAVE / UPDATE DUTY ---
 async function saveOrUpdateDuty() {
     const currentUser = auth.currentUser;
-    if (!currentUser) {
-        alert('You must be logged in');
-        return;
-    }
+    if (!currentUser) return alert('You must be logged in');
 
     const date = document.getElementById('popupDate').value;
     const timeIn = document.getElementById('popupTimeIn').value;
@@ -188,13 +178,17 @@ async function saveOrUpdateDuty() {
     const specialDay = document.getElementById('popupSpecialDay').value;
 
     if (!date || !timeIn || !timeOut) {
-        alert('Please fill in all required fields');
+        alert('Please fill in required fields');
         return;
     }
+
+    // NEW: auto compute hours
+    const hoursWorked = calculateHours(timeIn, timeOut);
 
     try {
         const duty = {
             date, timeIn, timeOut, rate, overTime, specialDay,
+            hours: hoursWorked,
             user: currentUser.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -215,33 +209,27 @@ async function saveOrUpdateDuty() {
         renderGraph();
 
     } catch (error) {
-        console.error("Save Error:", error);
-        alert("Failed to save duty.");
+        console.error("Save error:", error);
+        alert("Failed to save.");
     }
 }
 
+// --- Delete Duty ---
 async function deleteDuty() {
-    if (!confirm('Are you sure you want to delete this duty record?')) {
-        return;
-    }
+    if (!confirm("Delete this duty?")) return;
 
     const editId = document.getElementById('dutyPopup').dataset.editId;
-    
-    if (!editId) {
-        alert('No duty record to delete');
-        return;
-    }
+    if (!editId) return;
 
     try {
         await db.collection("duties").doc(editId).delete();
-        alert("Duty deleted successfully!");
+        alert("Duty deleted!");
         closePopup();
         await loadDutyRecords();
         renderCalendar();
         renderGraph();
     } catch (error) {
-        console.error("Delete Error:", error);
-        alert("Failed to delete duty.");
+        console.error("Delete error:", error);
     }
 }
 
@@ -255,10 +243,17 @@ async function loadDutyRecords() {
             .where("user", "==", currentUser.uid)
             .get();
 
-        allDuties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        allDuties = snapshot.docs.map(doc => {
+            const data = { id: doc.id, ...doc.data() };
+            // Recalculate hours even for old records
+            data.hours = calculateHours(data.timeIn, data.timeOut);
+            return data;
+        });
+
         console.log("Duties loaded:", allDuties);
+
     } catch (error) {
-        console.error("Load duties error:", error);
+        console.error("Load error:", error);
     }
 }
 
@@ -267,33 +262,28 @@ function renderGraph() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    // Filter duties for current month
     const monthDuties = allDuties.filter(d => {
-        const [y, m] = d.date.split('-').map(Number);
+        const [y, m] = d.date.split("-").map(Number);
         return y === year && m === month + 1;
     });
 
     const dates = monthDuties.map(d => d.date);
-    const hours = monthDuties.map(d => calculateHours(d.timeIn, d.timeOut));
+    const hours = monthDuties.map(d => d.hours || 0);
 
-    const ctx = document.getElementById('completedTimeChart');
+    const ctx = document.getElementById("completedTimeChart");
     if (!ctx) return;
 
-    const context = ctx.getContext('2d');
+    if (completedTimeChart) completedTimeChart.destroy();
 
-    if (completedTimeChart) {
-        completedTimeChart.destroy();
-    }
-
-    completedTimeChart = new Chart(context, {
+    completedTimeChart = new Chart(ctx.getContext("2d"), {
         type: 'bar',
         data: {
             labels: dates,
             datasets: [{
                 label: 'Hours Worked',
                 data: hours,
-                backgroundColor: 'rgba(90, 112, 176, 0.7)',
-                borderColor: 'rgba(90, 112, 176, 1)',
+                backgroundColor: 'rgba(90,112,176,0.7)',
+                borderColor: 'rgba(90,112,176,1)',
                 borderWidth: 1,
                 borderRadius: 6
             }]
@@ -302,14 +292,27 @@ function renderGraph() {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { 
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                }
-            },
-            plugins: {
-                legend: { display: true, position: 'top' }
+                y: { beginAtZero: true }
             }
         }
     });
+
+    calculateCutoffHours(monthDuties);
+}
+
+// --- Cutoff Hours ---
+function calculateCutoffHours(duties) {
+    let hours_1_15 = 0;
+    let hours_16_30 = 0;
+
+    duties.forEach(d => {
+        const day = new Date(d.date).getDate();
+        const h = d.hours || 0;
+
+        if (day >= 1 && day <= 15) hours_1_15 += h;
+        if (day >= 16 && day <= 31) hours_16_30 += h;
+    });
+
+    document.getElementById("hours_1_15").textContent = hours_1_15 + " hrs";
+    document.getElementById("hours_16_30").textContent = hours_16_30 + " hrs";
 }

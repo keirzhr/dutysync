@@ -169,17 +169,35 @@
             <div id="currentMonth">November 2025</div>
             <button id="nextMonth">&gt;</button>
           </div>
-          <div class="calendar-graph-wrapper">
-            <div class="calendar-wrapper">
-               <h3 class="calendar-title">Work Hours Input</h3> 
-              <div id="calendarContainer" class="calendar-grid"></div>
-            </div>
-            <div class="graph-wrapper">
-              <h3>Hours Worked</h3>
-              <canvas id="completedTimeChart"></canvas>
-            </div>
-          </div>
+      <div class="calendar-graph-wrapper">
+          
+        <div class="calendar-wrapper">
+          <h3 class="calendar-title">Work Hours Input</h3>
+          <div id="calendarContainer" class="calendar-grid"></div>
         </div>
+
+        <div class="graph-wrapper">
+          <h3>Hours Worked</h3>
+          <canvas id="completedTimeChart"></canvas>
+
+        <div class="cutoff-hours-box">
+            <div class="cutoff-block">
+                <h4>Cutoff (1–15)</h4>
+                <p id="hours_1_15">0 hrs</p>
+            </div>
+
+            <div class="cutoff-block">
+                <h4>Cutoff (16–30)</h4>
+                <p id="hours_16_30">0 hrs</p>
+            </div>
+        </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
 
         <!-- Popup Modal -->
         <div id="popupOverlay" class="popup-overlay">
