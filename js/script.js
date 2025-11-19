@@ -73,6 +73,27 @@ auth.onAuthStateChanged(async (user) => {
         console.log('No user logged in, redirecting...');
         window.location.href = '../index.html';
     }
+
+    // Auto-select Dashboard -> Overview
+const dashboardParent = document.querySelector('[data-page="dashboard"]');
+const overviewItem = document.querySelector('[data-page="overview"]');
+
+// Expand dashboard menu
+dashboardParent.classList.add('active', 'expanded');
+const dashboardSubMenu = document.getElementById('dashboard-submenu');
+if (dashboardSubMenu) dashboardSubMenu.classList.add('expanded');
+
+// Activate Overview sub-item
+overviewItem.classList.add('active');
+
+// Show Overview section
+document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+const overviewSection = document.getElementById('overview');
+if (overviewSection) overviewSection.classList.add('active');
+
+// Update breadcrumb
+updateBreadcrumb('Dashboard', 'Overview');
+
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -220,11 +241,13 @@ navItems.forEach(item => {
         if (isSub) {
             // Remove active from all nav items
             navItems.forEach(nav => nav.classList.remove("active"));
-            item.classList.add("active");
             
-            // Find parent for breadcrumb
+            // Add active to both sub-item and parent
+            item.classList.add("active");
             const navSection = item.closest('.nav-section');
             const parentItem = navSection?.querySelector('[data-parent]');
+            if (parentItem) parentItem.classList.add("active", "expanded"); // <-- add hover/active effect
+            
             const parentText = parentItem?.querySelector('.nav-text')?.textContent || 'Dashboard';
             
             updateBreadcrumb(parentText, itemText);
@@ -238,6 +261,7 @@ navItems.forEach(item => {
             if (window.innerWidth <= 768) sidebar.classList.remove("open");
             return;
         }
+
 
         // Handle standalone items (Settings, Help, etc.)
         if (!parentId && !isSub) {

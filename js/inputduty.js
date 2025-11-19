@@ -9,10 +9,55 @@ let completedTimeChart = null;
 auth.onAuthStateChanged(async user => {
     if (user) {
         await loadDutyRecords();
-        renderCalendar();
-        renderGraph();
+        renderDutyLogTable();  // <-- add this
+        renderCalendar();         // redraws the calendar
+        renderGraph();            // redraws the chart
     }
 });
+
+function renderDutyLogTable() {
+    const container = document.getElementById("dutyLogTableBody"); // tbody element
+    if (!container) return;
+
+    container.innerHTML = ""; // Clear existing rows
+
+    allDuties.sort((a, b) => new Date(b.date) - new Date(a.date)); // optional sorting
+
+    allDuties.forEach(duty => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${duty.date}</td>
+            <td>${duty.timeIn}</td>
+            <td>${duty.timeOut}</td>
+            <td>${duty.hours.toFixed(2)}</td>
+            <td>${duty.compensationType}</td>
+            <td>${duty.dayType}</td>
+            <td>
+                <button class="edit-btn" data-id="${duty.id}">Edit</button>
+                <button class="delete-btn" data-id="${duty.id}">Delete</button>
+            </td>
+        `;
+        container.appendChild(tr);
+    });
+
+    // Add click handlers for the edit/delete buttons
+    container.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const id = e.currentTarget.dataset.id;
+            const duty = allDuties.find(d => d.id === id);
+            if (duty) openPopup(duty.date);
+        });
+    });
+
+    container.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const id = e.currentTarget.dataset.id;
+            performDelete(id);
+        });
+    });
+}
+
 
 // --- Calculate Hours ---
 function calculateHours(timeIn, timeOut) {
@@ -134,7 +179,7 @@ function validateDuplicateEntry(dateStr, excludeId = null) {
 }
 
 function validateDropdownValues(rate, dayType) {
-    const validRates = ['Regular Rate', 'Overtime Rate', 'Night Shift'];
+    const validRates = ['Regular Rate','Night Shift'];
     const validDayTypes = ['Regular', 'Regular Holiday (130%)', 'Special Non-Working Holiday (200%)'];
 
     if (!validRates.includes(rate)) {
@@ -322,7 +367,7 @@ async function saveOrUpdateDuty() {
 
     try {
         const duty = {
-            date, timeIn, timeOut, rate, overTime, dayType,
+            date, timeIn, timeOut, compensationType: rate, overTime: parseFloat(overTime) || 0, dayType,
             hours: hoursWorked,
             user: currentUser.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -338,6 +383,7 @@ async function saveOrUpdateDuty() {
 
         closePopup();
         await loadDutyRecords();
+        renderDutyLogTable(); 
         renderCalendar();
         renderGraph();
 
@@ -368,6 +414,7 @@ async function performDelete(editId) {
         closePopup();
         closeDeleteConfirmation();
         await loadDutyRecords();
+        renderDutyLogTable();  
         renderCalendar();
         renderGraph();
     } catch (error) {
@@ -375,6 +422,7 @@ async function performDelete(editId) {
         showError("Failed to delete duty. Please try again.");
     }
 }
+
 
 function showDeleteConfirmation(onConfirm) {
     const modal = document.getElementById('deleteConfirmationModal');
