@@ -6,7 +6,6 @@
   <title>DutySync - Dashboard</title>
   
   <!-- CSS -->
-  <link rel="stylesheet" href="../css/dutylog.css">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/inputduty.css">
   <link rel="stylesheet" href="../css/viewdutylog.css">
@@ -223,146 +222,198 @@
       </section>
 
       <!-- View Duty Log Section -->
-      <section class="content-section" id="view-duty-log">
-        <div class="duty-log-container">
-          <div class="duty-log-header">
-            <h2 class="section-title">Duty Records</h2>
-            <div class="duty-log-controls">
-              <select id="sortByDate" class="sort-select">
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
-              </select>
-            </div>
-          </div>
+<!-- View Duty Log Section -->
+<!-- View Duty Log Section -->
+<section class="content-section" id="view-duty-log">
+  <div class="duty-log-container">
+    <div class="duty-log-header">
+      <h2 class="section-title">Duty Records</h2>
+      <div class="duty-log-controls">
+        <input type="month" id="monthFilter" class="month-filter">
+      </div>
+    </div>
 
-          <!-- Desktop Table View -->
-          <div class="duty-table-wrapper">
-            <table class="duty-table" id="dutyTable">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Time In</th>
-                  <th>Time Out</th>
-                  <th>Hours</th>
-                  <th>Rate</th>
-                  <th>Day Type</th>
-                  <th>Overtime</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="dutyTableBody">
-                <!-- Populated by JavaScript -->
-              </tbody>
-              <tfoot id="dutyTableFoot">
-                <!-- Summary row populated by JavaScript -->
-              </tfoot>
-            </table>
-          </div>
-
-          <!-- Mobile Card View -->
-          <div class="duty-cards-wrapper" id="dutyCardsWrapper">
+    <!-- Table and Dashboard Layout -->
+    <div class="duty-content-layout">
+      <!-- Table -->
+      <div class="duty-table-wrapper">
+        <table class="duty-table" id="dutyTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time In</th>
+              <th>Time Out</th>
+              <th>Hours</th>
+              <th>Rate</th>
+              <th>Day Type</th>
+              <th>Overtime</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dutyTableBody">
             <!-- Populated by JavaScript -->
-          </div>
+          </tbody>
+        </table>
+      </div>
 
-          <!-- Summary Card for Mobile -->
-          <div class="duty-summary-mobile" id="dutySummaryMobile">
-            <!-- Populated by JavaScript -->
-          </div>
+      <!-- Mini Dashboard (Below Table) -->
+      <div class="mini-dashboard" id="miniDashboard">
+        <div class="dashboard-card">
+          <div class="card-label">Total Hour</div>
+          <div class="card-value" id="dashTotalHours">0.00</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <div class="card-label">Regular Hour</div>
+          <div class="card-value" id="dashRegularHours">0.00</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <div class="card-label">Night Differential</div>
+          <div class="card-value night-shift" id="dashNightHours">0.00</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <div class="card-label">Special Day Hour</div>
+          <div class="card-value special-day" id="dashSpecialDayHours">0.00</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <div class="card-label">Over Time Hour</div>
+          <div class="card-value overtime" id="dashOverTimeHours">0.00</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <div class="card-label">Total work availability</div>
+          <div class="card-value percentage" id="dashAvailability">%0.00</div>
+        </div>
+      </div>
+    </div>
 
-          <!-- Empty State -->
-          <div class="duty-empty-state" id="dutyEmptyState" style="display: none;">
-            <i class="fas fa-calendar-times"></i>
-            <h3>No Duty Records Found</h3>
-            <p>Start tracking your work hours by adding your first duty entry.</p>
-            <button class="btn-add-duty" onclick="document.querySelector('[data-page=\'input-duty\']').click()">
-              <i class="fas fa-plus"></i> Add Duty Record
-            </button>
+    <!-- Mobile Card View (Hidden on Desktop) -->
+    <div class="duty-cards-wrapper" id="dutyCardsWrapper">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <!-- Empty State (Fallback) -->
+    <div class="duty-empty-state" id="dutyEmptyState" style="display: none;">
+      <i class="fas fa-calendar-times"></i>
+      <h3>No Duty Records</h3>
+      <p>No records found for the selected month. Try selecting a different month or add new duty entries.</p>
+      <button class="btn-add-duty" onclick="document.querySelector('[data-page=\'input-duty\']').click()">
+        <i class="fas fa-plus"></i> Add Duty Record
+      </button>
+    </div>
+  </div>
+
+  <!-- Edit Duty Modal -->
+ <!-- Edit Duty Modal -->
+<div id="dutyLogEditModal" class="popup-overlay">
+  <div class="popup-card">
+    <div class="popup-header">
+      <h3>Edit Duty Record</h3>
+    </div>
+    
+    <div id="editDutyError" class="popup-error" style="display: none;"></div>
+    
+    <div class="popup-content">
+      <input type="hidden" id="editDutyId">
+      
+      <div class="popup-section">
+        <label class="section-label">Date</label>
+        <input type="date" id="editDutyDate" class="date-input">
+      </div>
+
+      <div class="popup-section">
+        <label class="section-label">Work Hours</label>
+        <div class="time-input-group">
+          <div class="time-input-wrapper">
+            <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
+            <input type="time" id="editDutyTimeIn" class="time-input">
+            <small class="help-text">Start time</small>
+          </div>
+          <div class="time-separator">→</div>
+          <div class="time-input-wrapper">
+            <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
+            <input type="time" id="editDutyTimeOut" class="time-input">
+            <small class="help-text">End time</small>
           </div>
         </div>
+      </div>
 
-        <!-- Edit Duty Modal -->
-        <div id="dutyLogEditModal" class="popup-overlay">
-          <div class="popup-card">
-            <div class="popup-header">
-              <h3>Edit Duty Record</h3>
-            </div>
-            
-            <div id="editDutyError" class="popup-error" style="display: none;"></div>
-            
-            <div class="popup-content">
-              <input type="hidden" id="editDutyId">
-              
-              <div class="popup-section">
-                <label class="section-label">Date</label>
-                <input type="date" id="editDutyDate" class="date-input">
-              </div>
+      <div class="popup-section">
+        <label class="section-label">Compensation Type</label>
+        <select id="editDutyRate" class="select-input">
+          <option>Regular Rate</option>
+          <option>Night Shift</option>
+        </select>
+      </div>
 
-              <div class="popup-section">
-                <label class="section-label">Work Hours</label>
-                <div class="time-input-group">
-                  <div class="time-input-wrapper">
-                    <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
-                    <input type="time" id="editDutyTimeIn" class="time-input">
-                  </div>
-                  <div class="time-separator">→</div>
-                  <div class="time-input-wrapper">
-                    <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
-                    <input type="time" id="editDutyTimeOut" class="time-input">
-                  </div>
-                </div>
-              </div>
+      <div class="popup-section">
+        <label class="section-label">Day Type</label>
+        <select id="editDutyDayType" class="select-input">
+          <option>Regular</option>
+          <option>Regular Holiday (130%)</option>
+          <option>Special Non-Working Holiday (200%)</option>
+        </select>
+      </div>
 
-              <div class="popup-section">
-                <label class="section-label">Compensation Type</label>
-                <select id="editDutyRate" class="select-input">
-                  <option>Regular Rate</option>
-                  <option>Night Shift</option>
-                </select>
-              </div>
+      <div class="popup-section">
+        <label class="section-label">Additional Overtime Hours</label>
+        <input type="number" id="editDutyOvertime" step="0.25" min="0" placeholder="0" class="number-input">
+        <small class="help-text">Extra hours beyond regular shift</small>
+      </div>
+    </div>
 
-              <div class="popup-section">
-                <label class="section-label">Day Type</label>
-                <select id="editDutyDayType" class="select-input">
-                  <option>Regular</option>
-                  <option>Regular Holiday (130%)</option>
-                  <option>Special Non-Working Holiday (200%)</option>
-                </select>
-              </div>
+    <div class="popup-buttons">
+      <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
+      <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+  <!-- Delete Confirmation Modal -->
+  <div id="dutyLogDeleteModal" class="confirmation-modal">
+    <div class="confirmation-content">
+      <div class="confirmation-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="confirmation-title">Delete Entry?</h3>
+      <p class="confirmation-message">
+        This action cannot be undone. Are you sure you want to delete this duty record?
+      </p>
+      <div class="confirmation-buttons">
+        <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
+          <i class="fas fa-times"></i> Keep
+        </button>
+        <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 
-              <div class="popup-section">
-                <label class="section-label">Additional Overtime Hours</label>
-                <input type="number" id="editDutyOvertime" step="0.25" min="0" placeholder="0" class="number-input">
-              </div>
-            </div>
-
-            <div class="popup-buttons">
-              <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
-              <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div id="dutyLogDeleteModal" class="confirmation-modal">
-          <div class="confirmation-content">
-            <div class="confirmation-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="confirmation-title">Delete Entry?</h3>
-            <p class="confirmation-message">
-              This action cannot be undone. Are you sure you want to delete this duty record?
-            </p>
-            <div class="confirmation-buttons">
-              <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
-                <i class="fas fa-times"></i> Keep
-              </button>
-              <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+  <!-- Delete Confirmation Modal -->
+  <div id="dutyLogDeleteModal" class="confirmation-modal">
+    <div class="confirmation-content">
+      <div class="confirmation-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="confirmation-title">Delete Entry?</h3>
+      <p class="confirmation-message">
+        This action cannot be undone. Are you sure you want to delete this duty record?
+      </p>
+      <div class="confirmation-buttons">
+        <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
+          <i class="fas fa-times"></i> Keep
+        </button>
+        <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 
       <!-- Settings Section -->
       <section class="content-section" id="settings">

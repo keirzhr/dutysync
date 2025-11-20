@@ -4,24 +4,48 @@ console.log("🔥 inputduty.js (Calendar) loaded");
 let currentDate = new Date();
 let allDuties = [];
 let completedTimeChart = null;
+let unsubscribeDuties = null; // Real-time listener
 
 // --- Check Auth State ---
 auth.onAuthStateChanged(async user => {
     if (user) {
-        await loadDutyRecords();
-        renderDutyLogTable();  // <-- add this
-        renderCalendar();         // redraws the calendar
-        renderGraph();            // redraws the chart
+        setupRealtimeDutiesListener(user.uid);
+    } else {
+        if (unsubscribeDuties) {
+            unsubscribeDuties();
+            unsubscribeDuties = null;
+        }
     }
 });
 
+// --- Setup Real-time Firestore Listener ---
+function setupRealtimeDutiesListener(userId) {
+    if (unsubscribeDuties) unsubscribeDuties();
+
+    unsubscribeDuties = db.collection("duties")
+        .where("user", "==", userId)
+        .onSnapshot(snapshot => {
+            allDuties = snapshot.docs.map(doc => {
+                const data = { id: doc.id, ...doc.data() };
+                data.hours = calculateHours(data.timeIn, data.timeOut);
+                return data;
+            });
+            console.log("✅ Input Duty records updated (real-time):", allDuties.length);
+            renderDutyLogTable();
+            renderCalendar();
+            renderGraph();
+        }, error => {
+            console.error("❌ Real-time listener error:", error);
+        });
+}
+
 function renderDutyLogTable() {
-    const container = document.getElementById("dutyLogTableBody"); // tbody element
+    const container = document.getElementById("dutyTableBody");
     if (!container) return;
 
-    container.innerHTML = ""; // Clear existing rows
+    container.innerHTML = "";
 
-    allDuties.sort((a, b) => new Date(b.date) - new Date(a.date)); // optional sorting
+    allDuties.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     allDuties.forEach(duty => {
         const tr = document.createElement("tr");
@@ -41,7 +65,6 @@ function renderDutyLogTable() {
         container.appendChild(tr);
     });
 
-    // Add click handlers for the edit/delete buttons
     container.querySelectorAll(".edit-btn").forEach(btn => {
         btn.addEventListener("click", e => {
             const id = e.currentTarget.dataset.id;
@@ -58,7 +81,6 @@ function renderDutyLogTable() {
     });
 }
 
-
 // --- Calculate Hours ---
 function calculateHours(timeIn, timeOut) {
     if (!timeIn || !timeOut) return 0;
@@ -68,7 +90,7 @@ function calculateHours(timeIn, timeOut) {
     let start = inH + inM / 60;
     let end = outH + outM / 60;
 
-    if (end < start) end += 24; // Overnight shift
+    if (end < start) end += 24;
     return +(end - start).toFixed(2);
 }
 
@@ -112,7 +134,6 @@ function validateTimeLogic(timeIn, timeOut) {
     const inMinutes = inH * 60 + inM;
     const outMinutes = outH * 60 + outM;
 
-    // Allow both regular (same day) and overnight shifts
     if (inMinutes === outMinutes) {
         showError("Time Out must be different from Time In");
         return false;
@@ -221,7 +242,6 @@ function renderCalendar() {
     const container = document.getElementById('calendarContainer');
     container.innerHTML = '';
 
-    // Day headers
     const dayHeaders = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     dayHeaders.forEach(day => {
         const header = document.createElement('div');
@@ -234,18 +254,15 @@ function renderCalendar() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-    // Previous month days
     for (let i = firstDay - 1; i >= 0; i--) {
         const day = daysInPrevMonth - i;
         container.appendChild(createDayElement(day, month - 1, year, true));
     }
 
-    // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
         container.appendChild(createDayElement(day, month, year, false));
     }
 
-    // Next month days
     const totalCells = container.children.length - 7;
     const remainingCells = 42 - totalCells;
 
@@ -299,7 +316,7 @@ function openPopup(dateStr) {
     if (existing) {
         document.getElementById('popupTimeIn').value = existing.timeIn;
         document.getElementById('popupTimeOut').value = existing.timeOut;
-        document.getElementById('popupRate').value = existing.rate;
+        document.getElementById('popupRate').value = existing.compensationType;
         document.getElementById('popupOverTime').value = existing.overTime;
         document.getElementById('popupDayType').value = existing.dayType;
         document.getElementById('dutyPopup').dataset.editId = existing.id;
@@ -354,7 +371,6 @@ async function saveOrUpdateDuty() {
     const dayType = document.getElementById('popupDayType').value;
     const editId = document.getElementById('dutyPopup').dataset.editId;
 
-    // Validation Chain
     if (!validateRequiredFields(date, timeIn, timeOut)) return;
     if (!validateTimeLogic(timeIn, timeOut)) return;
     if (!validateWorkHours(timeIn, timeOut)) return;
@@ -382,10 +398,7 @@ async function saveOrUpdateDuty() {
         }
 
         closePopup();
-        await loadDutyRecords();
-        renderDutyLogTable(); 
-        renderCalendar();
-        renderGraph();
+        // Real-time listener will handle updates automatically
 
     } catch (error) {
         console.error("Save error:", error);
@@ -401,9 +414,8 @@ async function deleteDuty() {
         return;
     }
 
-    // Show delete confirmation modal
-    showDeleteConfirmation(() => {
-        performDelete(editId);
+    showDeleteConfirmation(async () => {
+        await performDelete(editId);
     });
 }
 
@@ -413,16 +425,13 @@ async function performDelete(editId) {
         console.log("Duty deleted successfully");
         closePopup();
         closeDeleteConfirmation();
-        await loadDutyRecords();
-        renderDutyLogTable();  
-        renderCalendar();
-        renderGraph();
+        // Real-time listener will handle updates automatically
     } catch (error) {
         console.error("Delete error:", error);
+        closeDeleteConfirmation();
         showError("Failed to delete duty. Please try again.");
     }
 }
-
 
 function showDeleteConfirmation(onConfirm) {
     const modal = document.getElementById('deleteConfirmationModal');
@@ -433,8 +442,12 @@ function showDeleteConfirmation(onConfirm) {
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     const cancelBtn = document.getElementById('cancelDeleteBtn');
 
-    const handleConfirm = () => {
-        onConfirm();
+    const handleConfirm = async () => {
+        confirmBtn.disabled = true;
+        cancelBtn.disabled = true;
+        await onConfirm();
+        confirmBtn.disabled = false;
+        cancelBtn.disabled = false;
         cleanup();
     };
 
@@ -456,29 +469,6 @@ function closeDeleteConfirmation() {
     const modal = document.getElementById('deleteConfirmationModal');
     if (modal) {
         modal.classList.remove('active');
-    }
-}
-
-// --- Load Duty Records ---
-async function loadDutyRecords() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    try {
-        const snapshot = await db.collection("duties")
-            .where("user", "==", currentUser.uid)
-            .get();
-
-        allDuties = snapshot.docs.map(doc => {
-            const data = { id: doc.id, ...doc.data() };
-            data.hours = calculateHours(data.timeIn, data.timeOut);
-            return data;
-        });
-
-        console.log("Duties loaded:", allDuties);
-
-    } catch (error) {
-        console.error("Load error:", error);
     }
 }
 
@@ -541,3 +531,8 @@ function calculateCutoffHours(duties) {
     document.getElementById("hours_1_15").textContent = hours_1_15.toFixed(2) + " hrs";
     document.getElementById("hours_16_30").textContent = hours_16_30.toFixed(2) + " hrs";
 }
+
+// --- Cleanup ---
+window.addEventListener('beforeunload', () => {
+    if (unsubscribeDuties) unsubscribeDuties();
+});

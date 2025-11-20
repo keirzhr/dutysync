@@ -460,7 +460,7 @@
 #dutyPopup h3 {
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 1px;
   color: var(--text-primary);
 }
 
@@ -601,14 +601,6 @@
   color: var(--primary-color);
   font-weight: 600;
   margin-bottom: 2px;
-}
-
-.help-text {
-  display: block;
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-  font-weight: 400;
 }
 
 /* Required Indicator */
@@ -772,9 +764,6 @@
     font-size: 11px;
   }
 
-  .help-text {
-    font-size: 10px;
-  }
 }
 
 @media (max-width: 480px) {
