@@ -281,69 +281,188 @@
 }
 
 /* ===== MOBILE CARD VIEW (HIDDEN ON DESKTOP) ===== */
-.duty-cards-wrapper {
-  display: none;
-  flex-direction: column;
+/* =========================================== */
+/* ===== FINAL SWIPEABLE CARD DESIGN ===== */
+/* =========================================== */
+
+/* 1. The Swipe Container (The Parent) */
+#dutyCardsWrapper {
+  display: flex;           /* Side-by-side layout */
+  flex-wrap: nowrap;       /* CRITICAL: Prevents stacking */
+  overflow-x: auto;        /* Enables horizontal scroll */
   gap: 16px;
+  width: 100%;             /* Forces container to fit screen width */
+  padding: 10px 4px 24px 4px; /* Extra bottom padding for shadow */
+  
+  /* Snap Physics */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Hide Scrollbar */
+  scrollbar-width: none;
 }
+#dutyCardsWrapper::-webkit-scrollbar { display: none; }
 
+/* 2. The Card (The Child) */
 .duty-card {
-  background-color: var(--card-bg);
+  /* Dimensions */
+  min-width: 85vw;      /* 85% of screen width */
+  max-width: 380px;     /* Cap size on larger screens */
+  flex-shrink: 0;       /* CRITICAL: Prevents card from squishing */
+  scroll-snap-align: center; /* Centers card on stop */
+
+  /* Theme Colors */
+  background-color: var(--card-bg); /* Matches your theme now */
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  
+  /* Styling */
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-[data-theme="dark"] .duty-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+/* Left Color Strip */
+.duty-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: var(--primary-color);
 }
 
-.duty-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="dark"] .duty-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.duty-card .card-row {
+/* --- Header --- */
+.duty-card-header {
+  padding: 16px 20px 10px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 13px;
+  border-bottom: 1px dashed var(--border-color); /* Themed border */
+}
+
+.date-day {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary); /* Themed Text */
+  line-height: 1.2;
+}
+
+.date-full {
+  font-size: 12px;
+  color: var(--text-secondary); /* Themed Text */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Body (Columns) --- */
+.duty-card-body {
+  display: flex;
+  padding: 20px;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Timeline Column */
+.col-timeline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 12px;
+}
+
+/* Line connector */
+.col-timeline::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--border-color); /* Themed line color */
+  z-index: 0;
+}
+
+.time-node { position: relative; z-index: 1; padding-left: 15px; }
+
+.time-node::after {
+  content: '';
+  position: absolute;
+  left: -4px; top: 4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--card-bg); /* Matches card background */
+  border: 3px solid var(--primary-color);
+}
+
+.time-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.time-value {
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
-.duty-card .card-row:last-of-type:not(.card-actions) {
-  border-bottom: none;
+/* Stats Column (The Box) */
+.col-stats {
+  flex: 0 0 100px;
+  background: var(--primary-color); /* Uses your primary color */
+  color: #fff; /* Keep text white inside the colored box */
+  border-radius: 16px;
+  padding: 15px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
-.duty-card .card-row strong {
+.stat-big {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label { font-size: 10px; opacity: 0.9; text-transform: uppercase; }
+
+.stat-ot {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.3);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* --- Footer --- */
+.duty-card-footer {
+  padding: 12px 20px;
+  background-color: var(--body-bg); /* Slightly distinct bg from card */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+}
+
+.rate-text {
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
-  min-width: 80px;
 }
 
-.duty-card .card-actions {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  background-color: var(--hover-bg);
-  border-top: 1px solid var(--border-color);
-  justify-content: center;
-}
+.rate-text i { color: var(--primary-color); margin-right: 6px; }
 
-.duty-card .card-actions .action-btn {
-  flex: 1;
-  justify-content: center;
-  padding: 10px;
-  font-size: 12px;
-  min-width: unset;
+.card-actions button {
+  background: none; border: none; cursor: pointer;
+  padding: 8px; font-size: 16px;
+  color: var(--text-secondary);
 }
 
 /* ===== POPUP OVERLAY ===== */
@@ -812,7 +931,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1085px) {
   .duty-log-header {
     flex-direction: column;
     align-items: flex-start;
@@ -859,7 +978,7 @@
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 969px) {
   .duty-cards-wrapper {
     display: none !important;
   }
