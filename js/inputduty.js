@@ -516,20 +516,28 @@ function renderGraph() {
 }
 
 // --- Cutoff Hours ---
+// --- Cutoff Hours ---
 function calculateCutoffHours(duties) {
     let hours_1_15 = 0;
-    let hours_16_30 = 0;
+    let hours_16_end = 0; // Renamed for clarity (previously hours_16_30)
 
     duties.forEach(d => {
         const day = new Date(d.date).getDate();
-        const h = d.hours || 0;
+        
+        // 🛑 FIX: Sum the base hours (d.hours) and the explicit overtime (d.overTime)
+        // Ensure d.overTime is treated as a number, defaulting to 0 if missing.
+        const totalPayableTime = (d.hours || 0) + (d.overTime || 0); 
 
-        if (day >= 1 && day <= 15) hours_1_15 += h;
-        if (day >= 16 && day <= 31) hours_16_30 += h;
+        if (day <= 15) { 
+            hours_1_15 += totalPayableTime;
+        } else { 
+            hours_16_end += totalPayableTime;
+        }
     });
 
     document.getElementById("hours_1_15").textContent = hours_1_15.toFixed(2) + " hrs";
-    document.getElementById("hours_16_30").textContent = hours_16_30.toFixed(2) + " hrs";
+    // Using the original ID here for compatibility:
+    document.getElementById("hours_16_30").textContent = hours_16_end.toFixed(2) + " hrs";
 }
 
 // --- Cleanup ---

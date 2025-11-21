@@ -242,7 +242,8 @@ async function fetchAndCalculateHours() {
     const snapshot = await db.collection('duties').where('user', '==', user.uid).get();
 
     let regularHours = 0, overtimeHours = 0, nightHours = 0;
-    let holidayPayAcc = 0; // Accumulated holiday pay
+    let holidayHours = 0;
+    let holidayPayAcc = 0;
 
     snapshot.forEach(doc => {
       const duty = doc.data();
@@ -254,29 +255,71 @@ async function fetchAndCalculateHours() {
 
       const hours = parseFloat(duty.hours) || 0;
       const overtime = parseFloat(duty.overTime) || 0;
+      const dayType = duty.dayType || 'Regular';
+      const compensationType = duty.compensationType || 'Regular Rate';
 
-      if (duty.compensationType === 'Night Shift') {
+      // --- FIXED LOGIC START ---
+      // We process Night Diff independently from Holiday so they can stack.
+
+      const isHoliday = dayType.includes('Holiday') || dayType.includes('Special');
+      const isNight = compensationType.toLowerCase().includes('night');
+
+      // 1. Calculate Night Hours (For the 10% premium later)
+      if (isNight) {
         nightHours += hours;
+      }
+
+      // 2. Calculate Base/Holiday Pay
+      if (isHoliday) {
+        holidayHours += hours; // For display stats
+        // Accumulate weighted holiday hours
+        if (dayType.includes('130')) {
+           holidayPayAcc += hours * 1.30;
+        } else if (dayType.includes('200')) {
+           holidayPayAcc += hours * 2.00;
+        } else {
+           holidayPayAcc += hours * 1.30; // Fallback
+        }
       } else {
+        // If it is NOT a holiday, the base pay comes from Regular Hours.
+        // Even if it is a Night Shift, the "Base" (100%) is counted here.
         regularHours += hours;
       }
+      // --- FIXED LOGIC END ---
 
       overtimeHours += overtime;
-
-      // Handle multiple holidays
-      if (duty.dayType === 'Regular Holiday (130%)') {
-        holidayPayAcc += hours * 1.30;
-      } else if (duty.dayType === 'Special Non-Working Holiday (200%)') {
-        holidayPayAcc += hours * 2.00;
-      }
     });
 
+    const totalHours = regularHours + overtimeHours + nightHours + holidayHours;
+    // Total worked is physical hours (excluding the double count of night diff overlap)
+    // We approximate this by just summing the main buckets plus OT
+    const totalWorked = regularHours + holidayHours + overtimeHours; 
+
+    // Update summary display
     document.getElementById('summaryRegularHours').textContent = regularHours.toFixed(2);
     document.getElementById('summaryOvertimeHours').textContent = overtimeHours.toFixed(2);
     document.getElementById('summaryNightHours').textContent = nightHours.toFixed(2);
-    document.getElementById('summaryTotalHours').textContent = (regularHours + overtimeHours + nightHours).toFixed(2);
+    document.getElementById('summaryHolidayHours').textContent = holidayHours.toFixed(2);
+    document.getElementById('summaryWorkedHours').textContent = totalWorked.toFixed(2);
 
-    window.fetchedHours = { regularHours, overtimeHours, nightHours, holidayPayAcc };
+    console.log('📊 Hours calculated:', {
+      regularHours,
+      overtimeHours,
+      nightHours,
+      holidayHours,
+      totalHours,
+      totalWorked
+    });
+
+    window.fetchedHours = {
+      regularHours,
+      overtimeHours,
+      nightHours,
+      holidayHours,
+      holidayPayAcc,
+      totalHours,
+      totalWorked
+    };
   } catch (error) {
     console.error('Error fetching duties:', error);
   }
@@ -291,21 +334,23 @@ function calculatePayslip() {
     return;
   }
 
-  const hours = window.fetchedHours || { regularHours: 0, overtimeHours: 0, nightHours: 0, holidayPayAcc: 0 };
+  const hours = window.fetchedHours || { regularHours: 0, overtimeHours: 0, nightHours: 0, holidayHours: 0, holidayPayAcc: 0 };
   const hourlyRate = rateType === 'daily' ? roundToDecimal(rate / 8, 4) : rate;
 
   const basicPay = roundToDecimal(hours.regularHours * hourlyRate, 2);
   const overtimePay = roundToDecimal(hours.overtimeHours * hourlyRate * 1.25, 2);
-  const nightDiffPay = roundToDecimal(hours.nightHours * hourlyRate * 1.10, 2);
-
-  // Holiday pay is already accumulated per type
-  const holidayPay = roundToDecimal((hours.holidayPayAcc * hourlyRate) - (hours.holidayPayAcc - (hours.holidayPayAcc / hourlyRate)) * 0, 2); // simplified
+  
+  // FIXED MATH: Changed multiplier to 0.10 (10% Premium)
+  // Because the Base (100%) is already covered in 'regularHours' or 'holidayPay'
+  const nightDiffPay = roundToDecimal(hours.nightHours * hourlyRate * 0.10, 2);
+  
+  const holidayPay = roundToDecimal(hours.holidayPayAcc * hourlyRate, 2);
 
   const grossPay = roundToDecimal(basicPay + overtimePay + nightDiffPay + holidayPay, 2);
 
   // --- Contributions (semi-monthly)
   const sssDeduction = roundToDecimal(calculateSSS(grossPay * 2) / 2, 2);
-  const philhealthDeduction = roundToDecimal(calculatePhilHealth(grossPay * 2), 2); // returns semi-monthly directly
+  const philhealthDeduction = roundToDecimal(calculatePhilHealth(grossPay * 2), 2);
   const pagibigDeduction = roundToDecimal(calculatePagibig(grossPay * 2) / 2, 2);
 
   const taxableIncome = roundToDecimal(grossPay - (sssDeduction + philhealthDeduction + pagibigDeduction), 2);
@@ -335,7 +380,7 @@ function calculatePayslip() {
   };
 
   document.getElementById('generatePdfBtn').disabled = false;
-  console.log('✅ Payslip calculated with multi-holiday handling:', calculatedPayslip);
+  console.log('✅ Payslip calculated:', calculatedPayslip);
 }
 
 // --- Round to Decimal ---
@@ -384,7 +429,7 @@ function calculatePagibig(monthlyGross) {
 }
 
 // --- BIR Withholding Tax (Semi-Monthly) ---
-// Semi-monthly thresholds: Annual ₱250,000 = Monthly ₱20,833 = Semi-monthly ₱10,416.50
+// Semi-monthly thresholds: Annual PHP 250,000 = Monthly PHP 20,833 = Semi-monthly PHP 10,416.50
 function calculateBIRWithholdingTax(taxableIncomeSemiMonthly) {
   const semiMonthlyTable = [
     { maxIncome: 10416.50, fixed: 0, percent: 0, compensationLevel: 0 },
@@ -552,6 +597,6 @@ function closeSuccessModal() {
    'previewGrossPay','previewSSS','previewPhilHealth','previewPagibig','previewBIRTax',
    'previewTotalDeductions','previewNetPay'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = '₱0.00';
+    if (el) el.textContent = 'PHP 0.00';
   });
 }

@@ -174,18 +174,28 @@ function renderMiniDashboard(records) {
 
         totalHours += hours + overtime;
 
-        // FIX #1: Properly categorize regular vs night hours
-        if (dayType === 'Regular' || (!dayType.includes('Holiday') && !dayType.includes('Special'))) {
-            // This is a regular day
-            if (rate && rate.toLowerCase().includes('night')) {
-                nightHours += hours;
-            } else {
-                regularHours += hours;
-            }
-        } else if (dayType.includes('Holiday') || dayType.includes('Special')) {
-            // This is a special/holiday day
+        // --- FIXED LOGIC START --- 
+        // We decouple the checks so a shift can count as BOTH Night AND Special if applicable.
+
+        const isHolidayOrSpecial = dayType.includes('Holiday') || dayType.includes('Special');
+        const isNightShift = rate && rate.toLowerCase().includes('night'); // Checks for 'Night Shift' or 'Night Diff'
+
+        // 1. Calculate Special Day Hours (Holiday/Special)
+        if (isHolidayOrSpecial) {
             specialDayHours += hours;
         }
+
+        // 2. Calculate Night Differential (Regardless if it's a holiday or not)
+        if (isNightShift) {
+            nightHours += hours;
+        }
+
+        // 3. Calculate Regular Hours
+        // Count as regular only if it is NOT a holiday AND NOT a night shift
+        if (!isHolidayOrSpecial && !isNightShift) {
+            regularHours += hours;
+        }
+        // --- FIXED LOGIC END ---
 
         overTimeHours += overtime;
     });

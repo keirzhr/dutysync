@@ -282,49 +282,62 @@
             </div>
 
             <!-- Hours Summary (Auto-calculated) -->
-            <div class="form-section-group">
-              <label class="form-section-label">Hours Summary</label>
-              <div class="hours-summary-grid">
-                <div class="hours-item">
-                  <div class="hours-icon regular">
-                    <i class="fas fa-briefcase"></i>
-                  </div>
-                  <div class="hours-details">
-                    <span class="hours-label">Regular Hours</span>
-                    <span class="hours-value" id="summaryRegularHours">0.00</span>
-                  </div>
-                </div>
-                <div class="hours-item">
-                  <div class="hours-icon overtime">
-                    <i class="fas fa-hourglass-half"></i>
-                  </div>
-                  <div class="hours-details">
-                    <span class="hours-label">Overtime Hours</span>
-                    <span class="hours-value" id="summaryOvertimeHours">0.00</span>
-                  </div>
-                </div>
-                <div class="hours-item">
-                  <div class="hours-icon night">
-                    <i class="fas fa-moon"></i>
-                  </div>
-                  <div class="hours-details">
-                    <span class="hours-label">Night Diff Hours</span>
-                    <span class="hours-value" id="summaryNightHours">0.00</span>
-                  </div>
-                </div>
-                <div class="hours-item">
-                  <div class="hours-icon total">
-                    <i class="fas fa-calculator"></i>
-                  </div>
-                  <div class="hours-details">
-                    <span class="hours-label">Total Hours</span>
-                    <span class="hours-value" id="summaryTotalHours">0.00</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+           <!-- Hours Summary (Auto-calculated) -->
+<div class="form-section-group">
+  <label class="form-section-label">Hours Summary</label>
+  
+  <div class="hours-summary-grid">
+    <div class="hours-item">
+      <div class="hours-icon regular">
+        <i class="fas fa-briefcase"></i>
+      </div>
+      <div class="hours-details">
+        <span class="hours-label">Regular Hours</span>
+        <span class="hours-value" id="summaryRegularHours">0.00</span>
+      </div>
+    </div>
+    
+    <div class="hours-item">
+      <div class="hours-icon overtime">
+        <i class="fas fa-hourglass-half"></i>
+      </div>
+      <div class="hours-details">
+        <span class="hours-label">Overtime Hours</span>
+        <span class="hours-value" id="summaryOvertimeHours">0.00</span>
+      </div>
+    </div>
+    
+    <div class="hours-item">
+      <div class="hours-icon night">
+        <i class="fas fa-moon"></i>
+      </div>
+      <div class="hours-details">
+        <span class="hours-label">Night Diff Hours</span>
+        <span class="hours-value" id="summaryNightHours">0.00</span>
+      </div>
+    </div>
+    
+    <div class="hours-item">
+      <div class="hours-icon holiday">
+        <i class="fas fa-gift"></i>
+      </div>
+      <div class="hours-details">
+        <span class="hours-label">Holiday Hours</span>
+        <span class="hours-value" id="summaryHolidayHours">0.00</span>
+      </div>
+    </div>
+  </div>
 
-            <!-- Calculate Button -->
+  <div class="hours-item total-worked-card">
+    <div class="hours-icon worked">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="hours-details">
+      <span class="hours-label">Total Worked (Physical Hours)</span>
+      <span class="hours-value" id="summaryWorkedHours">0.00</span>
+    </div>
+  </div>
+</div>            <!-- Calculate Button -->
             <button type="button" id="calculatePayslipBtn" class="btn-calculate">
               <i class="fas fa-calculator"></i> Calculate Payslip
             </button>
@@ -364,68 +377,76 @@
             <span class="period-value" id="previewPeriod">Select period</span>
           </div>
 
-          <div class="preview-body">
-            <!-- Earnings Section -->
-            <div class="preview-section">
-              <h4 class="preview-section-title">
-                <i class="fas fa-plus-circle"></i> Earnings
-              </h4>
-              <div class="preview-row">
-                <span>Basic Pay</span>
-                <span id="previewBasicPay">₱0.00</span>
-              </div>
-              <div class="preview-row">
-                <span>Overtime Pay (25%)</span>
-                <span id="previewOvertimePay">₱0.00</span>
-              </div>
-              <div class="preview-row">
-                <span>Night Differential (10%)</span>
-                <span id="previewNightDiff">₱0.00</span>
-              </div>
-              <div class="preview-row">
-                <span>Holiday Pay</span>
-                <span id="previewHolidayPay">₱0.00</span>
-              </div>
-              <div class="preview-row total">
-                <span>Gross Pay</span>
-                <span id="previewGrossPay">₱0.00</span>
-              </div>
-            </div>
+<div class="preview-body">
+  <!-- Two Column Grid for Earnings and Deductions -->
+  <div class="preview-sections-grid">
+    
+    <!-- Earnings Section (Left Column) -->
+    <div class="preview-section">
+      <h4 class="preview-section-title">
+        <i class="fas fa-plus-circle"></i> Earnings
+      </h4>
+      <div class="preview-section-content">
+        <div class="preview-row">
+          <span>Basic Pay</span>
+          <span id="previewBasicPay">₱0.00</span>
+        </div>
+        <div class="preview-row">
+          <span>Overtime Pay</span>
+          <span id="previewOvertimePay">₱0.00</span>
+        </div>
+        <div class="preview-row">
+          <span>Night Differential</span>
+          <span id="previewNightDiff">₱0.00</span>
+        </div>
+        <div class="preview-row">
+          <span>Holiday Pay</span>
+          <span id="previewHolidayPay">₱0.00</span>
+        </div>
+        <div class="preview-row total">
+          <span>Gross Pay</span>
+          <span id="previewGrossPay">₱0.00</span>
+        </div>
+      </div>
+    </div>
 
-            <!-- Deductions Section -->
-            <div class="preview-section">
-              <h4 class="preview-section-title">
-                <i class="fas fa-minus-circle"></i> Deductions
-              </h4>
-              <div class="preview-row">
-                <span>SSS</span>
-                <span id="previewSSS">₱0.00</span>
-              </div>
-              <div class="preview-row">
-                <span>PhilHealth</span>
-                <span id="previewPhilHealth">₱0.00</span>
-              </div>
-              <div class="preview-row">
-                <span>Pag-IBIG</span>
-                <span id="previewPagibig">₱0.00</span>
-              </div>
-              <div class="preview-row">
-                <span>BIR Withholding Tax</span>
-                <span id="previewBIRTax">₱0.00</span>
-              </div>
-              <div class="preview-row total deduction">
-                <span>Total Deductions</span>
-                <span id="previewTotalDeductions">₱0.00</span>
-              </div>
-            </div>
+    <!-- Deductions Section (Right Column) -->
+    <div class="preview-section">
+      <h4 class="preview-section-title">
+        <i class="fas fa-minus-circle"></i> Deductions
+      </h4>
+      <div class="preview-section-content">
+        <div class="preview-row">
+          <span>SSS</span>
+          <span id="previewSSS">₱0.00</span>
+        </div>
+        <div class="preview-row">
+          <span>PhilHealth</span>
+          <span id="previewPhilHealth">₱0.00</span>
+        </div>
+        <div class="preview-row">
+          <span>Pag-IBIG</span>
+          <span id="previewPagibig">₱0.00</span>
+        </div>
+        <div class="preview-row">
+          <span>BIR Tax</span>
+          <span id="previewBIRTax">₱0.00</span>
+        </div>
+        <div class="preview-row total deduction">
+          <span>Total Deductions</span>
+          <span id="previewTotalDeductions">₱0.00</span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
 
-            <!-- Net Pay -->
-            <div class="preview-net-pay">
-              <span class="net-label">NET PAY</span>
-              <span class="net-value" id="previewNetPay">₱0.00</span>
-            </div>
-          </div>
-
+  <!-- Net Pay (Full Width Below) -->
+  <div class="preview-net-pay">
+    <span class="net-label">NET PAY</span>
+    <span class="net-value" id="previewNetPay">₱0.00</span>
+  </div>
+</div>
           <div class="preview-footer">
             <button type="button" id="generatePdfBtn" class="btn-generate" disabled>
               <i class="fas fa-file-pdf"></i> Download Payslip
