@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/inputduty.css">
   <link rel="stylesheet" href="../css/viewdutylog.css">
+  <link rel="stylesheet" href="../css/profile.css">
+  <link rel="stylesheet" href="../css/viewpayslip.css">
+  <link rel="stylesheet" href="../css/generate.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
@@ -49,6 +52,7 @@
           <a class="nav-item sub-item" data-page="generate-payslip"><span class="nav-text">Generate Payslip</span></a>
         </div>
       </div>
+      
       <!-- Analytics Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="analytics" data-parent="analytics">
@@ -57,7 +61,6 @@
           <span class="nav-arrow">›</span>
         </a>
         <div class="sub-menu" id="analytics-submenu">
-          <a class="nav-item sub-item" data-page="total-hours"><span class="nav-text">Total Hours</span></a>
           <a class="nav-item sub-item" data-page="net-pay-trends"><span class="nav-text">Net Pay Trends</span></a>
           <a class="nav-item sub-item" data-page="deduction-breakdown"><span class="nav-text">Deduction Breakdown</span></a>
         </div>
@@ -67,7 +70,8 @@
       <a class="nav-item" data-page="help"><i class="fas fa-question-circle nav-icon"></i><span class="nav-text">Help</span></a>
     </nav>
 
-    <div class="sidebar-footer">
+    <!-- Updated Sidebar Footer with Profile Link -->
+    <div class="sidebar-footer" id="sidebarFooterProfile">
       <div class="user-avatar" id="userAvatar">--</div>
       <div class="user-info">
         <div class="user-name" id="userName">Loading...</div>
@@ -95,6 +99,368 @@
 
     <div class="content">
 
+<!-- Profile Section (UPDATED) -->
+<section class="content-section" id="profile">
+  <div class="profile-container">
+    <!-- Profile Header Card -->
+    <div class="profile-header-card">
+      <div class="profile-banner"></div>
+      <div class="profile-info-section">
+        <div class="profile-avatar-wrapper">
+          <div class="profile-avatar-large" id="profileAvatarLarge">--</div>
+          <!-- Add this inside the profile section, after profile-avatar-wrapper -->
+          <input type="file" id="photoInput" accept="image/*" style="display: none;">
+
+          <!-- Update the button to trigger file input -->
+          <button class="avatar-edit-btn" id="avatarEditBtn" type="button">
+            <i class="fas fa-camera"></i>
+          </button>
+        </div>
+        <div class="profile-header-info">
+          <h2 class="profile-name" id="profileName">Loading...</h2>
+          <p class="profile-email" id="profileEmail">Loading...</p>
+          <div class="profile-badges">
+            <span class="profile-badge" id="profilePosition">Manager</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Details Card -->
+    <div class="profile-details-card">
+      <div class="profile-card-header">
+        <h3>Personal Information</h3>
+      </div>
+
+      <div class="profile-form" id="profileForm">
+        <!-- Full Name -->
+        <div class="profile-field-group">
+          <label class="profile-label">Full Name</label>
+          <div class="profile-field">
+            <i class="fas fa-user field-icon"></i>
+            <input type="text" id="profileFullName" class="profile-input" disabled>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="profile-field-group">
+          <label class="profile-label">Email Address</label>
+          <div class="profile-field">
+            <i class="fas fa-envelope field-icon"></i>
+            <input type="email" id="profileEmailInput" class="profile-input" disabled>
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="profile-field-group">
+          <label class="profile-label">Phone Number</label>
+          <div class="profile-field">
+            <i class="fas fa-phone field-icon"></i>
+            <input type="tel" id="profilePhone" class="profile-input" placeholder="Enter phone number" disabled>
+          </div>
+        </div>
+
+        <!-- Position -->
+        <div class="profile-field-group">
+          <label class="profile-label">Position</label>
+          <div class="profile-field">
+            <i class="fas fa-briefcase field-icon"></i>
+            <input type="text" id="profilePositionInput" class="profile-input" placeholder="Enter position" disabled>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="profile-field-group">
+          <label class="profile-label">Location</label>
+          <div class="profile-field">
+            <i class="fas fa-map-marker-alt field-icon"></i>
+            <input type="text" id="profileLocation" class="profile-input" placeholder="Enter location" disabled>
+          </div>
+        </div>
+
+        <!-- Hire Date -->
+        <div class="profile-field-group">
+          <label class="profile-label">Hire Date</label>
+          <div class="profile-field">
+            <i class="fas fa-calendar field-icon"></i>
+            <input type="date" id="profileHireDate" class="profile-input" disabled>
+          </div>
+        </div>
+
+        <!-- Action Buttons (Hidden by default) -->
+        <div class="profile-actions" id="profileActions" style="display: none;">
+          <button class="btn-cancel-profile" id="btnCancelProfile">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button class="btn-save-profile" id="btnSaveProfile">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+
+        <!-- Edit Button (Visible by default) -->
+        <div class="profile-actions-default" id="profileActionsDefault">
+          <button class="btn-edit-profile" id="btnEditProfile">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- Generate Payslip Section - Add this to dashboard.html -->
+<section class="content-section" id="generate-payslip">
+  <div class="generate-payslip-container">
+    <!-- Main Layout -->
+    <div class="generate-layout">
+      <!-- Left Column: Input Form -->
+      <div class="generate-form-section">
+        <div class="form-card">
+          <div class="form-card-header">
+            <i class="fas fa-calculator"></i>
+            <h3>Payroll Calculator</h3>
+          </div>
+
+          <div class="form-card-body">
+            <!-- Employee Info Display -->
+
+            <!-- Period Selection -->
+            <div class="form-section-group">
+              <label class="form-section-label">Pay Period</label>
+              <div class="period-selectors">
+                <div class="select-wrapper">
+                  <label for="generateYear">Year</label>
+                  <select id="generateYear" class="form-select">
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+                <div class="select-wrapper">
+                  <label for="generateMonth">Month</label>
+                  <select id="generateMonth" class="form-select">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
+                </div>
+                <div class="select-wrapper">
+                  <label for="generateCutoff">Cutoff</label>
+                  <select id="generateCutoff" class="form-select">
+                    <option value="1">1st – 15th</option>
+                    <option value="2">16th – 30th/31st</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rate Input -->
+            <div class="form-section-group">
+              <label class="form-section-label">Rate Configuration</label>
+              <div class="rate-config">
+                <div class="rate-type-toggle">
+                  <button type="button" class="rate-btn active" data-type="hourly">
+                    <i class="fas fa-clock"></i> Per Hour
+                  </button>
+                  <button type="button" class="rate-btn" data-type="daily">
+                    <i class="fas fa-calendar-day"></i> Per Day
+                  </button>
+                </div>
+                <div class="rate-input-wrapper">
+                  <span class="currency-symbol">₱</span>
+                  <input type="number" id="rateInput" class="rate-input" placeholder="0.00" step="0.01" min="0">
+                  <span class="rate-label" id="rateLabel">/day</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hours Summary (Auto-calculated) -->
+            <div class="form-section-group">
+              <label class="form-section-label">Hours Summary</label>
+              <div class="hours-summary-grid">
+                <div class="hours-item">
+                  <div class="hours-icon regular">
+                    <i class="fas fa-briefcase"></i>
+                  </div>
+                  <div class="hours-details">
+                    <span class="hours-label">Regular Hours</span>
+                    <span class="hours-value" id="summaryRegularHours">0.00</span>
+                  </div>
+                </div>
+                <div class="hours-item">
+                  <div class="hours-icon overtime">
+                    <i class="fas fa-hourglass-half"></i>
+                  </div>
+                  <div class="hours-details">
+                    <span class="hours-label">Overtime Hours</span>
+                    <span class="hours-value" id="summaryOvertimeHours">0.00</span>
+                  </div>
+                </div>
+                <div class="hours-item">
+                  <div class="hours-icon night">
+                    <i class="fas fa-moon"></i>
+                  </div>
+                  <div class="hours-details">
+                    <span class="hours-label">Night Diff Hours</span>
+                    <span class="hours-value" id="summaryNightHours">0.00</span>
+                  </div>
+                </div>
+                <div class="hours-item">
+                  <div class="hours-icon total">
+                    <i class="fas fa-calculator"></i>
+                  </div>
+                  <div class="hours-details">
+                    <span class="hours-label">Total Hours</span>
+                    <span class="hours-value" id="summaryTotalHours">0.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button type="button" id="calculatePayslipBtn" class="btn-calculate">
+              <i class="fas fa-calculator"></i> Calculate Payslip
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Preview Card -->
+      <div class="generate-preview-section">
+        <div class="preview-card">
+          <div class="preview-header">
+            <div class="preview-logo">
+              <img src="../images/logo.png" alt="Logo" class="preview-logo-img">
+              <span>DutySync</span>
+            </div>
+            <div class="preview-badge">PAYSLIP</div>
+          </div>
+
+          <!-- Employee Info in Preview -->
+          <div class="preview-employee-info">
+            <div class="preview-employee-row">
+              <span class="info-label">Employee Name:</span>
+              <span class="info-value" id="previewEmployeeName">---</span>
+            </div>
+            <div class="preview-employee-row">
+              <span class="info-label">Position:</span>
+              <span class="info-value" id="previewEmployeePosition">---</span>
+            </div>
+            <div class="preview-employee-row">
+              <span class="info-label">Email:</span>
+              <span class="info-value" id="previewEmployeeEmail">---</span>
+            </div>
+          </div>
+
+          <div class="preview-period">
+            <span class="period-label">Pay Period:</span>
+            <span class="period-value" id="previewPeriod">Select period</span>
+          </div>
+
+          <div class="preview-body">
+            <!-- Earnings Section -->
+            <div class="preview-section">
+              <h4 class="preview-section-title">
+                <i class="fas fa-plus-circle"></i> Earnings
+              </h4>
+              <div class="preview-row">
+                <span>Basic Pay</span>
+                <span id="previewBasicPay">₱0.00</span>
+              </div>
+              <div class="preview-row">
+                <span>Overtime Pay (25%)</span>
+                <span id="previewOvertimePay">₱0.00</span>
+              </div>
+              <div class="preview-row">
+                <span>Night Differential (10%)</span>
+                <span id="previewNightDiff">₱0.00</span>
+              </div>
+              <div class="preview-row">
+                <span>Holiday Pay</span>
+                <span id="previewHolidayPay">₱0.00</span>
+              </div>
+              <div class="preview-row total">
+                <span>Gross Pay</span>
+                <span id="previewGrossPay">₱0.00</span>
+              </div>
+            </div>
+
+            <!-- Deductions Section -->
+            <div class="preview-section">
+              <h4 class="preview-section-title">
+                <i class="fas fa-minus-circle"></i> Deductions
+              </h4>
+              <div class="preview-row">
+                <span>SSS</span>
+                <span id="previewSSS">₱0.00</span>
+              </div>
+              <div class="preview-row">
+                <span>PhilHealth</span>
+                <span id="previewPhilHealth">₱0.00</span>
+              </div>
+              <div class="preview-row">
+                <span>Pag-IBIG</span>
+                <span id="previewPagibig">₱0.00</span>
+              </div>
+              <div class="preview-row">
+                <span>BIR Withholding Tax</span>
+                <span id="previewBIRTax">₱0.00</span>
+              </div>
+              <div class="preview-row total deduction">
+                <span>Total Deductions</span>
+                <span id="previewTotalDeductions">₱0.00</span>
+              </div>
+            </div>
+
+            <!-- Net Pay -->
+            <div class="preview-net-pay">
+              <span class="net-label">NET PAY</span>
+              <span class="net-value" id="previewNetPay">₱0.00</span>
+            </div>
+          </div>
+
+          <div class="preview-footer">
+            <button type="button" id="generatePdfBtn" class="btn-generate" disabled>
+              <i class="fas fa-file-pdf"></i> Download Payslip
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="generateStatus" class="generate-status" style="display: none;">
+          <div class="status-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Generating payslip...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="payslipSuccessModal" class="modal-overlay">
+    <div class="modal-content success-modal">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3>Payslip Generated!</h3>
+      <p>Your payslip has been successfully generated and saved.</p>
+      <div class="modal-buttons">
+        <button class="btn-modal btn-view" id="viewPayslipBtn">
+          <i class="fas fa-eye"></i> View Payslip
+        </button>
+        <button class="btn-modal btn-close" onclick="closeSuccessModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</section>
       <!-- Input Duty Section -->
       <section class="content-section" id="input-duty">
         <div class="calendar-graph-container">
@@ -222,198 +588,174 @@
       </section>
 
       <!-- View Duty Log Section -->
-<!-- View Duty Log Section -->
-<!-- View Duty Log Section -->
-<section class="content-section" id="view-duty-log">
-  <div class="duty-log-container">
-    <div class="duty-log-header">
-      <h2 class="section-title">Duty Records</h2>
-      <div class="duty-log-controls">
-        <input type="month" id="monthFilter" class="month-filter">
-      </div>
-    </div>
+      <section class="content-section" id="view-duty-log">
+        <div class="duty-log-container">
+          <div class="duty-log-header">
+            <h2 class="section-title">Duty Records</h2>
+            <div class="duty-log-controls">
+              <input type="month" id="monthFilter" class="month-filter">
+            </div>
+          </div>
 
-    <!-- Table and Dashboard Layout -->
-    <div class="duty-content-layout">
-      <!-- Table -->
-      <div class="duty-table-wrapper">
-        <table class="duty-table" id="dutyTable">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time In</th>
-              <th>Time Out</th>
-              <th>Hours</th>
-              <th>Rate</th>
-              <th>Day Type</th>
-              <th>Overtime</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="dutyTableBody">
+          <!-- Table and Dashboard Layout -->
+          <div class="duty-content-layout">
+            <!-- Table -->
+            <div class="duty-table-wrapper">
+              <table class="duty-table" id="dutyTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Hours</th>
+                    <th>Rate</th>
+                    <th>Day Type</th>
+                    <th>Overtime</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="dutyTableBody">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mini Dashboard (Below Table) -->
+            <div class="mini-dashboard" id="miniDashboard">
+              <div class="dashboard-card">
+                <div class="card-label">Total Hour</div>
+                <div class="card-value" id="dashTotalHours">0.00</div>
+              </div>
+              
+              <div class="dashboard-card">
+                <div class="card-label">Regular Hour</div>
+                <div class="card-value" id="dashRegularHours">0.00</div>
+              </div>
+              
+              <div class="dashboard-card">
+                <div class="card-label">Night Differential</div>
+                <div class="card-value night-shift" id="dashNightHours">0.00</div>
+              </div>
+              
+              <div class="dashboard-card">
+                <div class="card-label">Special Day Hour</div>
+                <div class="card-value special-day" id="dashSpecialDayHours">0.00</div>
+              </div>
+              
+              <div class="dashboard-card">
+                <div class="card-label">Over Time Hour</div>
+                <div class="card-value overtime" id="dashOverTimeHours">0.00</div>
+              </div>
+              
+              <div class="dashboard-card">
+                <div class="card-label">Total work availability</div>
+                <div class="card-value percentage" id="dashAvailability">%0.00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile Card View (Hidden on Desktop) -->
+          <div class="duty-cards-wrapper" id="dutyCardsWrapper">
             <!-- Populated by JavaScript -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Mini Dashboard (Below Table) -->
-      <div class="mini-dashboard" id="miniDashboard">
-        <div class="dashboard-card">
-          <div class="card-label">Total Hour</div>
-          <div class="card-value" id="dashTotalHours">0.00</div>
-        </div>
-        
-        <div class="dashboard-card">
-          <div class="card-label">Regular Hour</div>
-          <div class="card-value" id="dashRegularHours">0.00</div>
-        </div>
-        
-        <div class="dashboard-card">
-          <div class="card-label">Night Differential</div>
-          <div class="card-value night-shift" id="dashNightHours">0.00</div>
-        </div>
-        
-        <div class="dashboard-card">
-          <div class="card-label">Special Day Hour</div>
-          <div class="card-value special-day" id="dashSpecialDayHours">0.00</div>
-        </div>
-        
-        <div class="dashboard-card">
-          <div class="card-label">Over Time Hour</div>
-          <div class="card-value overtime" id="dashOverTimeHours">0.00</div>
-        </div>
-        
-        <div class="dashboard-card">
-          <div class="card-label">Total work availability</div>
-          <div class="card-value percentage" id="dashAvailability">%0.00</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile Card View (Hidden on Desktop) -->
-    <div class="duty-cards-wrapper" id="dutyCardsWrapper">
-      <!-- Populated by JavaScript -->
-    </div>
-
-    <!-- Empty State (Fallback) -->
-    <div class="duty-empty-state" id="dutyEmptyState" style="display: none;">
-      <i class="fas fa-calendar-times"></i>
-      <h3>No Duty Records</h3>
-      <p>No records found for the selected month. Try selecting a different month or add new duty entries.</p>
-      <button class="btn-add-duty" onclick="document.querySelector('[data-page=\'input-duty\']').click()">
-        <i class="fas fa-plus"></i> Add Duty Record
-      </button>
-    </div>
-  </div>
-
-  <!-- Edit Duty Modal -->
- <!-- Edit Duty Modal -->
-<div id="dutyLogEditModal" class="popup-overlay">
-  <div class="popup-card">
-    <div class="popup-header">
-      <h3>Edit Duty Record</h3>
-    </div>
-    
-    <div id="editDutyError" class="popup-error" style="display: none;"></div>
-    
-    <div class="popup-content">
-      <input type="hidden" id="editDutyId">
-      
-      <div class="popup-section">
-        <label class="section-label">Date</label>
-        <input type="date" id="editDutyDate" class="date-input">
-      </div>
-
-      <div class="popup-section">
-        <label class="section-label">Work Hours</label>
-        <div class="time-input-group">
-          <div class="time-input-wrapper">
-            <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
-            <input type="time" id="editDutyTimeIn" class="time-input">
-            <small class="help-text">Start time</small>
           </div>
-          <div class="time-separator">→</div>
-          <div class="time-input-wrapper">
-            <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
-            <input type="time" id="editDutyTimeOut" class="time-input">
-            <small class="help-text">End time</small>
+
+          <!-- Empty State (Fallback) -->
+          <div class="duty-empty-state" id="dutyEmptyState" style="display: none;">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No Duty Records</h3>
+            <p>No records found for the selected month. Try selecting a different month or add new duty entries.</p>
+            <button class="btn-add-duty" onclick="document.querySelector('[data-page=\'input-duty\']').click()">
+              <i class="fas fa-plus"></i> Add Duty Record
+            </button>
           </div>
         </div>
-      </div>
 
-      <div class="popup-section">
-        <label class="section-label">Compensation Type</label>
-        <select id="editDutyRate" class="select-input">
-          <option>Regular Rate</option>
-          <option>Night Shift</option>
-        </select>
-      </div>
+        <!-- Edit Duty Modal -->
+        <div id="dutyLogEditModal" class="popup-overlay">
+          <div class="popup-card">
+            <div class="popup-header">
+              <h3>Edit Duty Record</h3>
+            </div>
+            
+            <div id="editDutyError" class="popup-error" style="display: none;"></div>
+            
+            <div class="popup-content">
+              <input type="hidden" id="editDutyId">
+              
+              <div class="popup-section">
+                <label class="section-label">Date</label>
+                <input type="date" id="editDutyDate" class="date-input">
+              </div>
 
-      <div class="popup-section">
-        <label class="section-label">Day Type</label>
-        <select id="editDutyDayType" class="select-input">
-          <option>Regular</option>
-          <option>Regular Holiday (130%)</option>
-          <option>Special Non-Working Holiday (200%)</option>
-        </select>
-      </div>
+              <div class="popup-section">
+                <label class="section-label">Work Hours</label>
+                <div class="time-input-group">
+                  <div class="time-input-wrapper">
+                    <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
+                    <input type="time" id="editDutyTimeIn" class="time-input">
+                    <small class="help-text">Start time</small>
+                  </div>
+                  <div class="time-separator">→</div>
+                  <div class="time-input-wrapper">
+                    <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
+                    <input type="time" id="editDutyTimeOut" class="time-input">
+                    <small class="help-text">End time</small>
+                  </div>
+                </div>
+              </div>
 
-      <div class="popup-section">
-        <label class="section-label">Additional Overtime Hours</label>
-        <input type="number" id="editDutyOvertime" step="0.25" min="0" placeholder="0" class="number-input">
-        <small class="help-text">Extra hours beyond regular shift</small>
-      </div>
-    </div>
+              <div class="popup-section">
+                <label class="section-label">Compensation Type</label>
+                <select id="editDutyRate" class="select-input">
+                  <option>Regular Rate</option>
+                  <option>Night Shift</option>
+                </select>
+              </div>
 
-    <div class="popup-buttons">
-      <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
-      <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
-    </div>
-  </div>
-</div>
-  <!-- Delete Confirmation Modal -->
-  <div id="dutyLogDeleteModal" class="confirmation-modal">
-    <div class="confirmation-content">
-      <div class="confirmation-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <h3 class="confirmation-title">Delete Entry?</h3>
-      <p class="confirmation-message">
-        This action cannot be undone. Are you sure you want to delete this duty record?
-      </p>
-      <div class="confirmation-buttons">
-        <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
-          <i class="fas fa-times"></i> Keep
-        </button>
-        <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
-          <i class="fas fa-trash"></i> Delete
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
+              <div class="popup-section">
+                <label class="section-label">Day Type</label>
+                <select id="editDutyDayType" class="select-input">
+                  <option>Regular</option>
+                  <option>Regular Holiday (130%)</option>
+                  <option>Special Non-Working Holiday (200%)</option>
+                </select>
+              </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div id="dutyLogDeleteModal" class="confirmation-modal">
-    <div class="confirmation-content">
-      <div class="confirmation-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <h3 class="confirmation-title">Delete Entry?</h3>
-      <p class="confirmation-message">
-        This action cannot be undone. Are you sure you want to delete this duty record?
-      </p>
-      <div class="confirmation-buttons">
-        <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
-          <i class="fas fa-times"></i> Keep
-        </button>
-        <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
-          <i class="fas fa-trash"></i> Delete
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
+              <div class="popup-section">
+                <label class="section-label">Additional Overtime Hours</label>
+                <input type="number" id="editDutyOvertime" step="0.25" min="0" placeholder="0" class="number-input">
+                <small class="help-text">Extra hours beyond regular shift</small>
+              </div>
+            </div>
+
+            <div class="popup-buttons">
+              <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
+              <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="dutyLogDeleteModal" class="confirmation-modal">
+          <div class="confirmation-content">
+            <div class="confirmation-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="confirmation-title">Delete Entry?</h3>
+            <p class="confirmation-message">
+              This action cannot be undone. Are you sure you want to delete this duty record?
+            </p>
+            <div class="confirmation-buttons">
+              <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
+                <i class="fas fa-times"></i> Keep
+              </button>
+              <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- Settings Section -->
       <section class="content-section" id="settings">
@@ -447,6 +789,435 @@
       <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section>
     </div>
 
+
+    <!-- View Payslip Section -->
+<!-- View Payslip Section -->
+<section class="content-section" id="view-payslip">
+  <div class="payslip-container">
+    <!-- Header -->
+    <div class="payslip-header">
+      <h2 class="section-title">Payslip Management</h2>
+    </div>
+
+    <!-- Top Controls -->
+    <div class="payslip-controls">
+      <div class="overview-header">
+        <h3>PaySlip Overview</h3>
+        <div class="overview-controls">
+          <label for="payslipYearFilter">Select Year</label>
+          <select id="payslipYearFilter" class="year-filter">
+            <!-- Populated by JavaScript with available years -->
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout: Two Columns -->
+    <div class="payslip-layout">
+      
+      <!-- Left: Record List of PaySlip (Accordion with Fixed Months) -->
+      <div class="payslip-table-section">
+        <div class="table-header">
+          <h3>Record List of PaySlip</h3>
+        </div>
+
+        <div id="payslipAccordion" class="payslip-accordion">
+          <!-- January -->
+          <div class="accordion-month" data-month="1">
+            <div class="month-header">
+              <span class="month-name">January</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- February -->
+          <div class="accordion-month" data-month="2">
+            <div class="month-header">
+              <span class="month-name">February</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- March -->
+          <div class="accordion-month" data-month="3">
+            <div class="month-header">
+              <span class="month-name">March</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- April -->
+          <div class="accordion-month" data-month="4">
+            <div class="month-header">
+              <span class="month-name">April</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- May -->
+          <div class="accordion-month" data-month="5">
+            <div class="month-header">
+              <span class="month-name">May</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- June -->
+          <div class="accordion-month" data-month="6">
+            <div class="month-header">
+              <span class="month-name">June</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- July -->
+          <div class="accordion-month" data-month="7">
+            <div class="month-header">
+              <span class="month-name">July</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- August -->
+          <div class="accordion-month" data-month="8">
+            <div class="month-header">
+              <span class="month-name">August</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- September -->
+          <div class="accordion-month" data-month="9">
+            <div class="month-header">
+              <span class="month-name">September</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- October -->
+          <div class="accordion-month" data-month="10">
+            <div class="month-header">
+              <span class="month-name">October</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- November -->
+          <div class="accordion-month" data-month="11">
+            <div class="month-header">
+              <span class="month-name">November</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- December -->
+          <div class="accordion-month" data-month="12">
+            <div class="month-header">
+              <span class="month-name">December</span>
+              <span class="month-toggle">▼</span>
+            </div>
+            <div class="month-content">
+              <div class="cutoff-row" data-cutoff="1">
+                <span class="cutoff-label">Cutoff 1–15</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+              <div class="cutoff-row" data-cutoff="2">
+                <span class="cutoff-label">Cutoff 16–30</span>
+                <div class="cutoff-details">
+                  <span class="attachment-text">None</span>
+                  <span class="status-badge status-pending">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Salary Summary (Fixed Months) -->
+      <div class="payslip-overview-section">
+        <div class="overview-list-header">
+          <h3>Salary Summary</h3>
+        </div>
+
+        <div class="salary-list-wrapper">
+          <div class="salary-list">
+            <div class="salary-item" data-month="1">
+              <span class="salary-month">January</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="2">
+              <span class="salary-month">February</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="3">
+              <span class="salary-month">March</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="4">
+              <span class="salary-month">April</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="5">
+              <span class="salary-month">May</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="6">
+              <span class="salary-month">June</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="7">
+              <span class="salary-month">July</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="8">
+              <span class="salary-month">August</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="9">
+              <span class="salary-month">September</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="10">
+              <span class="salary-month">October</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="11">
+              <span class="salary-month">November</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+            <div class="salary-item" data-month="12">
+              <span class="salary-month">December</span>
+              <span class="salary-amount">₱0.00</span>
+              <div class="salary-bar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Earning at Bottom -->
+        <div class="total-earning-box">
+          <span class="total-label">Total Earning</span>
+          <span class="total-value" id="totalEarning">₱0.00</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Download Modal -->
+  <div id="payslipDownloadModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Download Payslip</h3>
+        <button class="modal-close" onclick="closeDownloadModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="downloadFileName"></p>
+        <p class="modal-subtitle">Your payslip is ready to download</p>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-modal btn-cancel" onclick="closeDownloadModal()">Cancel</button>
+        <button class="btn-modal btn-download" id="confirmDownloadBtn">
+          <i class="fas fa-download"></i> Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+
+
     <!-- Logout Modal -->
     <div id="logoutModal" class="modal">
       <div class="modal-content">
@@ -468,9 +1239,13 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
   <script src="../js/script.js"></script>
   <script src="../js/inputduty.js"></script>
   <script src="../js/viewdutylog.js"></script>
+  <script src="../js/profile.js"></script>
+  <script src="../js/viewpayslip.js"></script>
+  <script src="../js/generate.js"></script>
 
 </body>
 </html>
