@@ -874,56 +874,56 @@
         </div>
       </section>
 
-      <!-- Settings Section -->
-      <section class="content-section" id="settings">
-        <div class="card">
-          <h3 style="margin-bottom: 15px;">Preferences</h3>
-          
-          <!-- Theme Toggle -->
-          <div class="form-group theme-toggle">
-            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-              <span>Dark Mode</span>
-              <div class="toggle-switch">
-                <input type="checkbox" id="themeCheckbox">
-                <span class="slider round"></span>
-              </div>
-            </label>
-          </div>
-
-          <!-- Rate Configuration -->
-          <div class="form-group">
-            <label>Pay Rate Configuration</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-              <div>
-                <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Hourly Rate (PHP)</label>
-                <input type="number" id="hourlyRateInput" placeholder="0.00" step="0.01" min="0">
-              </div>
-              <div>
-                <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Daily Rate (PHP)</label>
-                <input type="number" id="dailyRateInput" placeholder="0.00" step="0.01" min="0">
-              </div>
+    <!-- Settings Section -->
+    <section class="content-section" id="settings">
+      <div class="card">
+        <h3 style="margin-bottom: 15px;">Preferences</h3>
+        
+        <!-- Theme Toggle -->
+        <div class="form-group theme-toggle">
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span>Dark Mode</span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="themeCheckbox">
+              <span class="slider round"></span>
             </div>
-            <button class="btn" id="updateRateBtn" style="width: 100%; margin-bottom: 20px;">
-              <i class="fas fa-save" style="margin-right: 8px;"></i>Save Rate
-            </button>
-            <div id="rateStatusMessage" style="font-size: 12px; color: var(--text-secondary); display: none;"></div>
-          </div>
-
-          <!-- Password Section -->
-          <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
-          
-          <div class="form-group">
-            <label>Current Password</label>
-            <input type="password" id="currentPassword" placeholder="Enter current password">
-          </div>
-          <div class="form-group">
-            <label>New Password</label>
-            <input type="password" id="newPassword" placeholder="Enter new password">
-          </div>
-          <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
-          <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
+          </label>
         </div>
-      </section>
+
+        <!-- Rate Configuration -->
+        <div class="form-group">
+          <label>Pay Rate Configuration</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Hourly Rate (PHP)</label>
+              <input type="number" id="hourlyRateInput" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <div>
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Daily Rate (PHP)</label>
+              <input type="number" id="dailyRateInput" placeholder="0.00" step="0.01" min="0">
+            </div>
+          </div>
+          <button class="btn" id="updateRateBtn" style="width: 100%; margin-bottom: 20px;">
+            <i class="fas fa-save" style="margin-right: 8px;"></i>Save Rate
+          </button>
+          <div id="rateStatusMessage" style="font-size: 12px; color: var(--text-secondary); display: none;"></div>
+        </div>
+
+        <!-- Password Section -->
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+        
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="currentPassword" placeholder="Enter current password">
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="newPassword" placeholder="Enter new password">
+        </div>
+        <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
+        <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
+      </div>
+    </section>
 
       <!-- Other Sections -->
       <section class="content-section" id="overview"><div class="card"><p>Overview content here...</p></div></section>
