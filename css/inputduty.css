@@ -293,6 +293,116 @@
   margin-right: auto;
 }
 
+
+/* ===== AUTO PREVIEW BOX ===== */
+.auto-preview-box {
+  background: linear-gradient(135deg, rgba(90, 112, 176, 0.05), rgba(90, 112, 176, 0.02));
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+[data-theme="dark"] .auto-preview-box {
+  background: rgba(90, 112, 176, 0.08);
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.preview-row:last-child {
+  border-bottom: none;
+}
+
+.preview-row.total {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 2px solid var(--primary-color);
+  border-bottom: none;
+}
+
+.preview-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-label i {
+  font-size: 14px;
+  color: var(--primary-color);
+  width: 16px;
+  text-align: center;
+}
+
+.preview-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.preview-value.night {
+  color: #17a2b8;
+}
+
+.preview-value.overtime {
+  color: #ffc107;
+}
+
+.preview-row.total .preview-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.preview-row.total .preview-value {
+  font-size: 16px;
+  color: #28a745;
+}
+
+/* Add subtle animation when values update */
+@keyframes valueUpdate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.preview-value.updating {
+  animation: valueUpdate 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .auto-preview-box {
+    padding: 12px;
+  }
+
+  .preview-row {
+    padding: 8px 0;
+  }
+
+  .preview-label {
+    font-size: 12px;
+  }
+
+  .preview-value {
+    font-size: 13px;
+  }
+
+  .preview-row.total .preview-value {
+    font-size: 15px;
+  }
+}
+
 /* Title & Message */
 .confirmation-title {
   font-size: 18px;

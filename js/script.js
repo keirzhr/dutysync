@@ -283,6 +283,155 @@ navItems.forEach(item => {
     });
 });
 
+// ========================================
+// RATE UPDATE SYSTEM
+// ========================================
+
+let savedRates = { hourly: 0, daily: 0 };
+
+// --- Initialize Rate Settings ---
+function initializeRateSettings() {
+  loadSavedRates();
+  setupRateEventListeners();
+}
+
+// --- Setup Rate Event Listeners ---
+function setupRateEventListeners() {
+  const updateRateBtn = document.getElementById('updateRateBtn');
+  if (updateRateBtn) {
+    updateRateBtn.addEventListener('click', updateAndSaveRate);
+  }
+}
+
+// --- Load Saved Rates from Firestore ---
+async function loadSavedRates() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (userDoc.exists) {
+      const data = userDoc.data();
+      savedRates.hourly = data.hourlyRate || 0;
+      savedRates.daily = data.dailyRate || 0;
+      
+      // Populate settings inputs
+      document.getElementById('hourlyRateInput').value = savedRates.hourly;
+      document.getElementById('dailyRateInput').value = savedRates.daily;
+      
+      console.log('📊 Rates loaded from Firestore:', savedRates);
+      
+      // Auto-populate generate section
+      populateRateInGenerate();
+    }
+  } catch (error) {
+    console.error('Error loading rates:', error);
+  }
+}
+
+// --- Update and Save Rate ---
+async function updateAndSaveRate() {
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Please login to update rates');
+    return;
+  }
+
+  const hourlyRate = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
+  const dailyRate = parseFloat(document.getElementById('dailyRateInput').value) || 0;
+
+  if (hourlyRate <= 0 && dailyRate <= 0) {
+    alert('Please enter at least one valid rate');
+    return;
+  }
+
+  try {
+    const updateBtn = document.getElementById('updateRateBtn');
+    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    updateBtn.disabled = true;
+
+    // Save to Firestore
+    await db.collection('users').doc(user.uid).update({
+      hourlyRate: hourlyRate,
+      dailyRate: dailyRate,
+      rateUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update global variable
+    savedRates.hourly = hourlyRate;
+    savedRates.daily = dailyRate;
+
+    // Populate generate section
+    populateRateInGenerate();
+
+    // Show success message
+    const statusMsg = document.getElementById('rateStatusMessage');
+    statusMsg.textContent = '✅ Rates saved successfully!';
+    statusMsg.style.display = 'block';
+    statusMsg.style.color = '#10b981';
+
+    updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Rate';
+    updateBtn.disabled = false;
+
+    setTimeout(() => {
+      statusMsg.style.display = 'none';
+    }, 3000);
+
+    console.log('✅ Rates updated:', { hourlyRate, dailyRate });
+  } catch (error) {
+    console.error('Error updating rates:', error);
+    alert('Failed to save rates. Please try again.');
+    
+    const updateBtn = document.getElementById('updateRateBtn');
+    updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Rate';
+    updateBtn.disabled = false;
+  }
+}
+
+// --- Populate Rate in Generate Section (Read-Only) ---
+function populateRateInGenerate() {
+  const rateInput = document.getElementById('rateInput');
+  if (rateInput) {
+    // Determine which rate to use based on current rateType
+    const rateValue = rateType === 'hourly' ? savedRates.hourly : savedRates.daily;
+    rateInput.value = rateValue;
+    rateInput.readOnly = true; // Make it read-only
+    rateInput.style.cursor = 'not-allowed';
+    rateInput.style.opacity = '0.7';
+    
+    console.log(`📌 Rate populated in generate section (${rateType}):`, rateValue);
+  }
+}
+
+// --- Setup Listener for Rate Type Change ---
+function setupRateTypeChangeListener() {
+  const rateButtons = document.querySelectorAll('.rate-btn');
+  rateButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setTimeout(() => {
+        populateRateInGenerate();
+      }, 100);
+    });
+  });
+}
+
+// --- Hook into existing generate.js initialization ---
+// Call this after loadEmployeeInfo completes
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    await loadEmployeeInfo(user);
+    initializeGeneratePayslip();
+    initializeRateSettings(); // ADD THIS LINE
+    setupDutyUpdateListener();
+    loadPayslipHistory();
+  }
+});
+
+// Add this to setupEventListeners function in generate.js
+// After the existing rate-btn event listeners:
+setupRateTypeChangeListener();
+
+
 // --- Form Submission Placeholder ---
 document.querySelectorAll("form").forEach(form => {
     form.addEventListener("submit", e => {

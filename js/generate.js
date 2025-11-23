@@ -1,17 +1,19 @@
-console.log("📄 generate.js loaded");
+console.log("📄 generate.js loaded (With History System)");
 
 // --- Global Variables ---
 let rateType = 'hourly';
 let calculatedPayslip = null;
 let generatedPayslipUrl = null;
 let employeeInfo = { name: '', position: '', email: '', initials: '--' };
+let payslipHistory = [];
 
 // --- Initialize on Auth State Change ---
 auth.onAuthStateChanged(async user => {
   if (user) {
     await loadEmployeeInfo(user);
     initializeGeneratePayslip();
-    setupDutyUpdateListener(); // Listen for duty changes
+    setupDutyUpdateListener();
+    loadPayslipHistory(); // Load history on login
   }
 });
 
@@ -45,10 +47,6 @@ async function loadEmployeeInfo(user) {
 // --- Update Employee Display in UI ---
 function updateEmployeeDisplay() {
   const els = {
-    'generateEmployeeAvatar': employeeInfo.initials,
-    'generateEmployeeName': employeeInfo.name,
-    'generateEmployeePosition': employeeInfo.position,
-    'generateEmployeeEmail': employeeInfo.email,
     'previewEmployeeName': employeeInfo.name,
     'previewEmployeePosition': employeeInfo.position,
     'previewEmployeeEmail': employeeInfo.email
@@ -56,27 +54,20 @@ function updateEmployeeDisplay() {
   
   Object.entries(els).forEach(([id, value]) => {
     const el = document.getElementById(id);
-    if (el) {
-      // Skip avatar elements, handle separately below
-      if (!id.includes('Avatar')) {
-        el.textContent = value;
-      }
+    if (el && !id.includes('Avatar')) {
+      el.textContent = value;
     }
   });
 
-  // Update avatar displays
   updateAvatarDisplay();
 }
 
 // --- Update Avatar Display ---
 function updateAvatarDisplay() {
-  const generateEmployeeAvatar = document.getElementById('generateEmployeeAvatar');
   const previewEmployeeAvatar = document.getElementById('previewEmployeeAvatar');
 
-  [generateEmployeeAvatar, previewEmployeeAvatar].forEach(avatar => {
-    if (!avatar) return;
-    
-    avatar.innerHTML = '';
+  if (previewEmployeeAvatar) {
+    previewEmployeeAvatar.innerHTML = '';
     
     if (employeeInfo.photoURL) {
       const img = document.createElement('img');
@@ -86,11 +77,11 @@ function updateAvatarDisplay() {
       img.style.height = '100%';
       img.style.objectFit = 'cover';
       img.style.borderRadius = '50%';
-      avatar.appendChild(img);
+      previewEmployeeAvatar.appendChild(img);
     } else {
-      avatar.textContent = employeeInfo.initials;
+      previewEmployeeAvatar.textContent = employeeInfo.initials;
     }
-  });
+  }
 }
 
 // --- Setup Duty Update Listener ---
@@ -98,7 +89,6 @@ function setupDutyUpdateListener() {
   const user = auth.currentUser;
   if (!user) return;
 
-  // Listen for real-time changes in duties collection
   db.collection('duties')
     .where('user', '==', user.uid)
     .onSnapshot(() => {
@@ -108,7 +98,6 @@ function setupDutyUpdateListener() {
       console.error('Error listening to duties:', error);
     });
 
-  // Listen for profile photo updates
   db.collection('users').doc(user.uid).onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
@@ -229,7 +218,7 @@ function updatePreviewPeriod() {
   }
 }
 
-// --- Fetch Hours from Duty Logs ---
+// --- Fetch Hours from Duty Logs (AUTO SYSTEM) ---
 async function fetchAndCalculateHours() {
   const user = auth.currentUser;
   if (!user) return;
@@ -253,49 +242,33 @@ async function fetchAndCalculateHours() {
       if (cutoff === 1 && d > 15) return;
       if (cutoff === 2 && d <= 15) return;
 
-      const hours = parseFloat(duty.hours) || 0;
-      const overtime = parseFloat(duty.overTime) || 0;
+      const regular = parseFloat(duty.regularHours) || 0;
+      const night = parseFloat(duty.nightHours) || 0;
+      const overtime = parseFloat(duty.overtimeHours) || 0;
       const dayType = duty.dayType || 'Regular';
-      const compensationType = duty.compensationType || 'Regular Rate';
-
-      // --- FIXED LOGIC START ---
-      // We process Night Diff independently from Holiday so they can stack.
 
       const isHoliday = dayType.includes('Holiday') || dayType.includes('Special');
-      const isNight = compensationType.toLowerCase().includes('night');
 
-      // 1. Calculate Night Hours (For the 10% premium later)
-      if (isNight) {
-        nightHours += hours;
-      }
+      nightHours += night;
 
-      // 2. Calculate Base/Holiday Pay
       if (isHoliday) {
-        holidayHours += hours; // For display stats
-        // Accumulate weighted holiday hours
+        holidayHours += regular + night;
         if (dayType.includes('130')) {
-           holidayPayAcc += hours * 1.30;
+           holidayPayAcc += (regular + night) * 1.30;
         } else if (dayType.includes('200')) {
-           holidayPayAcc += hours * 2.00;
+           holidayPayAcc += (regular + night) * 2.00;
         } else {
-           holidayPayAcc += hours * 1.30; // Fallback
+           holidayPayAcc += (regular + night) * 1.30;
         }
       } else {
-        // If it is NOT a holiday, the base pay comes from Regular Hours.
-        // Even if it is a Night Shift, the "Base" (100%) is counted here.
-        regularHours += hours;
+        regularHours += regular + night;
       }
-      // --- FIXED LOGIC END ---
 
       overtimeHours += overtime;
     });
 
-    const totalHours = regularHours + overtimeHours + nightHours + holidayHours;
-    // Total worked is physical hours (excluding the double count of night diff overlap)
-    // We approximate this by just summing the main buckets plus OT
-    const totalWorked = regularHours + holidayHours + overtimeHours; 
+    const totalWorked = regularHours + holidayHours + overtimeHours;
 
-    // Update summary display
     document.getElementById('summaryRegularHours').textContent = regularHours.toFixed(2);
     document.getElementById('summaryOvertimeHours').textContent = overtimeHours.toFixed(2);
     document.getElementById('summaryNightHours').textContent = nightHours.toFixed(2);
@@ -307,7 +280,6 @@ async function fetchAndCalculateHours() {
       overtimeHours,
       nightHours,
       holidayHours,
-      totalHours,
       totalWorked
     });
 
@@ -317,14 +289,12 @@ async function fetchAndCalculateHours() {
       nightHours,
       holidayHours,
       holidayPayAcc,
-      totalHours,
       totalWorked
     };
   } catch (error) {
     console.error('Error fetching duties:', error);
   }
 }
-
 
 // --- Calculate Payslip ---
 function calculatePayslip() {
@@ -339,16 +309,11 @@ function calculatePayslip() {
 
   const basicPay = roundToDecimal(hours.regularHours * hourlyRate, 2);
   const overtimePay = roundToDecimal(hours.overtimeHours * hourlyRate * 1.25, 2);
-  
-  // FIXED MATH: Changed multiplier to 0.10 (10% Premium)
-  // Because the Base (100%) is already covered in 'regularHours' or 'holidayPay'
   const nightDiffPay = roundToDecimal(hours.nightHours * hourlyRate * 0.10, 2);
-  
   const holidayPay = roundToDecimal(hours.holidayPayAcc * hourlyRate, 2);
 
   const grossPay = roundToDecimal(basicPay + overtimePay + nightDiffPay + holidayPay, 2);
 
-  // --- Contributions (semi-monthly)
   const sssDeduction = roundToDecimal(calculateSSS(grossPay * 2) / 2, 2);
   const philhealthDeduction = roundToDecimal(calculatePhilHealth(grossPay * 2), 2);
   const pagibigDeduction = roundToDecimal(calculatePagibig(grossPay * 2) / 2, 2);
@@ -359,7 +324,6 @@ function calculatePayslip() {
   const totalDeductions = roundToDecimal(sssDeduction + philhealthDeduction + pagibigDeduction + withholdingTax, 2);
   const netPay = roundToDecimal(grossPay - totalDeductions, 2);
 
-  // --- Update preview and calculatedPayslip
   document.getElementById('previewBasicPay').textContent = formatCurrency(basicPay);
   document.getElementById('previewOvertimePay').textContent = formatCurrency(overtimePay);
   document.getElementById('previewNightDiff').textContent = formatCurrency(nightDiffPay);
@@ -429,7 +393,6 @@ function calculatePagibig(monthlyGross) {
 }
 
 // --- BIR Withholding Tax (Semi-Monthly) ---
-// Semi-monthly thresholds: Annual PHP 250,000 = Monthly PHP 20,833 = Semi-monthly PHP 10,416.50
 function calculateBIRWithholdingTax(taxableIncomeSemiMonthly) {
   const semiMonthlyTable = [
     { maxIncome: 10416.50, fixed: 0, percent: 0, compensationLevel: 0 },
@@ -457,9 +420,34 @@ function formatCurrency(amount) {
   return 'PHP ' + amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// --- Generate and Save Payslip ---
+// ========================================
+// PAYSLIP HISTORY SYSTEM
+// ========================================
+
+// --- Check if Payslip Already Exists ---
+async function checkPayslipExists(year, month, cutoff) {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  const docId = `${year}_${month}_${cutoff}`;
+  
+  try {
+    const docRef = db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .doc(docId);
+    
+    const doc = await docRef.get();
+    return doc.exists;
+  } catch (error) {
+    console.error('Error checking payslip existence:', error);
+    return false;
+  }
+}
+
+// --- Generate and Save Payslip (WITH DUPLICATE CHECK) ---
 async function generateAndSavePayslip() {
-  console.log('🚀 Generating payslip (Download Only)...');
+  console.log('🚀 Generating payslip with duplicate check...');
 
   if (!calculatedPayslip) {
     alert('Please calculate payslip first');
@@ -470,31 +458,64 @@ async function generateAndSavePayslip() {
   const month = document.getElementById('generateMonth').value;
   const cutoff = document.getElementById('generateCutoff').value;
 
+  // ✅ CHECK FOR DUPLICATE
+  const exists = await checkPayslipExists(year, month, cutoff);
+  
+  if (exists) {
+    alert('⚠️ Payslip already generated for this period. Please check your history below.');
+    // Scroll to history section
+    document.getElementById('payslipHistorySection')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
   const monthNames = [
     'January','February','March','April','May','June','July',
     'August','September','October','November','December'
   ];
   const monthName = monthNames[month - 1];
 
-  await loadJsPDF();
-  const pdfBlob = createPdfPayslip(year, month, cutoff, monthName);
-  const fileName = `Payslip_${monthName}-${year}_Cutoff${cutoff}.pdf`;
+  try {
+    // Show loading state
+    const genBtn = document.getElementById('generatePdfBtn');
+    const originalText = genBtn.innerHTML;
+    genBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    genBtn.disabled = true;
 
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(pdfBlob);
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(link.href);
-
+    await loadJsPDF();
+    
+    // Generate PDF and convert to Base64
+    const pdfBase64 = await createPdfPayslipBase64(year, month, cutoff, monthName);
+    
+    // Save to Firestore
+    await savePayslipToHistory(year, month, cutoff, pdfBase64);
+    
+    // Restore button
+    genBtn.innerHTML = originalText;
+    genBtn.disabled = false;
+    
+    // Show success modal
+    showSuccessModal();
+    
+    // Reload history
+    await loadPayslipHistory();
+    
+  } catch (error) {
+    console.error('Error generating payslip:', error);
+    alert('Failed to generate payslip. Please try again.');
+    const genBtn = document.getElementById('generatePdfBtn');
+    genBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download Payslip';
+    genBtn.disabled = false;
+  }
 }
 
-// --- Create PDF Payslip ---
-function createPdfPayslip(year, month, cutoff, monthName) {
+// --- Create PDF and Convert to Base64 ---
+async function createPdfPayslipBase64(year, month, cutoff, monthName) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const p = calculatedPayslip;
   const cutoffText = cutoff === '1' ? '1-15' : '16-30/31';
 
+  // Header
   doc.setFillColor(90, 112, 176);
   doc.rect(0, 0, 210, 45, 'F');
   doc.setTextColor(255, 255, 255);
@@ -505,6 +526,7 @@ function createPdfPayslip(year, month, cutoff, monthName) {
   doc.setFont('helvetica', 'normal');
   doc.text('DutySync Payroll System', 105, 35, { align: 'center' });
 
+  // Employee Info
   doc.setTextColor(0, 0, 0);
   doc.setFillColor(245, 247, 250);
   doc.rect(15, 55, 180, 35, 'F');
@@ -520,6 +542,7 @@ function createPdfPayslip(year, month, cutoff, monthName) {
   doc.text('Email: ' + employeeInfo.email, 110, 73);
   doc.text('Pay Period: ' + monthName + ' ' + cutoffText + ', ' + year, 110, 81);
 
+  // Earnings
   let y = 105;
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -548,6 +571,7 @@ function createPdfPayslip(year, month, cutoff, monthName) {
   y += 8;
   addRow('GROSS PAY', p.grossPay, true);
 
+  // Deductions
   y += 8;
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -568,6 +592,7 @@ function createPdfPayslip(year, month, cutoff, monthName) {
   doc.setTextColor(220, 53, 69);
   addRow('TOTAL DEDUCTIONS', p.totalDeductions, true);
 
+  // Net Pay
   y += 10;
   doc.setFillColor(16, 185, 129);
   doc.roundedRect(15, y, 180, 25, 3, 3, 'F');
@@ -578,12 +603,480 @@ function createPdfPayslip(year, month, cutoff, monthName) {
   doc.setFontSize(18);
   doc.text(formatCurrency(p.netPay), 185, y + 16, { align: 'right' });
 
+  // Footer
   doc.setTextColor(128, 128, 128);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.text('Generated on ' + new Date().toLocaleString('en-PH') + ' | Document ID: ' + Date.now(), 105, 285, { align: 'center' });
 
-  return doc.output('blob');
+  // Convert to Base64
+  const pdfBase64 = doc.output('datauristring').split(',')[1];
+  return pdfBase64;
+}
+
+// --- Save Payslip to Firestore ---
+async function savePayslipToHistory(year, month, cutoff, pdfBase64) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+
+  const docId = `${year}_${month}_${cutoff}`;
+  
+  const payslipData = {
+    year: parseInt(year),
+    month: parseInt(month),
+    cutoff: parseInt(cutoff),
+    generatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    pdfBase64: pdfBase64,
+    employeeName: employeeInfo.name,
+    employeeEmail: employeeInfo.email,
+    netPay: calculatedPayslip.netPay,
+    grossPay: calculatedPayslip.grossPay
+  };
+
+  try {
+    await db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .doc(docId)
+      .set(payslipData);
+    
+    console.log('✅ Payslip saved to history:', docId);
+  } catch (error) {
+    console.error('Error saving payslip to Firestore:', error);
+    throw error;
+  }
+}
+
+// --- Load Payslip History ---
+async function loadPayslipHistory() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const snapshot = await db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .orderBy('generatedAt', 'desc')
+      .get();
+
+    payslipHistory = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    console.log('📚 Loaded payslip history:', payslipHistory.length, 'records');
+    renderPayslipHistory();
+  } catch (error) {
+    console.error('Error loading payslip history:', error);
+  }
+}
+
+// ADD THIS FUNCTION to generate.js after renderPayslipHistory()
+
+// --- Update History Count Badge ---
+function updateHistoryCount() {
+  const historyCount = document.getElementById('historyCount');
+  if (historyCount) {
+    historyCount.textContent = payslipHistory.length;
+    console.log('📊 History count updated:', payslipHistory.length);
+  }
+}
+
+// --- Modified renderPayslipHistory (with count update) ---
+function renderPayslipHistory() {
+  const container = document.getElementById('payslipHistoryContainer');
+  if (!container) return;
+
+  // Update the count badge
+  updateHistoryCount();
+
+  if (payslipHistory.length === 0) {
+    container.innerHTML = `
+      <div class="history-empty-state">
+        <i class="fas fa-file-invoice" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+        <h3>No Payslip History</h3>
+        <p>Generated payslips will appear here</p>
+      </div>
+    `;
+    return;
+  }
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  container.innerHTML = payslipHistory.map(record => {
+    const monthName = monthNames[record.month - 1];
+    const cutoffText = record.cutoff === 1 ? '1-15' : '16-30/31';
+    const generatedDate = record.generatedAt ? 
+      new Date(record.generatedAt.toDate()).toLocaleDateString('en-PH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : 'N/A';
+
+    return `
+      <div class="history-card">
+        <div class="history-card-header">
+          <div class="history-period">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="period-text">${monthName} ${cutoffText}, ${record.year}</span>
+          </div>
+          <span class="history-badge">Generated</span>
+        </div>
+        
+        <div class="history-card-body">
+          <div class="history-info-row">
+            <span class="info-label"><i class="fas fa-money-bill-wave"></i> Net Pay:</span>
+            <span class="info-value net-pay">${formatCurrency(record.netPay)}</span>
+          </div>
+          <div class="history-info-row">
+            <span class="info-label"><i class="fas fa-coins"></i> Gross Pay:</span>
+            <span class="info-value">${formatCurrency(record.grossPay)}</span>
+          </div>
+          <div class="history-info-row">
+            <span class="info-label"><i class="fas fa-clock"></i> Generated:</span>
+            <span class="info-value">${generatedDate}</span>
+          </div>
+        </div>
+
+        <div class="history-card-footer">
+          <button class="btn-download-history" onclick="downloadPayslipFromHistory('${record.id}', '${monthName}', ${record.year}, ${record.cutoff})">
+            <i class="fas fa-download"></i> Download PDF
+          </button>
+          <button class="btn-delete-history" onclick="deletePayslipFromHistory('${record.id}', '${monthName} ${cutoffText}, ${record.year}')">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- Modified generateAndSavePayslip (FIXED) ---
+async function generateAndSavePayslip() {
+  console.log('🚀 Generating payslip with duplicate check...');
+
+  if (!calculatedPayslip) {
+    alert('Please calculate payslip first');
+    return;
+  }
+
+  const year = document.getElementById('generateYear').value;
+  const month = document.getElementById('generateMonth').value;
+  const cutoff = document.getElementById('generateCutoff').value;
+
+  // ✅ CHECK FOR DUPLICATE
+  const exists = await checkPayslipExists(year, month, cutoff);
+  
+  if (exists) {
+    alert('⚠️ Payslip already generated for this period. Please check your history below.');
+    document.getElementById('payslipHistorySection')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  const monthNames = [
+    'January','February','March','April','May','June','July',
+    'August','September','October','November','December'
+  ];
+  const monthName = monthNames[month - 1];
+
+  try {
+    // Show loading state
+    const genBtn = document.getElementById('generatePdfBtn');
+    const originalText = genBtn.innerHTML;
+    genBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    genBtn.disabled = true;
+
+    await loadJsPDF();
+    
+    // Generate PDF and convert to Base64
+    const pdfBase64 = await createPdfPayslipBase64(year, month, cutoff, monthName);
+    
+    // Save to Firestore
+    await savePayslipToHistory(year, month, cutoff, pdfBase64);
+    
+    // Restore button
+    genBtn.innerHTML = originalText;
+    genBtn.disabled = false;
+    
+    // Show success modal
+    showSuccessModal();
+    
+    // ✅ RELOAD HISTORY AND UPDATE COUNTS
+    await loadPayslipHistory();
+    updateHistoryCount(); // Explicitly update count
+    
+    // Scroll to history section
+    setTimeout(() => {
+      document.getElementById('payslipHistorySection')?.scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error generating payslip:', error);
+    alert('Failed to generate payslip. Please try again.');
+    const genBtn = document.getElementById('generatePdfBtn');
+    genBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download Payslip';
+    genBtn.disabled = false;
+  }
+}
+
+// --- Modified loadPayslipHistory (with automatic count update) ---
+async function loadPayslipHistory() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const snapshot = await db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .orderBy('generatedAt', 'desc')
+      .get();
+
+    payslipHistory = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    console.log('📚 Loaded payslip history:', payslipHistory.length, 'records');
+    
+    // ✅ RENDER AND UPDATE COUNT
+    renderPayslipHistory();
+    updateHistoryCount();
+    
+  } catch (error) {
+    console.error('Error loading payslip history:', error);
+  }
+}
+
+// --- Modified deletePayslipFromHistory (with count update) ---
+window.deletePayslipFromHistory = async function(docId, periodName) {
+  if (!confirm(`Are you sure you want to delete the payslip for ${periodName}?\n\nThis action cannot be undone.`)) {
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Please login to delete payslip');
+    return;
+  }
+
+  try {
+    console.log('🗑️ Deleting payslip:', docId);
+
+    await db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .doc(docId)
+      .delete();
+
+    console.log('✅ Payslip deleted successfully');
+    
+    // ✅ RELOAD HISTORY AND UPDATE COUNT
+    await loadPayslipHistory();
+    updateHistoryCount();
+    
+    // Show success message
+    showToast('Payslip deleted successfully', 'success');
+  } catch (error) {
+    console.error('Error deleting payslip:', error);
+    alert('Failed to delete payslip. Please try again.');
+  }
+};
+
+// --- Render Payslip History ---
+function renderPayslipHistory() {
+  const container = document.getElementById('payslipHistoryContainer');
+  if (!container) return;
+
+  if (payslipHistory.length === 0) {
+    container.innerHTML = `
+      <div class="history-empty-state">
+        <i class="fas fa-file-invoice" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+        <h3>No Payslip History</h3>
+        <p>Generated payslips will appear here</p>
+      </div>
+    `;
+    return;
+  }
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  container.innerHTML = payslipHistory.map(record => {
+    const monthName = monthNames[record.month - 1];
+    const cutoffText = record.cutoff === 1 ? '1-15' : '16-30/31';
+    const generatedDate = record.generatedAt ? 
+      new Date(record.generatedAt.toDate()).toLocaleDateString('en-PH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : 'N/A';
+
+    return `
+      <div class="history-card">
+        <div class="history-card-header">
+          <div class="history-period">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="period-text">${monthName} ${cutoffText}, ${record.year}</span>
+          </div>
+          <span class="history-badge">Generated</span>
+        </div>
+        
+        <div class="history-card-body">
+          <div class="history-info-row">
+            <span class="info-label"><i class="fas fa-money-bill-wave"></i> Net Pay:</span>
+            <span class="info-value net-pay">${formatCurrency(record.netPay)}</span>
+          </div>
+          <div class="history-info-row">
+            <span class="info-label"><i class="fas fa-coins"></i> Gross Pay:</span>
+            <span class="info-value">${formatCurrency(record.grossPay)}</span>
+          </div>
+          <div class="history-info-row">
+            <span class="info-label"><i class="fas fa-clock"></i> Generated:</span>
+            <span class="info-value">${generatedDate}</span>
+          </div>
+        </div>
+
+        <div class="history-card-footer">
+          <button class="btn-download-history" onclick="downloadPayslipFromHistory('${record.id}', '${monthName}', ${record.year}, ${record.cutoff})">
+            <i class="fas fa-download"></i> Download PDF
+          </button>
+          <button class="btn-delete-history" onclick="deletePayslipFromHistory('${record.id}', '${monthName} ${cutoffText}, ${record.year}')">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- Download Payslip from History ---
+window.downloadPayslipFromHistory = async function(docId, monthName, year, cutoff) {
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Please login to download payslip');
+    return;
+  }
+
+  try {
+    console.log('📥 Downloading payslip:', docId);
+    
+    // Show loading state
+    const btn = event.target.closest('.btn-download-history');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    btn.disabled = true;
+
+    // Get document from Firestore
+    const doc = await db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .doc(docId)
+      .get();
+
+    if (!doc.exists) {
+      alert('Payslip not found');
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+      return;
+    }
+
+    const data = doc.data();
+    const pdfBase64 = data.pdfBase64;
+
+    // Convert Base64 to Blob
+    const binaryString = atob(pdfBase64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Payslip_${year}_${monthName}_Cutoff${cutoff}.pdf`;
+    link.click();
+
+    // Cleanup
+    URL.revokeObjectURL(url);
+    
+    // Restore button
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+    
+    console.log('✅ Payslip downloaded successfully');
+  } catch (error) {
+    console.error('Error downloading payslip:', error);
+    alert('Failed to download payslip. Please try again.');
+  }
+};
+
+// --- Delete Payslip from History ---
+window.deletePayslipFromHistory = async function(docId, periodName) {
+  if (!confirm(`Are you sure you want to delete the payslip for ${periodName}?\n\nThis action cannot be undone.`)) {
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Please login to delete payslip');
+    return;
+  }
+
+  try {
+    console.log('🗑️ Deleting payslip:', docId);
+
+    await db.collection('payslip_history')
+      .doc(user.uid)
+      .collection('records')
+      .doc(docId)
+      .delete();
+
+    console.log('✅ Payslip deleted successfully');
+    
+    // Reload history
+    await loadPayslipHistory();
+    
+    // Show success message
+    showToast('Payslip deleted successfully', 'success');
+  } catch (error) {
+    console.error('Error deleting payslip:', error);
+    alert('Failed to delete payslip. Please try again.');
+  }
+};
+
+// --- Show Toast Notification ---
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+    <span>${message}</span>
+  `;
+  
+  const container = document.getElementById('toastContainer') || document.body;
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 100);
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// --- Show Success Modal ---
+function showSuccessModal() {
+  const modal = document.getElementById('payslipSuccessModal');
+  if (modal) {
+    modal.classList.add('active');
+  }
 }
 
 // --- Close Success Modal ---
@@ -597,6 +1090,6 @@ function closeSuccessModal() {
    'previewGrossPay','previewSSS','previewPhilHealth','previewPagibig','previewBIRTax',
    'previewTotalDeductions','previewNetPay'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = 'PHP 0.00';
+    if (el) el.textContent = '₱0.00';
   });
 }

@@ -1,10 +1,10 @@
-console.log("🔥 inputduty.js (Calendar) loaded");
+console.log("🔥 inputduty.js (Auto-Calculate) loaded");
 
 // --- Global Variables ---
 let currentDate = new Date();
 let allDuties = [];
 let completedTimeChart = null;
-let unsubscribeDuties = null; // Real-time listener
+let unsubscribeDuties = null;
 
 // --- Check Auth State ---
 auth.onAuthStateChanged(async user => {
@@ -27,7 +27,6 @@ function setupRealtimeDutiesListener(userId) {
         .onSnapshot(snapshot => {
             allDuties = snapshot.docs.map(doc => {
                 const data = { id: doc.id, ...doc.data() };
-                data.hours = calculateHours(data.timeIn, data.timeOut);
                 return data;
             });
             console.log("✅ Input Duty records updated (real-time):", allDuties.length);
@@ -44,19 +43,19 @@ function renderDutyLogTable() {
     if (!container) return;
 
     container.innerHTML = "";
-
     allDuties.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     allDuties.forEach(duty => {
+        const breakdown = calculateShiftBreakdown(duty.timeIn, duty.timeOut);
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
             <td>${duty.date}</td>
             <td>${duty.timeIn}</td>
             <td>${duty.timeOut}</td>
-            <td>${duty.hours.toFixed(2)}</td>
-            <td>${duty.compensationType}</td>
-            <td>${duty.dayType}</td>
+            <td>${breakdown.totalHours.toFixed(2)}</td>
+            <td>Auto</td>
+            <td>${duty.dayType || 'Regular'}</td>
             <td>
                 <button class="edit-btn" data-id="${duty.id}">Edit</button>
                 <button class="delete-btn" data-id="${duty.id}">Delete</button>
@@ -81,17 +80,59 @@ function renderDutyLogTable() {
     });
 }
 
-// --- Calculate Hours ---
-function calculateHours(timeIn, timeOut) {
-    if (!timeIn || !timeOut) return 0;
+// --- AUTOMATIC SHIFT BREAKDOWN LOGIC ---
+function calculateShiftBreakdown(timeIn, timeOut) {
+    if (!timeIn || !timeOut) return {
+        regularHours: 0,
+        nightHours: 0,
+        overtimeHours: 0,
+        totalHours: 0
+    };
+
     const [inH, inM] = timeIn.split(":").map(Number);
     const [outH, outM] = timeOut.split(":").map(Number);
 
-    let start = inH + inM / 60;
-    let end = outH + outM / 60;
+    let startMinutes = inH * 60 + inM;
+    let endMinutes = outH * 60 + outM;
 
-    if (end < start) end += 24;
-    return +(end - start).toFixed(2);
+    // Handle overnight shifts
+    if (endMinutes <= startMinutes) {
+        endMinutes += 24 * 60;
+    }
+
+    const totalMinutes = endMinutes - startMinutes;
+    const totalHours = totalMinutes / 60;
+
+    // Night shift window: 10 PM (22:00) to 6 AM (06:00)
+    const nightStart = 22 * 60; // 10 PM
+    const nightEnd = 6 * 60;    // 6 AM (next day)
+
+    let regularMinutes = 0;
+    let nightMinutes = 0;
+
+    // Calculate minute-by-minute
+    for (let i = 0; i < totalMinutes; i++) {
+        let currentMinute = (startMinutes + i) % (24 * 60);
+        
+        if (currentMinute >= nightStart || currentMinute < nightEnd) {
+            nightMinutes++;
+        } else {
+            regularMinutes++;
+        }
+    }
+
+    const regularHours = regularMinutes / 60;
+    const nightHours = nightMinutes / 60;
+
+    // Overtime: Anything beyond 8 hours
+    const overtimeHours = Math.max(0, totalHours - 8);
+
+    return {
+        regularHours: parseFloat(regularHours.toFixed(2)),
+        nightHours: parseFloat(nightHours.toFixed(2)),
+        overtimeHours: parseFloat(overtimeHours.toFixed(2)),
+        totalHours: parseFloat(totalHours.toFixed(2))
+    };
 }
 
 // --- Error Display Utility ---
@@ -143,14 +184,14 @@ function validateTimeLogic(timeIn, timeOut) {
 }
 
 function validateWorkHours(timeIn, timeOut) {
-    const hours = calculateHours(timeIn, timeOut);
+    const breakdown = calculateShiftBreakdown(timeIn, timeOut);
 
-    if (hours < 0.5) {
+    if (breakdown.totalHours < 0.5) {
         showError("Shift must be at least 30 minutes");
         return false;
     }
 
-    if (hours > 24) {
+    if (breakdown.totalHours > 24) {
         showError("Shift cannot exceed 24 hours");
         return false;
     }
@@ -177,19 +218,6 @@ function validateRequiredFields(date, timeIn, timeOut) {
     return true;
 }
 
-function validateFutureDate(dateStr) {
-    const selectedDate = new Date(dateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate > today) {
-        showError("Cannot log work for future dates");
-        return false;
-    }
-
-    return true;
-}
-
 function validateDuplicateEntry(dateStr, excludeId = null) {
     const duplicate = allDuties.find(d => d.date === dateStr && d.id !== excludeId);
     if (duplicate) {
@@ -199,14 +227,8 @@ function validateDuplicateEntry(dateStr, excludeId = null) {
     return true;
 }
 
-function validateDropdownValues(rate, dayType) {
-    const validRates = ['Regular Rate','Night Shift'];
+function validateDropdownValues(dayType) {
     const validDayTypes = ['Regular', 'Regular Holiday (130%)', 'Special Non-Working Holiday (200%)'];
-
-    if (!validRates.includes(rate)) {
-        showError("Invalid rate selection");
-        return false;
-    }
 
     if (!validDayTypes.includes(dayType)) {
         showError("Invalid day type selection");
@@ -306,9 +328,13 @@ function openPopup(dateStr) {
     document.getElementById('popupDate').value = dateStr;
     document.getElementById('popupTimeIn').value = '';
     document.getElementById('popupTimeOut').value = '';
-    document.getElementById('popupRate').value = 'Regular Rate';
-    document.getElementById('popupOverTime').value = '';
     document.getElementById('popupDayType').value = 'Regular';
+
+    // Clear preview
+    document.getElementById('previewRegular').textContent = '0.00 hrs';
+    document.getElementById('previewNight').textContent = '0.00 hrs';
+    document.getElementById('previewOT').textContent = '0.00 hrs';
+    document.getElementById('previewTotal').textContent = '0.00 hrs';
 
     const existing = allDuties.find(d => d.date === dateStr);
     const buttonsContainer = document.querySelector('.popup-buttons');
@@ -316,10 +342,11 @@ function openPopup(dateStr) {
     if (existing) {
         document.getElementById('popupTimeIn').value = existing.timeIn;
         document.getElementById('popupTimeOut').value = existing.timeOut;
-        document.getElementById('popupRate').value = existing.compensationType;
-        document.getElementById('popupOverTime').value = existing.overTime;
-        document.getElementById('popupDayType').value = existing.dayType;
+        document.getElementById('popupDayType').value = existing.dayType || 'Regular';
         document.getElementById('dutyPopup').dataset.editId = existing.id;
+
+        // Show preview
+        updateTimePreview();
 
         buttonsContainer.innerHTML = `
             <button id="deletePopupDuty" class="popup-btn popup-btn-delete">Delete</button>
@@ -345,7 +372,26 @@ function openPopup(dateStr) {
         document.getElementById('cancelPopupDuty').addEventListener('click', closePopup);
     }
 
+    // Add live preview listeners
+    document.getElementById('popupTimeIn').addEventListener('input', updateTimePreview);
+    document.getElementById('popupTimeOut').addEventListener('input', updateTimePreview);
+
     document.getElementById('popupOverlay').classList.add('active');
+}
+
+// --- Live Preview Update ---
+function updateTimePreview() {
+    const timeIn = document.getElementById('popupTimeIn').value;
+    const timeOut = document.getElementById('popupTimeOut').value;
+
+    if (timeIn && timeOut && validateTimeFormat(timeIn) && validateTimeFormat(timeOut)) {
+        const breakdown = calculateShiftBreakdown(timeIn, timeOut);
+        
+        document.getElementById('previewRegular').textContent = breakdown.regularHours.toFixed(2) + ' hrs';
+        document.getElementById('previewNight').textContent = breakdown.nightHours.toFixed(2) + ' hrs';
+        document.getElementById('previewOT').textContent = breakdown.overtimeHours.toFixed(2) + ' hrs';
+        document.getElementById('previewTotal').textContent = breakdown.totalHours.toFixed(2) + ' hrs';
+    }
 }
 
 function closePopup() {
@@ -366,25 +412,29 @@ async function saveOrUpdateDuty() {
     const date = document.getElementById('popupDate').value;
     const timeIn = document.getElementById('popupTimeIn').value;
     const timeOut = document.getElementById('popupTimeOut').value;
-    const rate = document.getElementById('popupRate').value;
-    const overTime = document.getElementById('popupOverTime').value || '0';
     const dayType = document.getElementById('popupDayType').value;
     const editId = document.getElementById('dutyPopup').dataset.editId;
 
     if (!validateRequiredFields(date, timeIn, timeOut)) return;
     if (!validateTimeLogic(timeIn, timeOut)) return;
     if (!validateWorkHours(timeIn, timeOut)) return;
-    if (!validateFutureDate(date)) return;
-    if (!validateDropdownValues(rate, dayType)) return;
+    if (!validateDropdownValues(dayType)) return;
     if (!editId && !validateDuplicateEntry(date)) return;
     if (editId && !validateDuplicateEntry(date, editId)) return;
 
-    const hoursWorked = calculateHours(timeIn, timeOut);
+    // Calculate automatic breakdown
+    const breakdown = calculateShiftBreakdown(timeIn, timeOut);
 
     try {
         const duty = {
-            date, timeIn, timeOut, compensationType: rate, overTime: parseFloat(overTime) || 0, dayType,
-            hours: hoursWorked,
+            date,
+            timeIn,
+            timeOut,
+            dayType,
+            regularHours: breakdown.regularHours,
+            nightHours: breakdown.nightHours,
+            overtimeHours: breakdown.overtimeHours,
+            totalHours: breakdown.totalHours,
             user: currentUser.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -398,7 +448,6 @@ async function saveOrUpdateDuty() {
         }
 
         closePopup();
-        // Real-time listener will handle updates automatically
 
     } catch (error) {
         console.error("Save error:", error);
@@ -425,7 +474,6 @@ async function performDelete(editId) {
         console.log("Duty deleted successfully");
         closePopup();
         closeDeleteConfirmation();
-        // Real-time listener will handle updates automatically
     } catch (error) {
         console.error("Delete error:", error);
         closeDeleteConfirmation();
@@ -483,7 +531,7 @@ function renderGraph() {
     });
 
     const dates = monthDuties.map(d => d.date);
-    const hours = monthDuties.map(d => d.hours || 0);
+    const hours = monthDuties.map(d => d.totalHours || 0);
 
     const ctx = document.getElementById("completedTimeChart");
     if (!ctx) return;
@@ -516,17 +564,13 @@ function renderGraph() {
 }
 
 // --- Cutoff Hours ---
-// --- Cutoff Hours ---
 function calculateCutoffHours(duties) {
     let hours_1_15 = 0;
-    let hours_16_end = 0; // Renamed for clarity (previously hours_16_30)
+    let hours_16_end = 0;
 
     duties.forEach(d => {
         const day = new Date(d.date).getDate();
-        
-        // 🛑 FIX: Sum the base hours (d.hours) and the explicit overtime (d.overTime)
-        // Ensure d.overTime is treated as a number, defaulting to 0 if missing.
-        const totalPayableTime = (d.hours || 0) + (d.overTime || 0); 
+        const totalPayableTime = d.totalHours || 0;
 
         if (day <= 15) { 
             hours_1_15 += totalPayableTime;
@@ -536,7 +580,6 @@ function calculateCutoffHours(duties) {
     });
 
     document.getElementById("hours_1_15").textContent = hours_1_15.toFixed(2) + " hrs";
-    // Using the original ID here for compatibility:
     document.getElementById("hours_16_30").textContent = hours_16_end.toFixed(2) + " hrs";
 }
 

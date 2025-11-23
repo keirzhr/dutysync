@@ -42,15 +42,10 @@
       </div>
       <!-- Payslip Section -->
       <div class="nav-section">
-        <a class="nav-item" data-page="payslip" data-parent="payslip">
+        <a class="nav-item" data-page="generate-payslip">
           <i class="fas fa-money-bill-wave nav-icon"></i>
           <span class="nav-text">Payslip</span>
-          <span class="nav-arrow">›</span>
         </a>
-        <div class="sub-menu" id="payslip-submenu">
-          <a class="nav-item sub-item" data-page="view-payslip"><span class="nav-text">View Payslip</span></a>
-          <a class="nav-item sub-item" data-page="generate-payslip"><span class="nav-text">Generate Payslip</span></a>
-        </div>
       </div>
       
       <!-- Analytics Section -->
@@ -262,24 +257,42 @@
             </div>
 
             <!-- Rate Input -->
-            <div class="form-section-group">
-              <label class="form-section-label">Rate Configuration</label>
-              <div class="rate-config">
-                <div class="rate-type-toggle">
-                  <button type="button" class="rate-btn active" data-type="hourly">
-                    <i class="fas fa-clock"></i> Per Hour
-                  </button>
-                  <button type="button" class="rate-btn" data-type="daily">
-                    <i class="fas fa-calendar-day"></i> Per Day
-                  </button>
-                </div>
-                <div class="rate-input-wrapper">
-                  <span class="currency-symbol">₱</span>
-                  <input type="number" id="rateInput" class="rate-input" placeholder="0.00" step="0.01" min="0">
-                  <span class="rate-label" id="rateLabel">/day</span>
-                </div>
-              </div>
+        <div class="form-section-group">
+          <label class="form-section-label">Rate Configuration</label>
+          <div class="rate-config">
+            <div class="rate-type-toggle">
+              <button type="button" class="rate-btn active" data-type="hourly">
+                <i class="fas fa-clock"></i> Per Hour
+              </button>
+              <button type="button" class="rate-btn" data-type="daily">
+                <i class="fas fa-calendar-day"></i> Per Day
+              </button>
             </div>
+            
+            <!-- Rate Input Container -->
+            <div id="rateInputContainer" style="display: flex; flex-direction: column;">
+              <div class="rate-input-wrapper">
+                <span class="currency-symbol">₱</span>
+                <input 
+                  type="number" 
+                  id="rateInput" 
+                  class="rate-input" 
+                  placeholder="0.00" 
+                  step="0.01" 
+                  min="0"
+                >
+                <span class="rate-label" id="rateLabel">/hour</span>
+              </div>
+              
+              <!-- Edit button will be inserted here by JavaScript for existing users -->
+            </div>
+            
+            <!-- Status indicator for existing users -->
+            <small id="rateStatus" class="help-text" style="margin-top: 8px; display: none;">
+              <i class="fas fa-lock"></i> Using saved default rate
+            </small>
+          </div>
+        </div>
 
             <!-- Hours Summary (Auto-calculated) -->
            <!-- Hours Summary (Auto-calculated) -->
@@ -449,7 +462,7 @@
 </div>
           <div class="preview-footer">
             <button type="button" id="generatePdfBtn" class="btn-generate" disabled>
-              <i class="fas fa-file-pdf"></i> Download Payslip
+              <i class="fas fa-file-pdf"></i> Generate Payslip
             </button>
           </div>
         </div>
@@ -481,6 +494,49 @@
       </div>
     </div>
   </div>
+
+  <!-- ADD THIS SECTION INSIDE THE generate-payslip-container DIV, 
+     AFTER THE generate-layout DIV CLOSES -->
+
+<!-- Payslip History Section -->
+<div class="payslip-history-section" id="payslipHistorySection">
+  <div class="history-section-header">
+    <h3>
+      <i class="fas fa-history"></i>
+      Payslip History
+      <span class="history-count" id="historyCount">0</span>
+    </h3>
+  </div>
+
+  <!-- History Container (populated by JavaScript) -->
+  <div id="payslipHistoryContainer">
+    <!-- Cards will be dynamically generated here -->
+    <div class="history-empty-state">
+      <i class="fas fa-file-invoice" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+      <h3>No Payslip History</h3>
+      <p>Generated payslips will appear here</p>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE THE SUCCESS MODAL TO REMOVE THE VIEW BUTTON SINCE WE'RE NOT USING FIREBASE STORAGE -->
+<!-- Keep the existing modal but update the buttons section: -->
+
+<div id="payslipSuccessModal" class="modal-overlay">
+  <div class="modal-content success-modal">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h3>Payslip Generated!</h3>
+    <p>Your payslip has been successfully generated and saved to your history.</p>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-close" onclick="closeSuccessModal()">
+        <i class="fas fa-check"></i> Done
+      </button>
+    </div>
+  </div>
+</div>
+
 </section>
       <!-- Input Duty Section -->
       <section class="content-section" id="input-duty">
@@ -538,74 +594,93 @@
         </div>
 
         <!-- Popup Modal -->
-        <div id="popupOverlay" class="popup-overlay">
-          <div id="dutyPopup" class="popup-card">
-            <div class="popup-header">
-              <h3>Add Work Duty</h3>
-            </div>
-            
-            <!-- Error Message Display -->
-            <div id="popupError" class="popup-error" style="display: none;"></div>
-            
-            <div class="popup-content">
-              <!-- Date Section -->
-              <div class="popup-section">
-                <label class="section-label">Date</label>
-                <input type="date" id="popupDate" readonly class="date-input">
-              </div>
+        <!-- Popup Modal - CLEAN AUTO VERSION -->
+<div id="popupOverlay" class="popup-overlay">
+  <div id="dutyPopup" class="popup-card">
+    <div class="popup-header">
+      <h3>Log Work Duty</h3>
+    </div>
+    
+    <!-- Error Message Display -->
+    <div id="popupError" class="popup-error" style="display: none;"></div>
+    
+    <div class="popup-content">
+      <!-- Date Section -->
+      <div class="popup-section">
+        <label class="section-label">Date</label>
+        <input type="date" id="popupDate" readonly class="date-input">
+      </div>
 
-              <!-- Time Section -->
-              <div class="popup-section">
-                <label class="section-label">Work Hours</label>
-                <div class="time-input-group">
-                  <div class="time-input-wrapper">
-                    <label for="popupTimeIn" class="input-label">Time In <span class="required">*</span></label>
-                    <input type="time" id="popupTimeIn" placeholder="HH:MM" class="time-input">
-                    <small class="help-text">Start time</small>
-                  </div>
-                  <div class="time-separator">→</div>
-                  <div class="time-input-wrapper">
-                    <label for="popupTimeOut" class="input-label">Time Out <span class="required">*</span></label>
-                    <input type="time" id="popupTimeOut" placeholder="HH:MM" class="time-input">
-                    <small class="help-text">End time</small>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Rate Section -->
-              <div class="popup-section">
-                <label class="section-label">Compensation Type</label>
-                <select id="popupRate" class="select-input">
-                  <option>Regular Rate</option>
-                  <option>Night Shift</option>
-                </select>
-              </div>
-
-              <!-- Day Type Section -->
-              <div class="popup-section">
-                <label class="section-label">Day Type</label>
-                <select id="popupDayType" class="select-input">
-                  <option>Regular</option>
-                  <option>Regular Holiday (130%)</option>
-                  <option>Special Non-Working Holiday (200%)</option>
-                </select>
-              </div>
-
-              <!-- Overtime Hours Section -->
-              <div class="popup-section">
-                <label class="section-label">Additional Overtime Hours</label>
-                <input type="number" id="popupOverTime" step="0.25" min="0" placeholder="0" class="number-input">
-                <small class="help-text">Extra hours beyond regular shift</small>
-              </div>
-            </div>
-
-            <!-- Buttons -->
-            <div class="popup-buttons">
-              <button id="savePopupDuty" class="popup-btn popup-btn-save">Save</button>
-              <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
-            </div>
+      <!-- Time Section -->
+      <div class="popup-section">
+        <label class="section-label">Work Hours</label>
+        <div class="time-input-group">
+          <div class="time-input-wrapper">
+            <label for="popupTimeIn" class="input-label">Time In <span class="required">*</span></label>
+            <input type="time" id="popupTimeIn" placeholder="HH:MM" class="time-input">
+            <small class="help-text">Start time</small>
+          </div>
+          <div class="time-separator">→</div>
+          <div class="time-input-wrapper">
+            <label for="popupTimeOut" class="input-label">Time Out <span class="required">*</span></label>
+            <input type="time" id="popupTimeOut" placeholder="HH:MM" class="time-input">
+            <small class="help-text">End time</small>
           </div>
         </div>
+      </div>
+
+      <!-- Day Type Section -->
+      <div class="popup-section">
+        <label class="section-label">Day Type</label>
+        <select id="popupDayType" class="select-input">
+          <option>Regular</option>
+          <option>Regular Holiday (130%)</option>
+          <option>Special Non-Working Holiday (200%)</option>
+        </select>
+      </div>
+
+      <!-- AUTO PREVIEW SECTION -->
+      <div class="popup-section">
+        <label class="section-label">Automatic Calculation Preview</label>
+        <div class="auto-preview-box">
+          <div class="preview-row">
+            <span class="preview-label">
+              <i class="fas fa-sun"></i> Regular Hours
+            </span>
+            <span class="preview-value" id="previewRegular">0.00 hrs</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">
+              <i class="fas fa-moon"></i> Night Diff (10PM-6AM)
+            </span>
+            <span class="preview-value night" id="previewNight">0.00 hrs</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">
+              <i class="fas fa-clock"></i> Overtime (>8 hrs)
+            </span>
+            <span class="preview-value overtime" id="previewOT">0.00 hrs</span>
+          </div>
+          <div class="preview-row total">
+            <span class="preview-label">
+              <i class="fas fa-check-circle"></i> Total Hours
+            </span>
+            <span class="preview-value" id="previewTotal">0.00 hrs</span>
+          </div>
+        </div>
+        <small class="help-text" style="margin-top: 8px; display: block;">
+          <i class="fas fa-info-circle"></i> All calculations are automatic based on your time entries
+        </small>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="popup-buttons">
+      <button id="savePopupDuty" class="popup-btn popup-btn-save">Save</button>
+      <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
       </section>
 
       <!-- View Duty Log Section -->
@@ -621,21 +696,21 @@
           <!-- Table and Dashboard Layout -->
           <div class="duty-content-layout">
             <!-- Table -->
-            <div class="duty-table-wrapper">
-              <table class="duty-table" id="dutyTable">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Time In</th>
-                    <th>Time Out</th>
-                    <th>Hours</th>
-                    <th>Rate</th>
-                    <th>Day Type</th>
-                    <th>Overtime</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="dutyTableBody">
+          <div class="duty-table-wrapper">
+            <table class="duty-table" id="dutyTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time In</th>
+                  <th>Time Out</th>
+                  <th>Hours</th>
+                  <th>Night Diff</th>
+                  <th>Day Type</th>
+                  <th>Overtime</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dutyTableBody">
                   <!-- Populated by JavaScript -->
                 </tbody>
               </table>
@@ -692,69 +767,90 @@
         </div>
 
         <!-- Edit Duty Modal -->
-        <div id="dutyLogEditModal" class="popup-overlay">
-          <div class="popup-card">
-            <div class="popup-header">
-              <h3>Edit Duty Record</h3>
-            </div>
-            
-            <div id="editDutyError" class="popup-error" style="display: none;"></div>
-            
-            <div class="popup-content">
-              <input type="hidden" id="editDutyId">
-              
-              <div class="popup-section">
-                <label class="section-label">Date</label>
-                <input type="date" id="editDutyDate" class="date-input">
-              </div>
+        <!-- Edit Duty Modal - AUTO VERSION -->
+<div id="dutyLogEditModal" class="popup-overlay">
+  <div class="popup-card">
+    <div class="popup-header">
+      <h3>Edit Duty Record</h3>
+    </div>
+    
+    <div id="editDutyError" class="popup-error" style="display: none;"></div>
+    
+    <div class="popup-content">
+      <input type="hidden" id="editDutyId">
+      
+      <div class="popup-section">
+        <label class="section-label">Date</label>
+        <input type="date" id="editDutyDate" class="date-input" readonly>
+      </div>
 
-              <div class="popup-section">
-                <label class="section-label">Work Hours</label>
-                <div class="time-input-group">
-                  <div class="time-input-wrapper">
-                    <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
-                    <input type="time" id="editDutyTimeIn" class="time-input">
-                    <small class="help-text">Start time</small>
-                  </div>
-                  <div class="time-separator">→</div>
-                  <div class="time-input-wrapper">
-                    <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
-                    <input type="time" id="editDutyTimeOut" class="time-input">
-                    <small class="help-text">End time</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="popup-section">
-                <label class="section-label">Compensation Type</label>
-                <select id="editDutyRate" class="select-input">
-                  <option>Regular Rate</option>
-                  <option>Night Shift</option>
-                </select>
-              </div>
-
-              <div class="popup-section">
-                <label class="section-label">Day Type</label>
-                <select id="editDutyDayType" class="select-input">
-                  <option>Regular</option>
-                  <option>Regular Holiday (130%)</option>
-                  <option>Special Non-Working Holiday (200%)</option>
-                </select>
-              </div>
-
-              <div class="popup-section">
-                <label class="section-label">Additional Overtime Hours</label>
-                <input type="number" id="editDutyOvertime" step="0.25" min="0" placeholder="0" class="number-input">
-                <small class="help-text">Extra hours beyond regular shift</small>
-              </div>
-            </div>
-
-            <div class="popup-buttons">
-              <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
-              <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
-            </div>
+      <div class="popup-section">
+        <label class="section-label">Work Hours</label>
+        <div class="time-input-group">
+          <div class="time-input-wrapper">
+            <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
+            <input type="time" id="editDutyTimeIn" class="time-input">
+            <small class="help-text">Start time</small>
+          </div>
+          <div class="time-separator">→</div>
+          <div class="time-input-wrapper">
+            <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
+            <input type="time" id="editDutyTimeOut" class="time-input">
+            <small class="help-text">End time</small>
           </div>
         </div>
+      </div>
+
+      <div class="popup-section">
+        <label class="section-label">Day Type</label>
+        <select id="editDutyDayType" class="select-input">
+          <option>Regular</option>
+          <option>Regular Holiday (130%)</option>
+          <option>Special Non-Working Holiday (200%)</option>
+        </select>
+      </div>
+
+      <!-- AUTO PREVIEW SECTION -->
+      <div class="popup-section">
+        <label class="section-label">Automatic Calculation Preview</label>
+        <div class="auto-preview-box">
+          <div class="preview-row">
+            <span class="preview-label">
+              <i class="fas fa-sun"></i> Regular Hours
+            </span>
+            <span class="preview-value" id="editPreviewRegular">0.00 hrs</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">
+              <i class="fas fa-moon"></i> Night Diff (10PM-6AM)
+            </span>
+            <span class="preview-value night" id="editPreviewNight">0.00 hrs</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">
+              <i class="fas fa-clock"></i> Overtime (>8 hrs)
+            </span>
+            <span class="preview-value overtime" id="editPreviewOT">0.00 hrs</span>
+          </div>
+          <div class="preview-row total">
+            <span class="preview-label">
+              <i class="fas fa-check-circle"></i> Total Hours
+            </span>
+            <span class="preview-value" id="editPreviewTotal">0.00 hrs</span>
+          </div>
+        </div>
+        <small class="help-text" style="margin-top: 8px; display: block;">
+          <i class="fas fa-info-circle"></i> All calculations are automatic based on your time entries
+        </small>
+      </div>
+    </div>
+
+    <div class="popup-buttons">
+      <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
+      <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
         <!-- Delete Confirmation Modal -->
         <div id="dutyLogDeleteModal" class="confirmation-modal">
@@ -782,6 +878,8 @@
       <section class="content-section" id="settings">
         <div class="card">
           <h3 style="margin-bottom: 15px;">Preferences</h3>
+          
+          <!-- Theme Toggle -->
           <div class="form-group theme-toggle">
             <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
               <span>Dark Mode</span>
@@ -791,6 +889,29 @@
               </div>
             </label>
           </div>
+
+          <!-- Rate Configuration -->
+          <div class="form-group">
+            <label>Pay Rate Configuration</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <div>
+                <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Hourly Rate (PHP)</label>
+                <input type="number" id="hourlyRateInput" placeholder="0.00" step="0.01" min="0">
+              </div>
+              <div>
+                <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Daily Rate (PHP)</label>
+                <input type="number" id="dailyRateInput" placeholder="0.00" step="0.01" min="0">
+              </div>
+            </div>
+            <button class="btn" id="updateRateBtn" style="width: 100%; margin-bottom: 20px;">
+              <i class="fas fa-save" style="margin-right: 8px;"></i>Save Rate
+            </button>
+            <div id="rateStatusMessage" style="font-size: 12px; color: var(--text-secondary); display: none;"></div>
+          </div>
+
+          <!-- Password Section -->
+          <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+          
           <div class="form-group">
             <label>Current Password</label>
             <input type="password" id="currentPassword" placeholder="Enter current password">
@@ -809,435 +930,6 @@
       <section class="content-section" id="reports"><div class="card"><p>Reports content here...</p></div></section>
       <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section>
     </div>
-
-
-    <!-- View Payslip Section -->
-<!-- View Payslip Section -->
-<section class="content-section" id="view-payslip">
-  <div class="payslip-container">
-    <!-- Header -->
-    <div class="payslip-header">
-      <h2 class="section-title">Payslip Management</h2>
-    </div>
-
-    <!-- Top Controls -->
-    <div class="payslip-controls">
-      <div class="overview-header">
-        <h3>PaySlip Overview</h3>
-        <div class="overview-controls">
-          <label for="payslipYearFilter">Select Year</label>
-          <select id="payslipYearFilter" class="year-filter">
-            <!-- Populated by JavaScript with available years -->
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Layout: Two Columns -->
-    <div class="payslip-layout">
-      
-      <!-- Left: Record List of PaySlip (Accordion with Fixed Months) -->
-      <div class="payslip-table-section">
-        <div class="table-header">
-          <h3>Record List of PaySlip</h3>
-        </div>
-
-        <div id="payslipAccordion" class="payslip-accordion">
-          <!-- January -->
-          <div class="accordion-month" data-month="1">
-            <div class="month-header">
-              <span class="month-name">January</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- February -->
-          <div class="accordion-month" data-month="2">
-            <div class="month-header">
-              <span class="month-name">February</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- March -->
-          <div class="accordion-month" data-month="3">
-            <div class="month-header">
-              <span class="month-name">March</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- April -->
-          <div class="accordion-month" data-month="4">
-            <div class="month-header">
-              <span class="month-name">April</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- May -->
-          <div class="accordion-month" data-month="5">
-            <div class="month-header">
-              <span class="month-name">May</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- June -->
-          <div class="accordion-month" data-month="6">
-            <div class="month-header">
-              <span class="month-name">June</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- July -->
-          <div class="accordion-month" data-month="7">
-            <div class="month-header">
-              <span class="month-name">July</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- August -->
-          <div class="accordion-month" data-month="8">
-            <div class="month-header">
-              <span class="month-name">August</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- September -->
-          <div class="accordion-month" data-month="9">
-            <div class="month-header">
-              <span class="month-name">September</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- October -->
-          <div class="accordion-month" data-month="10">
-            <div class="month-header">
-              <span class="month-name">October</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- November -->
-          <div class="accordion-month" data-month="11">
-            <div class="month-header">
-              <span class="month-name">November</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- December -->
-          <div class="accordion-month" data-month="12">
-            <div class="month-header">
-              <span class="month-name">December</span>
-              <span class="month-toggle">▼</span>
-            </div>
-            <div class="month-content">
-              <div class="cutoff-row" data-cutoff="1">
-                <span class="cutoff-label">Cutoff 1–15</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-              <div class="cutoff-row" data-cutoff="2">
-                <span class="cutoff-label">Cutoff 16–30</span>
-                <div class="cutoff-details">
-                  <span class="attachment-text">None</span>
-                  <span class="status-badge status-pending">Pending</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Salary Summary (Fixed Months) -->
-      <div class="payslip-overview-section">
-        <div class="overview-list-header">
-          <h3>Salary Summary</h3>
-        </div>
-
-        <div class="salary-list-wrapper">
-          <div class="salary-list">
-            <div class="salary-item" data-month="1">
-              <span class="salary-month">January</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="2">
-              <span class="salary-month">February</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="3">
-              <span class="salary-month">March</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="4">
-              <span class="salary-month">April</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="5">
-              <span class="salary-month">May</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="6">
-              <span class="salary-month">June</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="7">
-              <span class="salary-month">July</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="8">
-              <span class="salary-month">August</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="9">
-              <span class="salary-month">September</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="10">
-              <span class="salary-month">October</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="11">
-              <span class="salary-month">November</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-            <div class="salary-item" data-month="12">
-              <span class="salary-month">December</span>
-              <span class="salary-amount">₱0.00</span>
-              <div class="salary-bar" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Total Earning at Bottom -->
-        <div class="total-earning-box">
-          <span class="total-label">Total Earning</span>
-          <span class="total-value" id="totalEarning">₱0.00</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Download Modal -->
-  <div id="payslipDownloadModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Download Payslip</h3>
-        <button class="modal-close" onclick="closeDownloadModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p id="downloadFileName"></p>
-        <p class="modal-subtitle">Your payslip is ready to download</p>
-      </div>
-      <div class="modal-buttons">
-        <button class="btn-modal btn-cancel" onclick="closeDownloadModal()">Cancel</button>
-        <button class="btn-modal btn-download" id="confirmDownloadBtn">
-          <i class="fas fa-download"></i> Download
-        </button>
-      </div>
-    </div>
-  </div>
-
-</section>
-
-
-
 
     <!-- Logout Modal -->
     <div id="logoutModal" class="modal">

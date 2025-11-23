@@ -1,4 +1,4 @@
-console.log("📋 viewdutylog.js loaded (v3 - Final Design)");
+console.log("📋 viewdutylog.js loaded (FIXED Auto-Calculate Display)");
 
 // --- Global Variables ---
 let dutyLogRecords = [];
@@ -11,14 +11,13 @@ function initializeMonthFilter() {
     if (!monthFilterInput) return;
 
     const today = new Date();
-    const currentMonth = today.toISOString().slice(0, 7); // YYYY-MM
+    const currentMonth = today.toISOString().slice(0, 7);
     monthFilterInput.value = currentMonth;
     selectedMonth = currentMonth;
     console.log("📅 Month filter initialized to:", currentMonth);
 }
 
 // --- Auth State Observer ---
-// Checks if user is logged in, then starts listening for data
 auth.onAuthStateChanged(async user => {
     if (user) {
         console.log("👤 User detected:", user.uid);
@@ -43,19 +42,6 @@ if (monthFilterInput) {
     });
 }
 
-// --- Calculate Hours ---
-function calculateDutyHours(timeIn, timeOut) {
-    if (!timeIn || !timeOut) return 0;
-    const [inH, inM] = timeIn.split(":").map(Number);
-    const [outH, outM] = timeOut.split(":").map(Number);
-
-    let start = inH + inM / 60;
-    let end = outH + outM / 60;
-
-    if (end < start) end += 24;
-    return +(end - start).toFixed(2);
-}
-
 // --- Setup Real-time Firestore Listener ---
 function setupRealtimeDutyListener(userId) {
     console.log("📡 Setting up real-time listener...");
@@ -66,9 +52,6 @@ function setupRealtimeDutyListener(userId) {
         .onSnapshot(snapshot => {
             dutyLogRecords = snapshot.docs.map(doc => {
                 const data = { id: doc.id, ...doc.data() };
-                // Ensure numerical values
-                data.hours = calculateDutyHours(data.timeIn, data.timeOut);
-                data.overTime = parseFloat(data.overTime) || 0;
                 return data;
             });
             console.log(`✅ Fetched ${dutyLogRecords.length} records total.`);
@@ -82,11 +65,9 @@ function setupRealtimeDutyListener(userId) {
 // --- Filter Records by Selected Month ---
 function filterRecordsByMonth(records) {
     if (!selectedMonth) {
-        // Default to current month if null
         const today = new Date();
         selectedMonth = today.toISOString().slice(0, 7);
     }
-    // Assumes record.date is "YYYY-MM-DD" string
     return records.filter(record => record.date && record.date.slice(0, 7) === selectedMonth);
 }
 
@@ -103,7 +84,6 @@ function renderDutyLog() {
     console.log("🎨 Rendering UI...");
 
     const filteredRecords = filterRecordsByMonth(dutyLogRecords);
-    // Sort newest first
     const sortedRecords = [...filteredRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     console.log(`📊 Displaying ${sortedRecords.length} records for month: ${selectedMonth}`);
@@ -121,7 +101,7 @@ function renderDutyLog() {
     // 2. Dashboard Stats
     renderMiniDashboard(sortedRecords);
 
-    // 3. Mobile Cards (The Swipeable Column Design)
+    // 3. Mobile Cards
     renderMobileCards(sortedRecords);
 }
 
@@ -129,7 +109,7 @@ function renderDutyLog() {
 function renderEmptyTableState(tbody) {
     tbody.innerHTML = `
         <tr class="empty-row">
-            <td colspan="8" class="empty-cell">
+            <td colspan="7" class="empty-cell">
                 <i class="fas fa-inbox" style="font-size: 24px; color: #ccc; margin-bottom: 8px;"></i><br>
                 <span>No duty records found for this month</span>
             </td>
@@ -137,19 +117,25 @@ function renderEmptyTableState(tbody) {
     `;
 }
 
-// --- Render Desktop Table ---
+// --- Render Desktop Table (FIXED) ---
 function renderDesktopTable(tbody, records) {
     tbody.innerHTML = '';
     records.forEach(record => {
         const row = document.createElement('tr');
+        
+        // Handle both old and new data structures
+        const totalHours = record.totalHours || record.hours || 0;
+        const nightHours = record.nightHours || 0;
+        const overtimeHours = record.overtimeHours || record.overTime || 0;
+
         row.innerHTML = `
             <td data-label="Date">${formatDate(record.date)}</td>
             <td data-label="Time In">${record.timeIn}</td>
             <td data-label="Time Out">${record.timeOut}</td>
-            <td data-label="Hours"><strong>${record.hours.toFixed(2)}</strong></td>
-            <td data-label="Rate">${record.compensationType || 'Regular Rate'}</td>
+            <td data-label="Total Hours"><strong>${totalHours.toFixed(2)}</strong></td>
+            <td data-label="Night Diff">${nightHours > 0 ? nightHours.toFixed(2) + ' hrs' : '-'}</td>
             <td data-label="Day Type">${record.dayType || 'Regular'}</td>
-            <td data-label="Overtime">${record.overTime > 0 ? record.overTime.toFixed(2) + ' hrs' : '-'}</td>
+            <td data-label="Overtime">${overtimeHours > 0 ? overtimeHours.toFixed(2) + ' hrs' : '-'}</td>
             <td data-label="Actions">
                 <div class="action-buttons">
                     <button class="action-btn edit-btn" onclick="editDutyRecord('${record.id}')" title="Edit">
@@ -165,14 +151,13 @@ function renderDesktopTable(tbody, records) {
     });
 }
 
-// --- Render Mobile Cards (FINAL DESIGN) ---
+// --- Render Mobile Cards ---
 function renderMobileCards(records) {
     const cardsWrapper = document.getElementById('dutyCardsWrapper');
     if (!cardsWrapper) return;
 
     cardsWrapper.innerHTML = '';
 
-    // If no records, hide the wrapper or show empty msg
     if (records.length === 0) {
         cardsWrapper.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">No records for this month</div>';
         return;
@@ -182,18 +167,24 @@ function renderMobileCards(records) {
         const card = document.createElement('div');
         card.className = 'duty-card';
         
-        // Data Helpers
         const dayTypeClass = (record.dayType || 'regular').toLowerCase().replace(/ /g, '-');
         
-        // Date Parsing
         const dateObj = new Date(record.date);
-        const dayNumber = dateObj.getDate(); // e.g., 21
+        const dayNumber = dateObj.getDate();
         const dateString = dateObj.toLocaleDateString('en-US', { month: 'short', year: 'numeric', weekday: 'short' });
 
-        // OT Logic
-        const otDisplay = record.overTime > 0 
-            ? `<div class="stat-ot">+${record.overTime.toFixed(2)} OT</div>` 
+        // Handle both old and new data structures
+        const totalHours = record.totalHours || record.hours || 0;
+        const nightHours = record.nightHours || 0;
+        const overtimeHours = record.overtimeHours || record.overTime || 0;
+
+        const otDisplay = overtimeHours > 0 
+            ? `<div class="stat-ot">+${overtimeHours.toFixed(2)} OT</div>` 
             : `<div class="stat-ot" style="opacity:0.5">No OT</div>`;
+
+        const nightDisplay = nightHours > 0
+            ? `<div class="stat-night">🌙 ${nightHours.toFixed(2)} Night</div>`
+            : '';
 
         card.innerHTML = `
             <div class="duty-card-header">
@@ -218,15 +209,16 @@ function renderMobileCards(records) {
                 </div>
 
                 <div class="col-stats">
-                    <span class="stat-big">${record.hours.toFixed(2)}</span>
+                    <span class="stat-big">${totalHours.toFixed(2)}</span>
                     <span class="stat-label">Hrs</span>
                     ${otDisplay}
+                    ${nightDisplay}
                 </div>
             </div>
 
             <div class="duty-card-footer">
                 <div class="rate-text">
-                    <i class="fas fa-money-bill-wave"></i> ${record.compensationType || 'Regular Rate'}
+                    <i class="fas fa-robot"></i> Auto-Calculated
                 </div>
                 <div class="card-actions">
                     <button class="action-btn edit-btn" onclick="editDutyRecord('${record.id}')">
@@ -242,11 +234,10 @@ function renderMobileCards(records) {
         cardsWrapper.appendChild(card);
     });
     
-    // Ensure wrapper is visible
     cardsWrapper.style.display = 'flex'; 
 }
 
-// --- Render Mini Dashboard Stats ---
+// --- Render Mini Dashboard Stats (FIXED) ---
 function renderMiniDashboard(records) {
     let totalHours = 0;
     let regularHours = 0;
@@ -255,27 +246,21 @@ function renderMiniDashboard(records) {
     let overTimeHours = 0;
 
     records.forEach(record => {
-        const hours = record.hours || 0;
-        const overtime = record.overTime || 0;
-        const rate = record.compensationType || 'Regular Rate';
+        // Handle both old and new data structures
+        const total = record.totalHours || record.hours || 0;
+        const night = record.nightHours || 0;
+        const overtime = record.overtimeHours || record.overTime || 0;
+        const regular = record.regularHours || (total - night - overtime);
         const dayType = record.dayType || 'Regular';
 
-        totalHours += hours + overtime;
-
-        const isHolidayOrSpecial = dayType.includes('Holiday') || dayType.includes('Special');
-        const isNightShift = rate && rate.toLowerCase().includes('night'); 
-
-        if (isHolidayOrSpecial) {
-            specialDayHours += hours;
-        }
-        if (isNightShift) {
-            nightHours += hours;
-        }
-        if (!isHolidayOrSpecial && !isNightShift) {
-            regularHours += hours;
-        }
-
+        totalHours += total;
+        nightHours += night;
         overTimeHours += overtime;
+        regularHours += regular;
+
+        if (dayType.includes('Holiday') || dayType.includes('Special')) {
+            specialDayHours += total;
+        }
     });
 
     const expectedHours = 22 * 8;
@@ -309,16 +294,86 @@ function openEditModal(record) {
     const modal = document.getElementById('dutyLogEditModal');
     if (!modal) return;
     clearEditError();
+    
     document.getElementById('editDutyId').value = record.id;
     const dateInput = document.getElementById('editDutyDate');
     dateInput.value = record.date;
     dateInput.readOnly = true;
     document.getElementById('editDutyTimeIn').value = record.timeIn;
     document.getElementById('editDutyTimeOut').value = record.timeOut;
-    document.getElementById('editDutyRate').value = record.compensationType || 'Regular Rate';
     document.getElementById('editDutyDayType').value = record.dayType || 'Regular';
-    document.getElementById('editDutyOvertime').value = record.overTime || 0;
+    
+    // Show current auto-calculated values
+    updateEditPreview();
+    
+    // Add live preview listeners
+    document.getElementById('editDutyTimeIn').addEventListener('input', updateEditPreview);
+    document.getElementById('editDutyTimeOut').addEventListener('input', updateEditPreview);
+    
     modal.classList.add('active');
+}
+
+function updateEditPreview() {
+    const timeIn = document.getElementById('editDutyTimeIn').value;
+    const timeOut = document.getElementById('editDutyTimeOut').value;
+
+    if (timeIn && timeOut) {
+        const breakdown = calculateShiftBreakdown(timeIn, timeOut);
+        document.getElementById('editPreviewRegular').textContent = breakdown.regularHours.toFixed(2) + ' hrs';
+        document.getElementById('editPreviewNight').textContent = breakdown.nightHours.toFixed(2) + ' hrs';
+        document.getElementById('editPreviewOT').textContent = breakdown.overtimeHours.toFixed(2) + ' hrs';
+        document.getElementById('editPreviewTotal').textContent = breakdown.totalHours.toFixed(2) + ' hrs';
+    }
+}
+
+// Reuse the same calculation logic
+function calculateShiftBreakdown(timeIn, timeOut) {
+    if (!timeIn || !timeOut) return {
+        regularHours: 0,
+        nightHours: 0,
+        overtimeHours: 0,
+        totalHours: 0
+    };
+
+    const [inH, inM] = timeIn.split(":").map(Number);
+    const [outH, outM] = timeOut.split(":").map(Number);
+
+    let startMinutes = inH * 60 + inM;
+    let endMinutes = outH * 60 + outM;
+
+    if (endMinutes <= startMinutes) {
+        endMinutes += 24 * 60;
+    }
+
+    const totalMinutes = endMinutes - startMinutes;
+    const totalHours = totalMinutes / 60;
+
+    const nightStart = 22 * 60;
+    const nightEnd = 6 * 60;
+
+    let regularMinutes = 0;
+    let nightMinutes = 0;
+
+    for (let i = 0; i < totalMinutes; i++) {
+        let currentMinute = (startMinutes + i) % (24 * 60);
+        
+        if (currentMinute >= nightStart || currentMinute < nightEnd) {
+            nightMinutes++;
+        } else {
+            regularMinutes++;
+        }
+    }
+
+    const regularHours = regularMinutes / 60;
+    const nightHours = nightMinutes / 60;
+    const overtimeHours = Math.max(0, totalHours - 8);
+
+    return {
+        regularHours: parseFloat(regularHours.toFixed(2)),
+        nightHours: parseFloat(nightHours.toFixed(2)),
+        overtimeHours: parseFloat(overtimeHours.toFixed(2)),
+        totalHours: parseFloat(totalHours.toFixed(2))
+    };
 }
 
 function closeEditModal() {
@@ -343,19 +398,20 @@ window.saveEditedDuty = async function() {
     const date = document.getElementById('editDutyDate').value;
     const timeIn = document.getElementById('editDutyTimeIn').value;
     const timeOut = document.getElementById('editDutyTimeOut').value;
-    const rate = document.getElementById('editDutyRate').value;
     const dayType = document.getElementById('editDutyDayType').value;
-    const overTime = parseFloat(document.getElementById('editDutyOvertime').value) || 0;
 
     if (!date || !timeIn || !timeOut) return showEditError("Date, Time In, and Time Out are required");
-    const hours = calculateDutyHours(timeIn, timeOut);
-    if (hours < 0.5) return showEditError("Shift must be at least 30 minutes");
+    
+    const breakdown = calculateShiftBreakdown(timeIn, timeOut);
+    if (breakdown.totalHours < 0.5) return showEditError("Shift must be at least 30 minutes");
 
     try {
         await db.collection("duties").doc(id).update({
-            date, timeIn, timeOut, compensationType: rate,
-            overTime, dayType, hours,
-            // Ensure we don't overwrite the user accidentally, but usually good to keep
+            date, timeIn, timeOut, dayType,
+            regularHours: breakdown.regularHours,
+            nightHours: breakdown.nightHours,
+            overtimeHours: breakdown.overtimeHours,
+            totalHours: breakdown.totalHours,
             user: auth.currentUser.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
