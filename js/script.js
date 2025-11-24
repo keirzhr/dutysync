@@ -463,3 +463,34 @@ updatePasswordBtn?.addEventListener('click', async () => {
         alert(error.code === 'auth/wrong-password' ? 'Current password is incorrect' : 'Failed to update password: ' + error.message);
     }
 });
+
+// --- About Modal ---
+const aboutBtn = document.getElementById('aboutBtn');
+const aboutModalOverlay = document.getElementById('aboutModalOverlay');
+const aboutCloseBtn = document.getElementById('aboutCloseBtn');
+
+function openAboutModal() {
+  if (aboutModalOverlay) aboutModalOverlay.classList.add('active');
+}
+
+function closeAboutModal() {
+  if (aboutModalOverlay) aboutModalOverlay.classList.remove('active');
+}
+
+if (aboutBtn) {
+  aboutBtn.addEventListener('click', openAboutModal);
+}
+
+if (aboutCloseBtn) {
+  aboutCloseBtn.addEventListener('click', closeAboutModal);
+}
+
+if (aboutModalOverlay) {
+  aboutModalOverlay.addEventListener('click', (e) => {
+    if (e.target === aboutModalOverlay) closeAboutModal();
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeAboutModal();
+});

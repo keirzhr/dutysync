@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../css/profile.css">
   <link rel="stylesheet" href="../css/viewpayslip.css">
   <link rel="stylesheet" href="../css/generate.css">
+  <link rel="stylesheet" href="../css/deduction-breakdown.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
@@ -874,6 +875,217 @@
         </div>
       </section>
 
+
+    <!-- Deduction Breakdown Section -->
+<section class="content-section" id="deduction-breakdown">
+  <div class="deduction-breakdown-container">
+    
+    <!-- Header with Period Selector -->
+    <div class="breakdown-header">
+      <h2 class="section-title">
+        <i></i> Deduction Breakdown
+      </h2>
+      <div class="period-selector-group">
+        <select id="breakdownMonth" class="breakdown-select">
+          <option value="all">All Months</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+        <select id="breakdownYear" class="breakdown-select">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="deduction-summary-cards">
+      <div class="deduction-card total">
+        <div class="card-icon">
+          <i class="fas fa-wallet"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Total Deductions</span>
+          <span class="card-value" id="totalDeductions">₱0.00</span>
+          <span class="card-trend" id="totalTrend"></span>
+        </div>
+      </div>
+
+      <div class="deduction-card sss">
+        <div class="card-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">
+            SSS
+            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Social Security System - Retirement, disability, and sickness benefits"></i>
+          </span>
+          <span class="card-value" id="sssDeduction">₱0.00</span>
+          <span class="card-percentage" id="sssPercent">0%</span>
+        </div>
+      </div>
+
+      <div class="deduction-card philhealth">
+        <div class="card-icon">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">
+            PhilHealth
+            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Philippine Health Insurance - Medical and hospitalization coverage"></i>
+          </span>
+          <span class="card-value" id="philhealthDeduction">₱0.00</span>
+          <span class="card-percentage" id="philhealthPercent">0%</span>
+        </div>
+      </div>
+
+      <div class="deduction-card pagibig">
+        <div class="card-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">
+            Pag-IBIG
+            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Home Development Mutual Fund - Housing loans and savings"></i>
+          </span>
+          <span class="card-value" id="pagibigDeduction">₱0.00</span>
+          <span class="card-percentage" id="pagibigPercent">0%</span>
+        </div>
+      </div>
+
+      <div class="deduction-card tax">
+        <div class="card-icon">
+          <i class="fas fa-file-invoice-dollar"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">
+            BIR Tax
+            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Bureau of Internal Revenue - Withholding tax based on income brackets"></i>
+          </span>
+          <span class="card-value" id="taxDeduction">₱0.00</span>
+          <span class="card-percentage" id="taxPercent">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-container">
+      
+      <!-- Donut Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>
+            <i class="fas fa-chart-pie"></i>
+            Deduction Distribution
+          </h3>
+          <span class="chart-subtitle">Current Period Breakdown</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="deductionDonutChart"></canvas>
+          <div class="chart-legend" id="donutLegend"></div>
+        </div>
+      </div>
+
+      <!-- Trend Line Chart -->
+      <div class="chart-card wide">
+        <div class="chart-header">
+          <h3>
+            <i class="fas fa-chart-line"></i>
+            6-Month Deduction Trends
+          </h3>
+          <span class="chart-subtitle">Historical Overview</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="deductionTrendChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Gross-to-Net Ratio Card -->
+    <div class="ratio-card">
+      <div class="ratio-content">
+        <div class="ratio-icon">
+          <i class="fas fa-percentage"></i>
+        </div>
+        <div class="ratio-details">
+          <h3>Take-Home Pay Ratio</h3>
+          <p class="ratio-description">Percentage of gross income after deductions</p>
+          <div class="ratio-bar-container">
+            <div class="ratio-bar" id="ratioBar"></div>
+          </div>
+          <div class="ratio-stats">
+            <div class="stat-item">
+              <span class="stat-label">Gross Pay:</span>
+              <span class="stat-value" id="grossPayDisplay">₱0.00</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Net Pay:</span>
+              <span class="stat-value highlight" id="netPayDisplay">₱0.00</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">You Keep:</span>
+              <span class="stat-value highlight" id="keepPercentage">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Breakdown Table -->
+    <div class="breakdown-table-card">
+      <div class="table-header">
+        <h3>
+          <i class="fas fa-table"></i>
+          Historical Breakdown
+        </h3>
+        <button class="btn-export" id="exportBreakdownBtn">
+          <i class="fas fa-download"></i> Export Data
+        </button>
+      </div>
+      <div class="table-wrapper">
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Gross Pay</th>
+              <th>SSS</th>
+              <th>PhilHealth</th>
+              <th>Pag-IBIG</th>
+              <th>BIR Tax</th>
+              <th>Total Deductions</th>
+              <th>Net Pay</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="breakdown-empty-state" id="breakdownEmptyState" style="display: none;">
+      <i class="fas fa-chart-pie"></i>
+      <h3>No Deduction Data Available</h3>
+      <p>Generate payslips to see your deduction breakdown and trends</p>
+      <button class="btn-generate-payslip" onclick="document.querySelector('[data-page=\'generate-payslip\']').click()">
+        <i class="fas fa-plus"></i> Generate Payslip
+      </button>
+    </div>
+
+  </div>
+</section>
+
     <!-- Settings Section -->
     <section class="content-section" id="settings">
       <div class="card">
@@ -923,6 +1135,11 @@
         <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
         <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
       </div>
+
+              <button class="btn" id="aboutBtn" style="margin-top: 20px; margin-bottom: 20px; width: 100%; background: linear-gradient(135deg, #667eea, #764ba2);">
+  <i class="fas fa-info-circle"></i> About DutySync
+</button>
+      
     </section>
 
       <!-- Other Sections -->
@@ -930,7 +1147,7 @@
       <section class="content-section" id="reports"><div class="card"><p>Reports content here...</p></div></section>
       <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section>
     </div>
-
+    
     <!-- Logout Modal -->
     <div id="logoutModal" class="modal">
       <div class="modal-content">
@@ -943,11 +1160,178 @@
       </div>
     </div>
 
-    <footer>
-      <p>&copy; 2025 DutySync. All rights reserved.</p>
-    </footer>
-  </main>
+<!-- About Modal -->
+<div class="about-modal-overlay" id="aboutModalOverlay">
+  <button class="about-close-btn" id="aboutCloseBtn">&times;</button>
+  
+  <div class="about-modal-content">
+    <!-- Header -->
+    <div class="about-header">
+      <div class="about-logo">
+        <img src="../images/logo.png" class="about-logo-img">
+      </div>
+      <h2 class="about-title">DutySync</h2>
+      <p class="about-subtitle">Version 1.0</p>
+    </div>
 
+    <!-- Description -->
+    <div class="about-description">
+      <p><strong>DutySync</strong> is a web-based system designed to help employees, especially working students, efficiently log their work hours and track their payroll.</p>
+      <p style="margin-top: 10px;">The system allows users to input daily time in and time out, select duty types and automatically calculates gross and net pay with appropriate deductions.</p>
+    </div>
+
+<!-- Mission & Vision --> 
+<div class="mission-vision">
+  <div class="mission-card">
+    <div class="card-icon">
+      <i class="fas fa-bullseye fa-2x "></i> <!-- changed from fa-target to fa-bullseye -->
+    </div>
+    <h3 class="card-title">Our Mission</h3>
+    <p class="card-text">To provide an easy, reliable system that helps employees track hours, track their payroll data, and manage their compensation with transparency and transparency.</p>
+  </div>
+  <div class="vision-card">
+    <div class="card-icon">
+      <i class="fas fa-lightbulb fa-2x"></i>
+    </div>
+    <h3 class="card-title">Our Vision</h3>
+    <p class="card-text">To be the go-to platform that makes time tracking and payroll management simple, accurate, and accessible to every employee.</p>
+  </div>
+</div>
+
+
+    <!-- Team Section -->
+    <div class="team-section">
+      <h3 class="section-title">DEVELOPMENT TEAM</h3>
+      <div class="team-grid">
+        <div class="team-member">
+          <img src="../images/projectmanager.png" alt="Bathon, Mar Jerome S." class="member-avatar">
+          <div class="member-info">
+            <h4>Bathan, Mar Jerome S.</h4>
+            <div class="member-role">Project Manager</div>
+            <p class="member-description">Oversees the entire project, ensures the team meets deadlines, 
+            manages resources, coordinates tasks, and communicates with 
+            stakeholders to keep the project aligned with goals.</p>
+          </div>
+        </div>
+
+        <div class="team-member">
+          <img src="../images/systemanalyst.png" alt="Burguiti, Bwale Charles A." class="member-avatar">
+          <div class="member-info">
+            <h4>Bunquin, Ruwie Charles A.</h4>
+            <div class="member-role">System Analyst</div>
+            <p class="member-description">Gathers and analyzes user requirements, studies existing processes, 
+            identifies system needs, and creates detailed specifications to guide
+            the development of the system.</p>
+          </div>
+        </div>
+
+        <div class="team-member">
+          <img src="../images/systemdesigner.png" alt="Mocadotod, Raldkin" class="member-avatar">
+          <div class="member-info">
+            <h4>Macalalad, Roldan</h4>
+            <div class="member-role">UI/UX Designer</div>
+            <p class="member-description">Transforms requirements into a system blueprint, designs the system architecture,
+            database structure, user interface flow, and ensures the system is efficient,
+            scalable, and user-friendly.</p>
+          </div>
+        </div>
+
+        <div class="team-member">
+          <img src="../images/developer.png" alt="Valdito, Kail Britner R." class="member-avatar">
+          <div class="member-info">
+            <h4>Valida, Keil Rizher R.</h4>
+            <div class="member-role">Full Stack Developer</div>
+            <p class="member-description">Develops the system from design to implementation, writes clean and 
+              efficient code, integrates core features, resolves bugs, and collaborates with the team to ensure 
+              smooth system performance.</p>
+          </div>
+        </div>
+
+        <div class="team-member">
+          <img src="../images/qualityassurance.png" alt="Bedot, Jomor Ichino M." class="member-avatar">
+          <div class="member-info">
+            <h4>Bedar, Jomar Ichiro M.</h4>
+            <div class="member-role">Quality Assurance</div>
+            <p class="member-description">Tests the system to find defects, verifies that all features work as intended,
+            ensures system reliability and performance, 
+            and confirms the final product meets the required standards.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="tech-section">
+      <h3 class="section-title">TECHNOLOGIES USED</h3>
+      <div class="tech-breakdown">
+        <div class="tech-breakdown-item">
+          <div class="tech-breakdown-label">
+            <i class="fab fa-js-square"></i> JavaScript
+          </div>
+          <div class="tech-breakdown-bar">
+            <div class="tech-breakdown-fill" style="width: 80%; background: linear-gradient(90deg, #F7DF1E, #F1D40F);"></div>
+          </div>
+          <div class="tech-breakdown-percent">80%</div>
+        </div>
+
+        <div class="tech-breakdown-item">
+          <div class="tech-breakdown-label">
+            <i class="fab fa-html5"></i> HTML
+          </div>
+          <div class="tech-breakdown-bar">
+            <div class="tech-breakdown-fill" style="width: 70%; background: linear-gradient(90deg, #E34C26, #FF6B35);"></div>
+          </div>
+          <div class="tech-breakdown-percent">70%</div>
+        </div>
+
+        <div class="tech-breakdown-item">
+          <div class="tech-breakdown-label">
+            <i class="fab fa-css3-alt"></i> CSS
+          </div>
+          <div class="tech-breakdown-bar">
+            <div class="tech-breakdown-fill" style="width: 45%; background: linear-gradient(90deg, #563D7C, #9C27B0);"></div>
+          </div>
+          <div class="tech-breakdown-percent">45%</div>
+        </div>
+
+        <div class="tech-breakdown-item">
+          <div class="tech-breakdown-label">
+            <i class="fas fa-fire"></i> Firebase
+          </div>
+          <div class="tech-breakdown-bar">
+            <div class="tech-breakdown-fill" style="width: 30%; background: linear-gradient(90deg, #FFCA28, #FF6F00);"></div>
+          </div>
+          <div class="tech-breakdown-percent">30%</div>
+        </div>
+
+        <div class="tech-breakdown-item">
+          <div class="tech-breakdown-label">
+            <i class="fas fa-pencil-alt"></i> Figma
+          </div>
+          <div class="tech-breakdown-bar">
+            <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #A259FF, #FF61F6);"></div>
+          </div>
+          <div class="tech-breakdown-percent">100%</div>
+        </div>
+
+        <div class="tech-breakdown-item">
+          <div class="tech-breakdown-label">
+            <i class="fas fa-chart-line"></i> Chart.js
+          </div>
+          <div class="tech-breakdown-bar">
+            <div class="tech-breakdown-fill" style="width: 20%; background: linear-gradient(90deg, #FF6384, #FF9FF3);"></div>
+          </div>
+          <div class="tech-breakdown-percent">20%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="about-footer">
+      <p>&copy; 2025 DutySync. All rights reserved.</p>
+    </div>
+  </div>
+</div>
   <!-- Firebase + JS -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -959,6 +1343,7 @@
   <script src="../js/profile.js"></script>
   <script src="../js/viewpayslip.js"></script>
   <script src="../js/generate.js"></script>
+  <script src="../js/deduction-breakdown.js"></script>
 
 </body>
 </html>

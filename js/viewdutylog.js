@@ -240,30 +240,34 @@ function renderMobileCards(records) {
 // --- Render Mini Dashboard Stats (FIXED) ---
 function renderMiniDashboard(records) {
     let totalHours = 0;
-    let regularHours = 0;
+    let basicHours = 0; // Renamed from regularHours for clarity
     let nightHours = 0;
     let specialDayHours = 0;
     let overTimeHours = 0;
 
     records.forEach(record => {
-        // Handle both old and new data structures
+        // 1. Get the raw values
         const total = record.totalHours || record.hours || 0;
         const night = record.nightHours || 0;
         const overtime = record.overtimeHours || record.overTime || 0;
-        const regular = record.regularHours || (total - night - overtime);
         const dayType = record.dayType || 'Regular';
 
+        // 2. Calculate the 'Basic Pay' hours (Total Duration - Overtime)
+        // This ensures we don't double count the OT hours in the 'Regular' bucket
+        const basic = Math.max(0, total - overtime);
+
+        // 3. Accumulate
         totalHours += total;
+        basicHours += basic; // Add to our new Basic/Regular bucket
         nightHours += night;
         overTimeHours += overtime;
-        regularHours += regular;
 
         if (dayType.includes('Holiday') || dayType.includes('Special')) {
             specialDayHours += total;
         }
     });
 
-    const expectedHours = 22 * 8;
+    const expectedHours = 22 * 8; // Approx 22 working days
     const availability = expectedHours > 0 ? (totalHours / expectedHours) * 100 : 0;
 
     const setText = (id, val) => {
@@ -271,8 +275,9 @@ function renderMiniDashboard(records) {
         if(el) el.textContent = val;
     };
 
+    // Update the UI
     setText('dashTotalHours', totalHours.toFixed(2));
-    setText('dashRegularHours', regularHours.toFixed(2));
+    setText('dashRegularHours', basicHours.toFixed(2)); // Now displays Basic Hours (8.00)
     setText('dashNightHours', nightHours.toFixed(2));
     setText('dashSpecialDayHours', specialDayHours.toFixed(2));
     setText('dashOverTimeHours', overTimeHours.toFixed(2));

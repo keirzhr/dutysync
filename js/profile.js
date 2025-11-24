@@ -30,7 +30,7 @@ async function loadUserProfile(userId) {
                 position: 'Manager',
                 location: '',
                 hireDate: new Date().toISOString().split('T')[0],
-                photoURL: null,
+                photoBase64: null,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             
@@ -169,16 +169,18 @@ function setupProfileEventListeners() {
     }
 }
 
-// --- Handle Photo Upload ---
+// --- Handle Photo Upload (FIXED) ---
 async function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validate file type
     if (!file.type.startsWith('image/')) {
         showToast("Please select a valid image file", "error");
         return;
     }
 
+    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
         showToast("Image size must be less than 5MB", "error");
         return;
@@ -197,37 +199,58 @@ async function handlePhotoUpload(e) {
         avatarEditBtn.disabled = true;
         profileAvatarLarge.classList.add('loading');
 
-        // Delete old photo if exists
-        if (currentUserData.photoURL) {
-            const oldPhotoRef = firebase.storage().refFromURL(currentUserData.photoURL);
-            await oldPhotoRef.delete().catch(err => {
-                console.warn("Old photo deletion failed:", err.message);
-            });
-        }
+        // Convert image to Base64
+        const reader = new FileReader();
+        
+        reader.onload = async (event) => {
+            try {
+                const base64String = event.target.result; // This includes the data:image/... prefix
 
-        // Upload new photo
-        const timestamp = new Date().getTime();
-        const fileName = `${user.uid}_${timestamp}`;
-        const storageRef = firebase.storage().ref(`profiles/user-avatars/${user.uid}/${fileName}`);
-        const snapshot = await storageRef.put(file);
-        const photoURL = await snapshot.ref.getDownloadURL();
+                // Update Firestore with Base64 image
+                await db.collection('users').doc(user.uid).update({
+                    photoBase64: base64String,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-        // Update Firestore with new URL
-        await db.collection('users').doc(user.uid).update({
-            photoURL: photoURL,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+                // Update currentUserData
+                currentUserData.photoBase64 = base64String;
+                
+                // Refresh display
+                displayUserProfile(currentUserData);
 
-        currentUserData.photoURL = photoURL;
-        displayUserProfile(currentUserData);
+                // Re-enable button and remove loading state
+                avatarEditBtn.disabled = false;
+                profileAvatarLarge.classList.remove('loading');
+                
+                // Clear input
+                document.getElementById('photoInput').value = '';
 
-        avatarEditBtn.disabled = false;
-        profileAvatarLarge.classList.remove('loading');
-        document.getElementById('photoInput').value = '';
+                showToast("Photo uploaded successfully!", "success");
+                console.log("✅ Photo uploaded successfully");
+            } catch (error) {
+                console.error("Error saving photo to Firestore:", error);
+                avatarEditBtn.disabled = false;
+                profileAvatarLarge.classList.remove('loading');
+                document.getElementById('photoInput').value = '';
+                showToast("Failed to save photo: " + error.message, "error");
+            }
+        };
 
-        showToast("Photo uploaded successfully!", "success");
+        reader.onerror = () => {
+            console.error("Error reading file");
+            avatarEditBtn.disabled = false;
+            profileAvatarLarge.classList.remove('loading');
+            document.getElementById('photoInput').value = '';
+            showToast("Failed to read image file", "error");
+        };
+
+        // Read file as Base64
+        reader.readAsDataURL(file);
+
     } catch (error) {
         console.error("Error uploading photo:", error);
+        const avatarEditBtn = document.getElementById('avatarEditBtn');
+        const profileAvatarLarge = document.getElementById('profileAvatarLarge');
         avatarEditBtn.disabled = false;
         profileAvatarLarge.classList.remove('loading');
         document.getElementById('photoInput').value = '';
@@ -311,21 +334,9 @@ function cancelEditMode() {
     if (profileActionsDefault) {
         profileActionsDefault.style.display = 'flex';
     }
-    
-    if (userData.photoBase64) {
-        const img = document.createElement('img');
-        img.src = userData.photoBase64;
-        img.alt = 'Profile Photo';
-        profileAvatarLarge.innerHTML = '';
-        profileAvatarLarge.appendChild(img);
-    } else {
-        // fallback to initials
-        const initials = userData.fullName 
-            ? userData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-            : userData.email.substring(0, 2).toUpperCase();
-        profileAvatarLarge.textContent = initials;
-    }
 
+    // Reload display to show original data
+    displayUserProfile(currentUserData);
     
     console.log("Edit mode cancelled");
 }

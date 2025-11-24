@@ -218,7 +218,7 @@ function updatePreviewPeriod() {
   }
 }
 
-// --- Fetch Hours from Duty Logs (AUTO SYSTEM) ---
+// --- Fetch Hours from Duty Logs (STRICT CALCULATION) ---
 async function fetchAndCalculateHours() {
   const user = auth.currentUser;
   if (!user) return;
@@ -230,9 +230,18 @@ async function fetchAndCalculateHours() {
   try {
     const snapshot = await db.collection('duties').where('user', '==', user.uid).get();
 
-    let regularHours = 0, overtimeHours = 0, nightHours = 0;
-    let holidayHours = 0;
-    let holidayPayAcc = 0;
+    // 1. Buckets for PAYSLIP CALCULATION (Money)
+    let regularHoursPayable = 0;   // For Basic Pay
+    let overtimeHoursPayable = 0;  // For Regular OT Pay only
+    let holidayPayAccumulator = 0; // For Holiday Pay (Base + OT combined)
+    let nightDiffHours = 0;        // For Night Differential
+
+    // 2. Buckets for UI DISPLAY (Stats only)
+    let statsRegular = 0;
+    let statsOvertime = 0;
+    let statsHoliday = 0;
+    let statsNight = 0;
+    let grandTotalHours = 0; // <--- NEW: To track accurate physical time
 
     snapshot.forEach(doc => {
       const duty = doc.data();
@@ -242,54 +251,70 @@ async function fetchAndCalculateHours() {
       if (cutoff === 1 && d > 15) return;
       if (cutoff === 2 && d <= 15) return;
 
+      // Raw Data
       const regular = parseFloat(duty.regularHours) || 0;
       const night = parseFloat(duty.nightHours) || 0;
       const overtime = parseFloat(duty.overtimeHours) || 0;
       const dayType = duty.dayType || 'Regular';
+      const totalDuration = regular + night; // Total physical duration of the shift
 
       const isHoliday = dayType.includes('Holiday') || dayType.includes('Special');
 
-      nightHours += night;
+      // --- STATISTICS ---
+      grandTotalHours += totalDuration; // <--- NEW: Add physical hours here
+      statsNight += night;
+      statsOvertime += overtime;
+      
+      if (isHoliday) statsHoliday += totalDuration;
+      else statsRegular += Math.max(0, totalDuration - overtime);
+
+      // --- PAYSLIP CALCULATION (Money Logic) ---
+      nightDiffHours += night;
 
       if (isHoliday) {
-        holidayHours += regular + night;
-        if (dayType.includes('130')) {
-           holidayPayAcc += (regular + night) * 1.30;
-        } else if (dayType.includes('200')) {
-           holidayPayAcc += (regular + night) * 2.00;
-        } else {
-           holidayPayAcc += (regular + night) * 1.30;
+        // --- HOLIDAY LOGIC (Corrected) ---
+        let multiplier = 1.0;
+        if (dayType.includes('130')) multiplier = 1.30;
+        if (dayType.includes('200')) multiplier = 2.00;
+
+        const holidayBaseHours = Math.max(0, totalDuration - overtime);
+        const holidayOTHours = overtime;
+
+        // Base Pay
+        holidayPayAccumulator += holidayBaseHours * multiplier;
+        
+        // OT Pay (Base Rate * Multiplier * 1.3 Premium)
+        if (holidayOTHours > 0) {
+            holidayPayAccumulator += holidayOTHours * (multiplier * 1.3);
         }
+
       } else {
-        regularHours += regular + night;
+        // --- REGULAR DAY LOGIC ---
+        const basic = Math.max(0, totalDuration - overtime);
+        regularHoursPayable += basic;
+        overtimeHoursPayable += overtime;
       }
-
-      overtimeHours += overtime;
     });
 
-    const totalWorked = regularHours + holidayHours + overtimeHours;
+    // UPDATE UI
+    document.getElementById('summaryRegularHours').textContent = statsRegular.toFixed(2);
+    document.getElementById('summaryOvertimeHours').textContent = statsOvertime.toFixed(2);
+    document.getElementById('summaryNightHours').textContent = statsNight.toFixed(2);
+    document.getElementById('summaryHolidayHours').textContent = statsHoliday.toFixed(2);
+    
+    // FIXED: Use grandTotalHours instead of summing the buckets
+    document.getElementById('summaryWorkedHours').textContent = grandTotalHours.toFixed(2); 
 
-    document.getElementById('summaryRegularHours').textContent = regularHours.toFixed(2);
-    document.getElementById('summaryOvertimeHours').textContent = overtimeHours.toFixed(2);
-    document.getElementById('summaryNightHours').textContent = nightHours.toFixed(2);
-    document.getElementById('summaryHolidayHours').textContent = holidayHours.toFixed(2);
-    document.getElementById('summaryWorkedHours').textContent = totalWorked.toFixed(2);
+    console.log('📊 Stats:', { statsRegular, statsOvertime, statsHoliday, grandTotalHours });
 
-    console.log('📊 Hours calculated:', {
-      regularHours,
-      overtimeHours,
-      nightHours,
-      holidayHours,
-      totalWorked
-    });
-
+    // PASS DATA TO CALCULATOR
     window.fetchedHours = {
-      regularHours,
-      overtimeHours,
-      nightHours,
-      holidayHours,
-      holidayPayAcc,
-      totalWorked
+      regularHours: regularHoursPayable,
+      overtimeHours: overtimeHoursPayable,
+      nightHours: nightDiffHours,
+      holidayHours: statsHoliday,
+      holidayPayAcc: holidayPayAccumulator,
+      totalWorked: grandTotalHours // FIXED
     };
   } catch (error) {
     console.error('Error fetching duties:', error);
@@ -610,10 +635,17 @@ async function createPdfPayslipBase64(year, month, cutoff, monthName) {
   return pdfBase64;
 }
 
-// --- Save Payslip to Firestore ---
+// --- Save Payslip to Firestore (Fixed & Robust) ---
 async function savePayslipToHistory(year, month, cutoff, pdfBase64) {
   const user = auth.currentUser;
   if (!user) throw new Error('User not authenticated');
+
+  // Safety check: ensure calculations exist
+  if (!calculatedPayslip) {
+    console.error("❌ No calculated payslip data found.");
+    alert("Error: Please calculate the payslip again before saving.");
+    return;
+  }
 
   const docId = `${year}_${month}_${cutoff}`;
   
@@ -623,10 +655,19 @@ async function savePayslipToHistory(year, month, cutoff, pdfBase64) {
     cutoff: parseInt(cutoff),
     generatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     pdfBase64: pdfBase64,
-    employeeName: employeeInfo.name,
-    employeeEmail: employeeInfo.email,
-    netPay: calculatedPayslip.netPay,
-    grossPay: calculatedPayslip.grossPay
+    employeeName: employeeInfo.name || 'Unknown',
+    employeeEmail: employeeInfo.email || 'Unknown',
+    
+    // Financials (Added || 0 to prevent undefined/NaN errors)
+    netPay: calculatedPayslip.netPay || 0,
+    grossPay: calculatedPayslip.grossPay || 0,
+    
+    // Breakdown Fields (Crucial for Analytics)
+    sss: calculatedPayslip.sss || 0,
+    philhealth: calculatedPayslip.philhealth || 0,
+    pagibig: calculatedPayslip.pagibig || 0,
+    withholdingTax: calculatedPayslip.withholdingTax || 0, // Maps to 'tax' in analytics
+    totalDeductions: calculatedPayslip.totalDeductions || 0
   };
 
   try {
@@ -636,7 +677,7 @@ async function savePayslipToHistory(year, month, cutoff, pdfBase64) {
       .doc(docId)
       .set(payslipData);
     
-    console.log('✅ Payslip saved to history:', docId);
+    console.log('✅ Payslip and Breakdown saved to history:', docId, payslipData);
   } catch (error) {
     console.error('Error saving payslip to Firestore:', error);
     throw error;
@@ -868,16 +909,20 @@ function showSuccessModal() {
 }
 
 // --- Close Success Modal ---
-function closeSuccessModal() {
+async function closeSuccessModal() {
   document.getElementById('payslipSuccessModal').classList.remove('active');
   document.getElementById('generatePdfBtn').disabled = false;
   calculatedPayslip = null;
-  document.getElementById('rateInput').value = '';
   
+  // Clear preview values
   ['previewBasicPay','previewOvertimePay','previewNightDiff','previewHolidayPay',
    'previewGrossPay','previewSSS','previewPhilHealth','previewPagibig','previewBIRTax',
    'previewTotalDeductions','previewNetPay'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = '₱0.00';
+    if (el) el.textContent = 'PHP 0.00';
   });
+  
+  // Reload saved rates and repopulate the rate input
+  await loadSavedRates();
+  populateRateInGenerate();
 }

@@ -254,16 +254,33 @@
 .profile-input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background-color: var(--sidebar-bg);
+  color: var(--text-primary);
 }
 
 .profile-input:not(:disabled):focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(90, 112, 176, 0.1);
+  background-color: var(--dark-bg-alt);
 }
 
 .profile-input:not(:disabled) {
   background-color: var(--dark-bg-alt);
+}
+
+/* FIX: Remove autofill white background */
+.profile-input:-webkit-autofill,
+.profile-input:-webkit-autofill:hover,
+.profile-input:-webkit-autofill:focus,
+.profile-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--dark-bg-alt) inset !important;
+  box-shadow: 0 0 0 30px var(--dark-bg-alt) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.profile-input:-webkit-autofill::first-line {
+  font-family: inherit;
 }
 
 /* Profile Actions */
