@@ -89,6 +89,7 @@ function setupDutyUpdateListener() {
   const user = auth.currentUser;
   if (!user) return;
 
+  // Listen to duty changes
   db.collection('duties')
     .where('user', '==', user.uid)
     .onSnapshot(() => {
@@ -98,12 +99,23 @@ function setupDutyUpdateListener() {
       console.error('Error listening to duties:', error);
     });
 
+  // ✅ FIXED: Listen to profile changes in real-time
   db.collection('users').doc(user.uid).onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
+      
+      // Update employee info
+      employeeInfo.name = data.fullName || user.email.split('@')[0];
+      employeeInfo.position = data.position || 'Employee';
+      employeeInfo.email = data.email || user.email;
       employeeInfo.photoURL = data.photoURL || null;
-      updateAvatarDisplay();
-      console.log('📷 Profile photo updated');
+      employeeInfo.photoBase64 = data.photoBase64 || null; // ✅ Add this
+      employeeInfo.initials = employeeInfo.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      
+      // Update the display immediately
+      updateEmployeeDisplay();
+      
+      console.log('✅ Profile updated in Generate Payslip:', employeeInfo.name);
     }
   }, error => {
     console.error('Error listening to profile:', error);
