@@ -110,20 +110,20 @@ function renderBreakdownUI() {
     });
     
     // Check if empty
-    // Check if empty
-    if (filteredData.length === 0) {
-        updateSummaryCardsToZero();
-        updateRatioCard(0, 0); // ✅ ADD THIS LINE
-        renderDonutChart(0, 0, 0, 0);
-        renderBreakdownTable([]); 
-        
-        // Also render empty trend chart
-        const yearOnlyData = breakdownData.filter(item => 
-            yearFilter === 'all' || item.year.toString() === yearFilter
-        );
-        renderTrendChart(yearOnlyData);
-        return;
-    }
+// Check if empty
+if (filteredData.length === 0) {
+    updateSummaryCardsToZero();
+    updateRatioCard(0, 0); // ✅ ADD THIS LINE
+    renderDonutChart(0, 0, 0, 0);
+    renderBreakdownTable([]); 
+    
+    // Also render empty trend chart
+    const yearOnlyData = breakdownData.filter(item => 
+        yearFilter === 'all' || item.year.toString() === yearFilter
+    );
+    renderTrendChart(yearOnlyData);
+    return;
+}
     
     hideBreakdownEmptyState();
 
