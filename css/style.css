@@ -1055,14 +1055,19 @@ footer::before {
   line-height: 1.4;
 }
 
-.tech-section {
-  margin-bottom: 30px;
-}
+
 
 .tech-section h3 {
-  margin-bottom: 18px;
-  font-size: 20px;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 16px;
+  margin-top: 30px;
+  color: var(--text-primary);
+  letter-spacing: 1.2px;
+  position: relative;
+  padding-bottom: 8px;
 }
+
 
 .tech-grid {
   display: grid;
