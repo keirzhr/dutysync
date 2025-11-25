@@ -440,7 +440,12 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .profile-form {
-    grid-template-columns: 1fr;
+    grid-template-columns: none !important;
+    display: block
+  }
+
+  .profile-field-group {
+    grid-column: span 1 !important;
   }
 
   .profile-field-group:nth-last-child(1) {

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../css/viewpayslip.css">
   <link rel="stylesheet" href="../css/generate.css">
   <link rel="stylesheet" href="../css/deduction-breakdown.css">
+  <link rel="stylesheet" href="../css/netpaytrends.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
@@ -495,9 +496,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ADD THIS SECTION INSIDE THE generate-payslip-container DIV, 
-     AFTER THE generate-layout DIV CLOSES -->
 
 <!-- Payslip History Section -->
 <div class="payslip-history-section" id="payslipHistorySection">
@@ -1086,6 +1084,233 @@
   </div>
 </section>
 
+<!-- Net Pay Trends Section -->
+<section class="content-section" id="net-pay-trends">
+  <div class="netpay-trends-container">
+    
+    <!-- Header with Year Filter -->
+    <div class="netpay-header">
+      <h2 class="section-title">
+         Net Pay Trends
+      </h2>
+      <div class="netpay-period-selector">
+        <select id="netpayYear" class="netpay-select">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+    </div>
+
+    <!-- Comparison Cards -->
+    <div class="netpay-comparison-cards" id="netPayComparisonCards">
+      <!-- Current Period Card -->
+      <div class="netpay-comparison-card current">
+        <div class="comparison-card-header">
+          <div class="comparison-card-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="comparison-badge increase" id="comparisonBadge">
+            <i class="fas fa-arrow-up"></i> +0%
+          </div>
+        </div>
+        <div class="comparison-card-body">
+          <span class="comparison-label">Current Period</span>
+          <span class="comparison-value" id="currentNetPay">₱0.00</span>
+          <span class="comparison-subtitle" id="currentPeriodLabel">Select a period</span>
+        </div>
+      </div>
+
+      <!-- Previous Period Card -->
+      <div class="netpay-comparison-card previous">
+        <div class="comparison-card-header">
+          <div class="comparison-card-icon">
+            <i class="fas fa-history"></i>
+          </div>
+        </div>
+        <div class="comparison-card-body">
+          <span class="comparison-label">Previous Period</span>
+          <span class="comparison-value" id="previousNetPay">₱0.00</span>
+          <span class="comparison-subtitle" id="previousPeriodLabel">No previous data</span>
+        </div>
+      </div>
+
+      <!-- Average Card -->
+      <div class="netpay-comparison-card average">
+        <div class="comparison-card-header">
+          <div class="comparison-card-icon">
+            <i class="fas fa-calculator"></i>
+          </div>
+        </div>
+        <div class="comparison-card-body">
+          <span class="comparison-label">Average Net Pay</span>
+          <span class="comparison-value" id="averageNetPay">₱0.00</span>
+          <span class="comparison-subtitle">Per pay period</span>
+        </div>
+      </div>
+
+      <!-- YTD Total Card -->
+      <div class="netpay-comparison-card ytd">
+        <div class="comparison-card-header">
+          <div class="comparison-card-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+        </div>
+        <div class="comparison-card-body">
+          <span class="comparison-label">Year-to-Date Total</span>
+          <span class="comparison-value" id="ytdNetPay">₱0.00</span>
+          <span class="comparison-subtitle" id="ytdCount">0 periods</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Trend Chart -->
+    <div class="netpay-trend-chart-card" id="netPayTrendChartCard">
+      <div class="trend-chart-header">
+        <h3>
+          <i class="fas fa-chart-area"></i>
+          Net Pay Progression
+        </h3>
+        <div class="chart-view-toggle">
+          <button class="toggle-btn active" id="toggle6months">6 Periods</button>
+          <button class="toggle-btn" id="toggle12months">12 Periods</button>
+        </div>
+      </div>
+      <div class="trend-chart-body">
+        <canvas id="netPayTrendChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Insights Grid -->
+    <div class="netpay-insights-grid" id="netPayInsightsGrid">
+      
+      <!-- Hours Correlation Card -->
+      <div class="insight-card hours">
+        <div class="insight-header">
+          <div class="insight-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <span class="insight-title">Work Activity</span>
+        </div>
+        <div class="insight-body">
+          <div class="insight-row">
+            <span class="insight-row-label">Total Periods Worked</span>
+            <span class="insight-row-value" id="totalPeriodsWorked">0</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-row-label">Best Month</span>
+            <span class="insight-row-value" id="bestMonthLabel">N/A</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-row-label">Best Month Value</span>
+            <span class="insight-row-value highlight" id="bestMonthValue">₱0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earnings Breakdown Card -->
+      <div class="insight-card earnings">
+        <div class="insight-header">
+          <div class="insight-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <span class="insight-title">Earnings Summary</span>
+        </div>
+        <div class="insight-body">
+          <div class="insight-row">
+            <span class="insight-row-label">Total Gross Pay</span>
+            <span class="insight-row-value" id="totalEarningsGross">₱0.00</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-row-label">Total Deductions</span>
+            <span class="insight-row-value" id="totalDeductionsInsight">₱0.00</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-row-label">Total Net Pay</span>
+            <span class="insight-row-value highlight" id="totalEarningsNet">₱0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lowest Period Card -->
+      <div class="insight-card projection">
+        <div class="insight-header">
+          <div class="insight-icon">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <span class="insight-title">Period Comparison</span>
+        </div>
+        <div class="insight-body">
+          <div class="insight-row">
+            <span class="insight-row-label">Lowest Month</span>
+            <span class="insight-row-value" id="worstMonthLabel">N/A</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-row-label">Lowest Month Value</span>
+            <span class="insight-row-value" id="worstMonthValue">₱0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projection Card -->
+    <div class="projection-card" id="netPayProjectionCard">
+      <div class="projection-content">
+        <div class="projection-icon">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <div class="projection-details">
+          <h3>Annual Income Projection</h3>
+          <p class="projection-subtitle">Based on your recent earnings trend</p>
+          <div class="projection-value" id="projectedAnnualIncome">₱0.00</div>
+          <p class="projection-note">
+            <i class="fas fa-info-circle"></i> 
+            Projection calculated from average of last 3 pay periods × 24 periods
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Table -->
+    <div class="netpay-table-card" id="netPayTableCard">
+      <div class="netpay-table-header">
+        <h3>
+          <i class="fas fa-table"></i>
+          Detailed Net Pay History
+        </h3>
+        <button class="btn-export-netpay" id="exportNetPayBtn">
+          <i class="fas fa-download"></i> Export Data
+        </button>
+      </div>
+      <div class="netpay-table-wrapper">
+        <table class="netpay-table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Gross Pay</th>
+              <th>Deductions</th>
+              <th>Net Pay</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody id="netPayTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="netpay-empty-state" id="netPayEmptyState" style="display: none;">
+      <i class="fas fa-chart-line"></i>
+      <h3>No Net Pay Data Available</h3>
+      <p>Generate payslips to see your net pay trends and projections</p>
+      <button class="btn-generate-payslip" onclick="document.querySelector('[data-page=\'generate-payslip\']').click()">
+        <i class="fas fa-plus"></i> Generate Payslip
+      </button>
+    </div>
+
+  </div>
+</section>
+
     <!-- Settings Section -->
     <section class="content-section" id="settings">
       <div class="card">
@@ -1241,7 +1466,7 @@
           <div class="member-info">
             <h4>Valida, Keil Rizher R.</h4>
             <div class="member-role">Full Stack Developer</div>
-            <p class="member-description">Develops the system from design to implementation, writes clean and 
+            <p class="member-description">Develops the system from a scratch to implementation, writes clean and 
               efficient code, integrates core features, resolves bugs, and collaborates with the team to ensure 
               smooth system performance.</p>
           </div>
@@ -1260,71 +1485,102 @@
       </div>
     </div>
 
-    <!-- Tech Stack -->
-    <div class="tech-section">
-      <h3 class="section-title">TECHNOLOGIES USED</h3>
-      <div class="tech-breakdown">
-        <div class="tech-breakdown-item">
-          <div class="tech-breakdown-label">
-            <i class="fab fa-js-square"></i> JavaScript
-          </div>
-          <div class="tech-breakdown-bar">
-            <div class="tech-breakdown-fill" style="width: 80%; background: linear-gradient(90deg, #F7DF1E, #F1D40F);"></div>
-          </div>
-          <div class="tech-breakdown-percent">80%</div>
-        </div>
+   <!-- Tech Stack -->
+<div class="tech-section">
+  <h3 class="section-title">TECHNOLOGIES USED</h3>
+  <div class="tech-breakdown">
 
-        <div class="tech-breakdown-item">
-          <div class="tech-breakdown-label">
-            <i class="fab fa-html5"></i> HTML
-          </div>
-          <div class="tech-breakdown-bar">
-            <div class="tech-breakdown-fill" style="width: 70%; background: linear-gradient(90deg, #E34C26, #FF6B35);"></div>
-          </div>
-          <div class="tech-breakdown-percent">70%</div>
-        </div>
-
-        <div class="tech-breakdown-item">
-          <div class="tech-breakdown-label">
-            <i class="fab fa-css3-alt"></i> CSS
-          </div>
-          <div class="tech-breakdown-bar">
-            <div class="tech-breakdown-fill" style="width: 45%; background: linear-gradient(90deg, #563D7C, #9C27B0);"></div>
-          </div>
-          <div class="tech-breakdown-percent">45%</div>
-        </div>
-
-        <div class="tech-breakdown-item">
-          <div class="tech-breakdown-label">
-            <i class="fas fa-fire"></i> Firebase
-          </div>
-          <div class="tech-breakdown-bar">
-            <div class="tech-breakdown-fill" style="width: 30%; background: linear-gradient(90deg, #FFCA28, #FF6F00);"></div>
-          </div>
-          <div class="tech-breakdown-percent">30%</div>
-        </div>
-
-        <div class="tech-breakdown-item">
-          <div class="tech-breakdown-label">
-            <i class="fas fa-pencil-alt"></i> Figma
-          </div>
-          <div class="tech-breakdown-bar">
-            <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #A259FF, #FF61F6);"></div>
-          </div>
-          <div class="tech-breakdown-percent">100%</div>
-        </div>
-
-        <div class="tech-breakdown-item">
-          <div class="tech-breakdown-label">
-            <i class="fas fa-chart-line"></i> Chart.js
-          </div>
-          <div class="tech-breakdown-bar">
-            <div class="tech-breakdown-fill" style="width: 20%; background: linear-gradient(90deg, #FF6384, #FF9FF3);"></div>
-          </div>
-          <div class="tech-breakdown-percent">20%</div>
-        </div>
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fab fa-html5"></i> HTML
       </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #E34C26, #FF6B35);"></div>
+      </div>
+      <div class="tech-breakdown-percent">100%</div>
     </div>
+
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fab fa-css3-alt"></i> CSS
+      </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #563D7C, #9C27B0);"></div>
+      </div>
+      <div class="tech-breakdown-percent">100%</div>
+    </div>
+
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fab fa-js-square"></i> JavaScript
+      </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #F7DF1E, #F1D40F);"></div>
+      </div>
+      <div class="tech-breakdown-percent">100%</div>
+    </div>
+
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fas fa-fire"></i> Firebase Firestore
+      </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 70%; background: linear-gradient(90deg, #FFCA28, #FF6F00);"></div>
+      </div>
+      <div class="tech-breakdown-percent">70%</div>
+    </div>
+
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fas fa-chart-line"></i> Chart.js
+      </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 40%; background: linear-gradient(90deg, #FF6384, #FF9FF3);"></div>
+      </div>
+      <div class="tech-breakdown-percent">40%</div>
+    </div>
+
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fas fa-file-pdf"></i> jsPDF
+      </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 30%; background: linear-gradient(90deg, #36A2EB, #00CFFF);"></div>
+      </div>
+      <div class="tech-breakdown-percent">30%</div>
+    </div>
+
+    <div class="tech-breakdown-item">
+      <div class="tech-breakdown-label">
+        <i class="fas fa-pencil-alt"></i> Figma
+      </div>
+      <div class="tech-breakdown-bar">
+        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #A259FF, #FF61F6);"></div>
+      </div>
+      <div class="tech-breakdown-percent">100%</div>
+    </div>
+
+  </div>
+
+<h4 class="section-subtitle">TOOLS / PLATFORMS USED</h4>
+<ul class="tools-used">
+  <li>
+    <i class="fab fa-github"></i>
+    GitHub
+  </li>
+  <li>
+    <i class="fas fa-code"></i>
+    VS Code
+  </li>
+  <li>
+    <i class="fas fa-fire"></i>
+    Firebase Console
+  </li>
+  <li>
+    <i class="fas fa-wrench"></i>
+    Chrome DevTools
+  </li>
+</ul>
 
     <!-- Footer -->
     <div class="about-footer">
@@ -1344,6 +1600,7 @@
   <script src="../js/viewpayslip.js"></script>
   <script src="../js/generate.js"></script>
   <script src="../js/deduction-breakdown.js"></script>
+  <script src="../js/netpaytrends.js"></script>
 
 </body>
 </html>
