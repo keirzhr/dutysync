@@ -1275,11 +1275,6 @@ footer::before {
 }
 
 @media (max-width: 768px) {
-  .section-subtitle {
-    font-size: 16px;
-    letter-spacing: 0.8px;
-    margin-bottom: 20px;
-  }
 
   .tools-used {
     grid-template-columns: repeat(2, 1fr);
@@ -1300,14 +1295,7 @@ footer::before {
 }
 
 @media (max-width: 480px) {
-  .section-subtitle {
-    font-size: 14px;
-    letter-spacing: 0.5px;
-  }
 
-  .section-subtitle::after {
-    width: 40px;
-  }
 
   .tools-used {
     grid-template-columns: repeat(2, 1fr);
