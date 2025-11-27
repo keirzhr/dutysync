@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../css/generate.css">
   <link rel="stylesheet" href="../css/deduction-breakdown.css">
   <link rel="stylesheet" href="../css/netpaytrends.css">
+  <link rel="stylesheet" href="../css/overview.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
@@ -37,7 +38,6 @@
         </a>
         <div class="sub-menu" id="dashboard-submenu">
           <a class="nav-item sub-item" data-page="overview"><span class="nav-text">Overview</span></a>
-          <a class="nav-item sub-item" data-page="reports"><span class="nav-text">Reports</span></a>
           <a class="nav-item sub-item" data-page="input-duty"><span class="nav-text">Input Duty</span></a>
           <a class="nav-item sub-item" data-page="view-duty-log"><span class="nav-text">View Duty Log</span></a>
         </div>
@@ -1311,67 +1311,325 @@
   </div>
 </section>
 
-    <!-- Settings Section -->
-    <section class="content-section" id="settings">
-      <div class="card">
-        <h3 style="margin-bottom: 15px;">Preferences</h3>
-        
-        <!-- Theme Toggle -->
-        <div class="form-group theme-toggle">
-          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-            <span>Dark Mode</span>
-            <div class="toggle-switch">
-              <input type="checkbox" id="themeCheckbox">
-              <span class="slider round"></span>
-            </div>
-          </label>
-        </div>
+<section class="content-section" id="settings">
+  <div class="settings-wrapper">
+    
+    <div class="card settings-card">
+      <div class="card-header">
+        <h3><i class="fas fa-calculator"></i> Payroll Configuration</h3>
+        <p class="settings-subtitle">Manage base pay & multipliers</p>
+      </div>
 
-        <!-- Rate Configuration -->
-        <div class="form-group">
-          <label>Pay Rate Configuration</label>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Hourly Rate (PHP)</label>
+      <div class="settings-group">
+        <h4 class="group-title">Base Rates</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hourly Rate (PHP)</label>
+            <div class="input-with-icon">
+              <i class="fas fa-clock"></i>
               <input type="number" id="hourlyRateInput" placeholder="0.00" step="0.01" min="0">
             </div>
-            <div>
-              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Daily Rate (PHP)</label>
+          </div>
+          <div class="form-group">
+            <label>Daily Rate (PHP)</label>
+            <div class="input-with-icon">
+              <i class="fas fa-calendar-day"></i>
               <input type="number" id="dailyRateInput" placeholder="0.00" step="0.01" min="0">
             </div>
           </div>
-          <button class="btn" id="updateRateBtn" style="width: 100%; margin-bottom: 20px;">
-            <i class="fas fa-save" style="margin-right: 8px;"></i>Save Rate
-          </button>
-          <div id="rateStatusMessage" style="font-size: 12px; color: var(--text-secondary); display: none;"></div>
         </div>
-
-        <!-- Password Section -->
-        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
-        
-        <div class="form-group">
-          <label>Current Password</label>
-          <input type="password" id="currentPassword" placeholder="Enter current password">
-        </div>
-        <div class="form-group">
-          <label>New Password</label>
-          <input type="password" id="newPassword" placeholder="Enter new password">
-        </div>
-        <button class="btn" id="updatePasswordBtn" style="margin-right: 10px;">Update Password</button>
-        <button class="btn" id="logoutBtn" style="background: #dc3545;">Logout</button>
+        <button class="btn btn-primary full-width" id="updateRateBtn">
+          <i class="fas fa-save"></i> Save Base Rates
+        </button>
+        <div id="rateStatusMessage" class="status-msg"></div>
       </div>
 
-              <button class="btn" id="aboutBtn" style="margin-top: 20px; margin-bottom: 20px; width: 100%; background: linear-gradient(135deg, #667eea, #764ba2);">
-  <i class="fas fa-info-circle"></i> About DutySync
-</button>
+      <hr class="settings-divider">
+
+      <div class="settings-group">
+        <h4 class="group-title">Premium Multipliers</h4>
+        <div class="form-group">
+          <label>
+            Overtime (x Base)
+            <i class="fas fa-info-circle tooltip-icon" title="Standard: 1.25"></i>
+          </label>
+          <div class="input-with-icon">
+            <i class="fas fa-stopwatch"></i>
+            <input type="number" id="overtimeRateInput" placeholder="1.25" step="0.01" min="0">
+          </div>
+          <small class="helper-text">1.25 = 125% of hourly rate</small>
+        </div>
+        <div class="form-group">
+          <label>
+            Night Differential (x Base)
+            <i class="fas fa-info-circle tooltip-icon" title="Standard: 0.10"></i>
+          </label>
+          <div class="input-with-icon">
+            <i class="fas fa-moon"></i>
+            <input type="number" id="nightDiffRateInput" placeholder="0.10" step="0.01" min="0">
+          </div>
+          <small class="helper-text">0.10 = 10% additional per hour</small>
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-primary" id="savePremiumRatesBtn">
+            <i class="fas fa-save"></i> Save
+          </button>
+          <button class="btn btn-outline" id="resetPremiumRatesBtn">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
+        <div id="premiumRatesStatusMessage" class="status-msg"></div>
+      </div>
+    </div>
+
+    <div class="card settings-card">
+      <div class="card-header">
+        <h3><i class="fas fa-user-cog"></i> Account & Preferences</h3>
+        <p class="settings-subtitle">Appearance & Security</p>
+      </div>
+
+      <input type="checkbox" id="themeCheckbox" style="display: none;">
+
+      <div class="settings-group">
+        <label class="section-label">Appearance</label>
+        <div class="theme-selector-container">
+          
+          <div class="theme-option light-option" onclick="document.getElementById('themeCheckbox').checked = false; document.getElementById('themeCheckbox').dispatchEvent(new Event('change'));">
+            <div class="theme-preview">
+              <div class="preview-screen light-screen">
+                <i class="fas fa-sun"></i>
+              </div>
+            </div>
+            <span class="theme-label">Light</span>
+          </div>
+
+          <div class="theme-option dark-option" onclick="document.getElementById('themeCheckbox').checked = true; document.getElementById('themeCheckbox').dispatchEvent(new Event('change'));">
+            <div class="theme-preview">
+              <div class="preview-screen dark-screen">
+                <i class="fas fa-moon"></i>
+              </div>
+            </div>
+            <span class="theme-label">Dark</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="settings-divider">
+
+      <div class="settings-group">
+        <label class="section-label">Change Password</label>
+        <div class="form-group">
+          <input type="password" id="currentPassword" placeholder="Current password">
+        </div>
+        <div class="form-group">
+          <input type="password" id="newPassword" placeholder="New password">
+        </div>
+        <button class="btn btn-primary full-width" id="updatePasswordBtn">Update Password</button>
+      </div>
+
+      <hr class="settings-divider">
+
+      <div class="settings-group danger-zone">
+        <label class="section-label text-danger">Danger Zone</label>
+        <div class="danger-actions">
+           <button class="btn btn-danger" id="logoutBtn">
+              <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+          <button class="btn btn-danger-outline" onclick="deleteAccount()">
+              <i class="fas fa-trash-alt"></i> Delete Account
+          </button>
+        </div>
+      </div>
       
-    </section>
+      <div class="settings-footer">
+        <button class="btn btn-subtle" id="aboutBtn">
+          <i class="fas fa-info-circle"></i> About DutySync
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 
       <!-- Other Sections -->
-      <section class="content-section" id="overview"><div class="card"><p>Overview content here...</p></div></section>
-      <section class="content-section" id="reports"><div class="card"><p>Reports content here...</p></div></section>
-      <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section>
+<!-- OVERVIEW SECTION - Place this inside the <section class="content-section" id="overview"> tag in dashboard.html -->
+  <section class="content-section" id="overview">
+    <div class="overview-container">
+      
+      <!-- Section 1: Hero Stats -->
+      <div class="hero-stats-grid">
+        <div class="hero-stat-card hours">
+          <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">This Month Hours</span>
+            <span class="stat-value" id="heroThisMonthHours">0.00</span>
+            <span class="stat-unit">hrs</span>
+          </div>
+          <div class="stat-badge" id="hoursChange">+0%</div>
+        </div>
+
+        <div class="hero-stat-card netpay">
+          <div class="stat-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Current Net Pay</span>
+            <span class="stat-value" id="heroCurrentNetPay">₱0.00</span>
+            <span class="stat-unit">this period</span>
+          </div>
+          <div class="stat-badge positive" id="netPayChange">+0%</div>
+        </div>
+
+        <div class="hero-stat-card payslip">
+          <div class="stat-icon">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Last Payslip</span>
+            <span class="stat-value" id="heroLastPayslip">₱0.00</span>
+            <span class="stat-unit">generated</span>
+          </div>
+          <div class="stat-date" id="lastPayslipDate">No record</div>
+        </div>
+
+        <div class="hero-stat-card ytd">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Year-to-Date</span>
+            <span class="stat-value" id="heroYTDEarnings">₱0.00</span>
+            <span class="stat-unit">total earnings</span>
+          </div>
+          <div class="stat-badge" id="ytdCount">0 periods</div>
+        </div>
+      </div>
+
+      <!-- Section 2: Visual Insights -->
+      <div class="visual-insights-grid">
+        
+        <!-- Last 7 Days Work Chart -->
+        <div class="insight-card last-7days">
+          <div class="insight-header">
+            <h3>
+              <i class="fas fa-calendar-week"></i>
+              Last 7 Days Activity
+            </h3>
+            <span class="insight-subtitle">Daily hours worked</span>
+          </div>
+          <div class="insight-body">
+            <canvas id="last7DaysChart"></canvas>
+            <div class="chart-stats">
+              <div class="chart-stat">
+                <span class="stat-label">Total:</span>
+                <span class="stat-highlight" id="last7Total">0.00 hrs</span>
+              </div>
+              <div class="chart-stat">
+                <span class="stat-label">Average:</span>
+                <span class="stat-highlight" id="last7Avg">0.00 hrs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Deduction Breakdown -->
+        <div class="insight-card deduction-mini">
+          <div class="insight-header">
+            <h3>
+              <i class="fas fa-chart-pie"></i>
+              Deduction Breakdown
+            </h3>
+            <span class="insight-subtitle">Current period</span>
+          </div>
+          <div class="insight-body">
+            <canvas id="deductionMiniChart"></canvas>
+            <div class="deduction-mini-stats">
+              <div class="mini-stat">
+                <span class="stat-label">Gross:</span>
+                <span class="stat-value" id="miniGrossPay">₱0.00</span>
+              </div>
+              <div class="mini-stat">
+                <span class="stat-label">Deductions:</span>
+                <span class="stat-value deduction" id="miniTotalDeductions">₱0.00</span>
+              </div>
+              <div class="mini-stat">
+                <span class="stat-label">Net:</span>
+                <span class="stat-value net" id="miniNetPay">₱0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Quick Actions & Recent Activity -->
+      <div class="action-activity-grid">
+        
+        <!-- Quick Actions -->
+        <div class="action-card">
+          <div class="action-header">
+            <h3>
+              <i class="fas fa-bolt"></i>
+              Quick Actions
+            </h3>
+          </div>
+          <div class="action-body">
+            <button class="action-btn primary" onclick="document.querySelector('[data-page=input-duty]').click()">
+                <i class="fas fa-plus-circle"></i>
+                <span>Log Hours</span>
+            </button>
+            <button class="action-btn success" onclick="document.querySelector('[data-page=generate-payslip]').click()">
+              <i class="fas fa-calculator"></i>
+              <span>Generate Payslip</span>
+            </button>
+            <button class="action-btn info" onclick="document.querySelector('[data-page=view-duty-log]').click()">
+              <i class="fas fa-history"></i>
+              <span>View Records</span>
+            </button>
+            <button class="action-btn secondary" onclick="document.querySelector('[data-page=net-pay-trends]').click()">
+              <i class="fas fa-chart-area"></i>
+              <span>View Analytics</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Duty Logs -->
+        <div class="action-card">
+          <div class="action-header">
+            <h3>
+              <i class="fas fa-history"></i>
+              Recent Duty Logs
+            </h3>
+          <a href="#" class="view-all-link" onclick="document.querySelector('[data-page=view-duty-log]').click(); return false;">
+            View All
+          </a>
+          </div>
+          <div class="recent-logs-body" id="recentLogsContainer">
+            <div class="recent-empty">
+              <i class="fas fa-inbox"></i>
+              <p>No duty records yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State (shown when no data) -->
+      <div class="overview-empty-state" id="overviewEmptyState" style="display: none;">
+        <i class="fas fa-inbox"></i>
+        <h3>Get Started with DutySync</h3>
+        <p>Start by logging your work hours to see your earnings and analytics</p>
+        <button class="btn btn-primary" onclick="document.querySelector('[data-page=input-duty]').click()">
+          <i class="fas fa-plus-circle"></i> Log Your First Hours
+        </button>
+      </div>
+
     </div>
+  </section>
+      
+      <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section></div>
     
     <!-- Logout Modal -->
     <div id="logoutModal" class="modal">
@@ -1601,6 +1859,7 @@
   <script src="../js/generate.js"></script>
   <script src="../js/deduction-breakdown.js"></script>
   <script src="../js/netpaytrends.js"></script>
+  <script src="../js/overview.js"></script>
 
 </body>
 </html>

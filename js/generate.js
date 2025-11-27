@@ -7,6 +7,12 @@ let generatedPayslipUrl = null;
 let employeeInfo = { name: '', position: '', email: '', initials: '--' };
 let payslipHistory = [];
 
+// Add this variable to store the rates locally in this file
+let currentPremiumRates = { 
+    overtimeMultiplier: 1.25, 
+    nightDiffMultiplier: 0.10 
+};
+
 // --- Initialize on Auth State Change ---
 auth.onAuthStateChanged(async user => {
   if (user) {
@@ -99,7 +105,7 @@ function setupDutyUpdateListener() {
       console.error('Error listening to duties:', error);
     });
 
-  // ✅ FIXED: Listen to profile changes in real-time
+  // ✅ LISTEN TO PREMIUM RATES CHANGES IN REAL-TIME
   db.collection('users').doc(user.uid).onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
@@ -109,8 +115,15 @@ function setupDutyUpdateListener() {
       employeeInfo.position = data.position || 'Employee';
       employeeInfo.email = data.email || user.email;
       employeeInfo.photoURL = data.photoURL || null;
-      employeeInfo.photoBase64 = data.photoBase64 || null; // ✅ Add this
+      employeeInfo.photoBase64 = data.photoBase64 || null;
       employeeInfo.initials = employeeInfo.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      
+      // ✅ UPDATE PREMIUM RATES
+      if (window.savedPremiumRates) {
+        window.savedPremiumRates.overtimeMultiplier = data.overtimeMultiplier || 1.25;
+        window.savedPremiumRates.nightDiffMultiplier = data.nightDiffMultiplier || 0.10;
+        console.log('✅ Premium rates synced:', window.savedPremiumRates);
+      }
       
       // Update the display immediately
       updateEmployeeDisplay();
@@ -120,6 +133,25 @@ function setupDutyUpdateListener() {
   }, error => {
     console.error('Error listening to profile:', error);
   });
+
+  // Add this inside setupDutyUpdateListener()
+  db.collection('users').doc(user.uid).onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      
+      // Update the local variable immediately
+      currentPremiumRates.overtimeMultiplier = data.overtimeMultiplier ? parseFloat(data.overtimeMultiplier) : 1.25;
+      currentPremiumRates.nightDiffMultiplier = data.nightDiffMultiplier ? parseFloat(data.nightDiffMultiplier) : 0.10;
+      
+      console.log('✅ Rates updated:', currentPremiumRates);
+
+      // FORCE RE-CALCULATION immediately if hours have already been fetched
+      if(window.fetchedHours) {
+        calculatePayslip(); 
+      }
+    }
+  });
+  
 }
 
 // --- Initialize Generate Payslip ---
@@ -351,9 +383,13 @@ function calculatePayslip() {
 
   const hourlyRate = rateType === 'daily' ? roundToDecimal(rate / 8, 4) : rate;
 
+  // ✅ USE SAVED PREMIUM RATES FROM SETTINGS
+  const overtimeMultiplier = currentPremiumRates.overtimeMultiplier;
+  const nightDiffMultiplier = currentPremiumRates.nightDiffMultiplier;
+
   const basicPay = roundToDecimal(hours.regularHours * hourlyRate, 2);
-  const overtimePay = roundToDecimal(hours.overtimeHours * hourlyRate * 1.25, 2);
-  const nightDiffPay = roundToDecimal(hours.nightHours * hourlyRate * 0.10, 2);
+  const overtimePay = roundToDecimal(hours.overtimeHours * hourlyRate * overtimeMultiplier, 2);  // ✅ DYNAMIC
+  const nightDiffPay = roundToDecimal(hours.nightHours * hourlyRate * nightDiffMultiplier, 2);   // ✅ DYNAMIC
   const holidayPay = roundToDecimal(hours.holidayPayAcc * hourlyRate, 2);
 
   const grossPay = roundToDecimal(basicPay + overtimePay + nightDiffPay + holidayPay, 2);
@@ -384,11 +420,14 @@ function calculatePayslip() {
     basicPay, overtimePay, nightDiffPay, holidayPay, grossPay,
     sss: sssDeduction, philhealth: philhealthDeduction, pagibig: pagibigDeduction,
     withholdingTax, totalDeductions, netPay, hours, hourlyRate,
-    employee: { ...employeeInfo }
+    employee: { ...employeeInfo },
+    // ✅ SAVE THE MULTIPLIERS USED IN THIS PAYSLIP
+    overtimeMultiplier,
+    nightDiffMultiplier
   };
 
   document.getElementById('generatePdfBtn').disabled = false;
-  console.log('✅ Payslip calculated:', calculatedPayslip);
+  console.log('✅ Payslip calculated with custom premium rates:', calculatedPayslip);
 }
 
 // --- Round to Decimal ---
@@ -599,8 +638,10 @@ async function createPdfPayslipBase64(year, month, cutoff, monthName) {
   };
 
   addRow('Basic Pay', p.basicPay);
-  addRow('Overtime Pay (25% premium)', p.overtimePay);
-  addRow('Night Differential (10% premium)', p.nightDiffPay);
+  const otPercent = (p.overtimeMultiplier * 100).toFixed(0);
+  const ndPercent = (p.nightDiffMultiplier * 100).toFixed(0);
+  addRow(`Overtime Pay (${otPercent}% premium)`, p.overtimePay);
+  addRow(`Night Differential (${ndPercent}% premium)`, p.nightDiffPay);
   addRow('Holiday Pay', p.holidayPay);
   
   doc.setDrawColor(200, 200, 200);

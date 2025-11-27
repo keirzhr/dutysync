@@ -824,6 +824,252 @@ footer::before {
   background: var(--text-secondary);
 }
 
+
+/* --- Settings Grid Layout --- */
+.settings-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns side-by-side */
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: start; /* Aligns cards to top */
+}
+
+.settings-card {
+  padding: 25px;
+  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  height: 100%; /* Makes cards same height visually if needed, or remove for auto */
+}
+
+.card-header h3 {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.settings-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+/* Internal Grouping */
+.settings-group {
+  margin-bottom: 15px;
+}
+
+.group-title {
+  font-size: 13px;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Input Styles */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+}
+
+.input-with-icon i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding-left: 35px; /* Space for icon */
+  box-sizing: border-box;
+}
+
+.helper-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  display: block;
+}
+
+.status-msg {
+  font-size: 12px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.btn-group {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.btn-subtle {
+  background: transparent;
+  color: var(--text-secondary);
+  width: 100%;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.btn-subtle:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* --- Compact Theme Selection --- */
+.theme-selector-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.theme-option {
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px; /* Reduced padding */
+  background: var(--hover-bg); /* Slight background to distinguish area */
+}
+
+.theme-preview {
+  width: 100%;
+  height: 60px; /* Reduced height */
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px; /* Smaller icon */
+}
+
+/* Light Option */
+.light-option {
+  border: 2px solid transparent; 
+}
+.light-screen {
+  background: #f0f2f5;
+  color: #fbbf24;
+}
+
+/* Dark Option */
+.dark-option {
+  border: 1px solid var(--border-color);
+}
+.dark-screen {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+.theme-label {
+  font-weight: 500;
+  font-size: 12px; /* Smaller text */
+}
+
+/* Active State Logic */
+[data-theme="light"] .light-option {
+  border: 2px solid var(--primary-color);
+  background: rgba(var(--primary-color), 0.1);
+}
+
+[data-theme="dark"] .dark-option {
+  border: 2px solid var(--primary-color);
+  background: rgba(var(--primary-color), 0.1);
+}
+
+/* --- Dividers & Danger Zone --- */
+.settings-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 20px 0;
+}
+
+.section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.text-danger {
+  color: #ef4444;
+}
+
+.danger-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  width: 100%;
+}
+
+.btn-danger-outline {
+  background: transparent;
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  width: 100%;
+}
+
+.btn-danger-outline:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* --- Responsive Mobile Layout --- */
+@media (max-width: 900px) {
+  .settings-wrapper {
+    grid-template-columns: 1fr; /* Stack vertically on tablet/mobile */
+    gap: 20px;
+  }
+}
+
 /* About Modal Styles */
 .about-modal-overlay {
   display: none;

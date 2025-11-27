@@ -422,6 +422,7 @@ auth.onAuthStateChanged(async user => {
     await loadEmployeeInfo(user);
     initializeGeneratePayslip();
     initializeRateSettings(); // ADD THIS LINE
+    initializePremiumRatesSettings();
     setupDutyUpdateListener();
     loadPayslipHistory();
   }
@@ -494,3 +495,338 @@ if (aboutModalOverlay) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeAboutModal();
 });
+
+// ========================================
+// PREMIUM RATES (OVERTIME & NIGHT DIFF)
+// ========================================
+
+// Default PH Labor Law Standards
+const DEFAULT_RATES = {
+  overtimeMultiplier: 1.25,      // 125% of base rate
+  nightDiffMultiplier: 0.10      // 10% of base rate
+};
+
+let savedPremiumRates = {
+  overtimeMultiplier: DEFAULT_RATES.overtimeMultiplier,
+  nightDiffMultiplier: DEFAULT_RATES.nightDiffMultiplier
+};
+
+// --- Initialize Premium Rates Settings ---
+function initializePremiumRatesSettings() {
+  loadSavedPremiumRates();
+  setupPremiumRatesEventListeners();
+}
+
+// --- Setup Premium Rates Event Listeners ---
+function setupPremiumRatesEventListeners() {
+  const savePremiumBtn = document.getElementById('savePremiumRatesBtn');
+  const resetPremiumBtn = document.getElementById('resetPremiumRatesBtn');
+  
+  if (savePremiumBtn) {
+    savePremiumBtn.addEventListener('click', updateAndSavePremiumRates);
+  }
+  
+  if (resetPremiumBtn) {
+    resetPremiumBtn.addEventListener('click', resetPremiumRatesToDefaults);
+  }
+}
+
+// --- Load Saved Premium Rates from Firestore ---
+async function loadSavedPremiumRates() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (userDoc.exists) {
+      const data = userDoc.data();
+      
+      // Load with fallback to defaults
+      savedPremiumRates.overtimeMultiplier = data.overtimeMultiplier !== undefined 
+        ? data.overtimeMultiplier 
+        : DEFAULT_RATES.overtimeMultiplier;
+      
+      savedPremiumRates.nightDiffMultiplier = data.nightDiffMultiplier !== undefined 
+        ? data.nightDiffMultiplier 
+        : DEFAULT_RATES.nightDiffMultiplier;
+      
+      // Populate settings inputs
+      document.getElementById('overtimeRateInput').value = savedPremiumRates.overtimeMultiplier;
+      document.getElementById('nightDiffRateInput').value = savedPremiumRates.nightDiffMultiplier;
+      
+      console.log('✅ Premium rates loaded from Firestore:', savedPremiumRates);
+    } else {
+      // First time user - use defaults
+      document.getElementById('overtimeRateInput').value = DEFAULT_RATES.overtimeMultiplier;
+      document.getElementById('nightDiffRateInput').value = DEFAULT_RATES.nightDiffMultiplier;
+      console.log('📊 Using default premium rates for new user');
+    }
+  } catch (error) {
+    console.error('Error loading premium rates:', error);
+  }
+}
+
+// --- Update and Save Premium Rates ---
+async function updateAndSavePremiumRates() {
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Please login to update premium rates');
+    return;
+  }
+
+  const overtimeRate = parseFloat(document.getElementById('overtimeRateInput').value);
+  const nightDiffRate = parseFloat(document.getElementById('nightDiffRateInput').value);
+
+  // Validation
+  if (isNaN(overtimeRate) || overtimeRate <= 0) {
+    alert('Please enter a valid overtime rate (e.g., 1.25)');
+    return;
+  }
+
+  if (isNaN(nightDiffRate) || nightDiffRate < 0) {
+    alert('Please enter a valid night differential rate (e.g., 0.10)');
+    return;
+  }
+
+  if (overtimeRate > 5) {
+    alert('Overtime rate seems too high. Please check your input.');
+    return;
+  }
+
+  if (nightDiffRate > 1) {
+    alert('Night differential rate seems too high. Please check your input.');
+    return;
+  }
+
+  try {
+    const savePremiumBtn = document.getElementById('savePremiumRatesBtn');
+    savePremiumBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    savePremiumBtn.disabled = true;
+
+    // Save to Firestore
+    await db.collection('users').doc(user.uid).update({
+      overtimeMultiplier: overtimeRate,
+      nightDiffMultiplier: nightDiffRate,
+      premiumRatesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update global variable
+    savedPremiumRates.overtimeMultiplier = overtimeRate;
+    savedPremiumRates.nightDiffMultiplier = nightDiffRate;
+
+    // Show success message
+    const statusMsg = document.getElementById('premiumRatesStatusMessage');
+    statusMsg.innerHTML = '✅ Premium rates saved successfully!';
+    statusMsg.style.display = 'block';
+    statusMsg.style.color = '#10b981';
+
+    savePremiumBtn.innerHTML = '<i class="fas fa-save"></i> Save Premium Rates';
+    savePremiumBtn.disabled = false;
+
+    setTimeout(() => {
+      statusMsg.style.display = 'none';
+    }, 3000);
+
+    console.log('✅ Premium rates updated:', { overtimeRate, nightDiffRate });
+  } catch (error) {
+    console.error('Error updating premium rates:', error);
+    alert('Failed to save premium rates. Please try again.');
+    
+    const savePremiumBtn = document.getElementById('savePremiumRatesBtn');
+    savePremiumBtn.innerHTML = '<i class="fas fa-save"></i> Save Premium Rates';
+    savePremiumBtn.disabled = false;
+  }
+}
+
+// --- Reset Premium Rates to Defaults ---
+async function resetPremiumRatesToDefaults() {
+  if (!confirm('Are you sure you want to reset premium rates to PH Labor Law defaults?\n\nOvertime: 1.25x\nNight Differential: 0.10x')) {
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Please login to reset premium rates');
+    return;
+  }
+
+  try {
+    const resetBtn = document.getElementById('resetPremiumRatesBtn');
+    resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
+    resetBtn.disabled = true;
+
+    // Reset in Firestore
+    await db.collection('users').doc(user.uid).update({
+      overtimeMultiplier: DEFAULT_RATES.overtimeMultiplier,
+      nightDiffMultiplier: DEFAULT_RATES.nightDiffMultiplier,
+      premiumRatesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update global variable
+    savedPremiumRates.overtimeMultiplier = DEFAULT_RATES.overtimeMultiplier;
+    savedPremiumRates.nightDiffMultiplier = DEFAULT_RATES.nightDiffMultiplier;
+
+    // Update inputs
+    document.getElementById('overtimeRateInput').value = DEFAULT_RATES.overtimeMultiplier;
+    document.getElementById('nightDiffRateInput').value = DEFAULT_RATES.nightDiffMultiplier;
+
+    // Show success message
+    const statusMsg = document.getElementById('premiumRatesStatusMessage');
+    statusMsg.innerHTML = '✅ Premium rates reset to PH Labor Law defaults!';
+    statusMsg.style.display = 'block';
+    statusMsg.style.color = '#10b981';
+
+    resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset to Defaults';
+    resetBtn.disabled = false;
+
+    setTimeout(() => {
+      statusMsg.style.display = 'none';
+    }, 3000);
+
+    console.log('✅ Premium rates reset to defaults:', DEFAULT_RATES);
+  } catch (error) {
+    console.error('Error resetting premium rates:', error);
+    alert('Failed to reset premium rates. Please try again.');
+    
+    const resetBtn = document.getElementById('resetPremiumRatesBtn');
+    resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset to Defaults';
+    resetBtn.disabled = false;
+  }
+}
+
+// --- Delete Account Function ---
+async function deleteAccount() {
+    const user = auth.currentUser;
+    
+    if (!user) {
+        alert("No user logged in.");
+        return;
+    }
+
+    // 1. Confirm Intent
+    const confirmDelete = confirm(
+        "⚠️ WARNING: Are you sure you want to delete your account?\n\n" +
+        "This action is PERMANENT. All your data, settings, and payroll history will be erased forever."
+    );
+
+    if (!confirmDelete) return;
+
+    // 2. Second Confirmation (Safety Check)
+    const doubleCheck = prompt("To confirm, please type 'DELETE' below:");
+
+    if (doubleCheck !== 'DELETE') {
+        alert("Account deletion cancelled. Text did not match.");
+        return;
+    }
+
+    try {
+        const uid = user.uid;
+
+        // 3. Delete User Data from Firestore
+        // Note: If you have subcollections, you must delete them individually 
+        // or rely on a Cloud Function. This deletes the main user doc.
+        await db.collection('users').doc(uid).delete();
+        console.log('User data deleted from Firestore');
+
+        // 4. Delete Auth Account
+        await user.delete();
+        console.log('User account deleted');
+
+        // 5. Cleanup and Redirect
+        localStorage.clear();
+        alert("Your account has been successfully deleted.");
+        window.location.href = "../index.html";
+
+    } catch (error) {
+        console.error("Error deleting account:", error);
+
+        // Handle "Requires Recent Login" error from Firebase
+        if (error.code === 'auth/requires-recent-login') {
+            alert("Security measure: You must re-login before you can delete your account. Please logout, log back in, and try again.");
+            // Optional: Trigger logout here
+        } else {
+            alert("Failed to delete account: " + error.message);
+        }
+    }
+}
+
+
+// --- Payroll Edit Logic ---
+
+// 1. Enable Edit Mode
+function enableEdit(section) {
+    const fieldset = document.getElementById(`field-${section}`);
+    fieldset.disabled = false;
+    
+    // Show Action Buttons, Hide Edit Button
+    document.getElementById(`btns-${section}`).style.display = 'none';
+    document.getElementById(`actions-${section}`).style.display = 'flex';
+    
+    // Highlight inputs
+    const inputs = fieldset.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.style.borderColor = 'var(--primary-color)';
+        input.style.paddingLeft = '10px'; // Restore padding
+        input.style.background = 'var(--hover-bg)';
+    });
+}
+
+// 2. Cancel Edit Mode
+function cancelEdit(section) {
+    const fieldset = document.getElementById(`field-${section}`);
+    fieldset.disabled = true;
+    
+    document.getElementById(`btns-${section}`).style.display = 'block';
+    document.getElementById(`actions-${section}`).style.display = 'none';
+    
+    // Visual reset (optional: you might want to reload values from DB here)
+    const inputs = fieldset.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.style.borderColor = 'transparent';
+        input.style.paddingLeft = '0';
+        input.style.background = 'transparent';
+    });
+}
+
+// 3. Save Section
+async function saveSection(section) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const statusMsg = document.getElementById('statusMessage');
+    statusMsg.innerText = "Saving...";
+    statusMsg.style.color = "var(--text-secondary)";
+
+    let data = {};
+
+    // Gather data based on section
+    if (section === 'base') {
+        data.hourlyRate = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
+        data.dailyRate = parseFloat(document.getElementById('dailyRateInput').value) || 0;
+    } 
+    else if (section === 'defaults') {
+        data.defaultShiftHours = parseFloat(document.getElementById('defaultHoursInput').value) || 0;
+        data.breakHours = parseFloat(document.getElementById('breakInput').value) || 0;
+    } 
+    else if (section === 'multipliers') {
+        data.overtimeMultiplier = parseFloat(document.getElementById('overtimeRateInput').value) || 1.25;
+        data.nightDiffMultiplier = parseFloat(document.getElementById('nightDiffRateInput').value) || 0.10;
+    }
+
+    try {
+        await db.collection('users').doc(user.uid).update(data);
+        
+        statusMsg.innerText = "Saved!";
+        statusMsg.style.color = "#10b981"; // Green
+
+        // Lock inputs
+        cancelEdit(section); 
+
+        setTimeout(() => statusMsg.innerText = "", 2000);
+
+    } catch (error) {
+        console.error(error);
+        statusMsg.innerText = "Error saving.";
+        statusMsg.style.color = "#ef4444";
+    }
+}
