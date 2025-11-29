@@ -832,9 +832,6 @@ function renderPayslipHistory() {
           <button class="btn-download-history" onclick="downloadPayslipFromHistory('${record.id}', '${monthName}', ${record.year}, ${record.cutoff})">
             <i class="fas fa-download"></i> Download PDF
           </button>
-          <button class="btn-delete-history" onclick="deletePayslipFromHistory('${record.id}', '${monthName} ${cutoffText}, ${record.year}')">
-            <i class="fas fa-trash"></i>
-          </button>
         </div>
       </div>
     `;

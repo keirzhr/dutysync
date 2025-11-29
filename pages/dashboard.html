@@ -5,23 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DutySync - Dashboard</title>
   
-  <!-- CSS -->
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/inputduty.css">
   <link rel="stylesheet" href="../css/viewdutylog.css">
   <link rel="stylesheet" href="../css/profile.css">
-  <link rel="stylesheet" href="../css/viewpayslip.css">
   <link rel="stylesheet" href="../css/generate.css">
   <link rel="stylesheet" href="../css/deduction-breakdown.css">
   <link rel="stylesheet" href="../css/netpaytrends.css">
   <link rel="stylesheet" href="../css/overview.css">
+  <link rel="stylesheet" href="../css/help.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
 </head>
 <body>
 
-  <!-- Sidebar -->
   <button class="hamburger" id="hamburger">☰</button>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -29,7 +26,6 @@
       <span class="logo-text">DutySync</span>
     </div>
     <nav class="nav-menu">
-      <!-- Dashboard Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="dashboard" data-parent="dashboard">
           <i class="fas fa-chart-pie nav-icon"></i>
@@ -42,7 +38,7 @@
           <a class="nav-item sub-item" data-page="view-duty-log"><span class="nav-text">View Duty Log</span></a>
         </div>
       </div>
-      <!-- Payslip Section -->
+      
       <div class="nav-section">
         <a class="nav-item" data-page="generate-payslip">
           <i class="fas fa-money-bill-wave nav-icon"></i>
@@ -50,7 +46,6 @@
         </a>
       </div>
       
-      <!-- Analytics Section -->
       <div class="nav-section">
         <a class="nav-item" data-page="analytics" data-parent="analytics">
           <i class="fas fa-chart-line nav-icon"></i>
@@ -62,12 +57,11 @@
           <a class="nav-item sub-item" data-page="deduction-breakdown"><span class="nav-text">Deduction Breakdown</span></a>
         </div>
       </div>
-      <!-- Settings & Help -->
+      
       <a class="nav-item" data-page="settings"><i class="fas fa-cog nav-icon"></i><span class="nav-text">Settings</span></a>
       <a class="nav-item" data-page="help"><i class="fas fa-question-circle nav-icon"></i><span class="nav-text">Help</span></a>
     </nav>
 
-    <!-- Updated Sidebar Footer with Profile Link -->
     <div class="sidebar-footer" id="sidebarFooterProfile">
       <div class="user-avatar" id="userAvatar">--</div>
       <div class="user-info">
@@ -78,10 +72,8 @@
     </div>
   </aside>
 
-  <!-- Toast container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Main Content -->
   <main class="main-content">
     <header>
       <div class="header-content">
@@ -95,449 +87,141 @@
     </header>
 
     <div class="content">
-
-<!-- Profile Section (UPDATED) -->
-<section class="content-section" id="profile">
-  <div class="profile-container">
-    <!-- Profile Header Card -->
-    <div class="profile-header-card">
-      <div class="profile-banner"></div>
-      <div class="profile-info-section">
-        <div class="profile-avatar-wrapper">
-          <div class="profile-avatar-large" id="profileAvatarLarge">--</div>
-          <!-- Add this inside the profile section, after profile-avatar-wrapper -->
-          <input type="file" id="photoInput" accept="image/*" style="display: none;">
-
-          <!-- Update the button to trigger file input -->
-          <button class="avatar-edit-btn" id="avatarEditBtn" type="button">
-            <i class="fas fa-camera"></i>
-          </button>
-        </div>
-        <div class="profile-header-info">
-          <h2 class="profile-name" id="profileName">Loading...</h2>
-          <p class="profile-email" id="profileEmail">Loading...</p>
-          <div class="profile-badges">
-            <span class="profile-badge" id="profilePosition">Manager</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Profile Details Card -->
-    <div class="profile-details-card">
-      <div class="profile-card-header">
-        <h3>Personal Information</h3>
-      </div>
-
-      <div class="profile-form" id="profileForm">
-        <!-- Full Name -->
-        <div class="profile-field-group">
-          <label class="profile-label">Full Name</label>
-          <div class="profile-field">
-            <i class="fas fa-user field-icon"></i>
-            <input type="text" id="profileFullName" class="profile-input" disabled>
-          </div>
-        </div>
-
-        <!-- Email -->
-        <div class="profile-field-group">
-          <label class="profile-label">Email Address</label>
-          <div class="profile-field">
-            <i class="fas fa-envelope field-icon"></i>
-            <input type="email" id="profileEmailInput" class="profile-input" disabled>
-          </div>
-        </div>
-
-        <!-- Phone -->
-        <div class="profile-field-group">
-          <label class="profile-label">Phone Number</label>
-          <div class="profile-field">
-            <i class="fas fa-phone field-icon"></i>
-            <input type="tel" id="profilePhone" class="profile-input" placeholder="Enter phone number" disabled>
-          </div>
-        </div>
-
-        <!-- Position -->
-        <div class="profile-field-group">
-          <label class="profile-label">Position</label>
-          <div class="profile-field">
-            <i class="fas fa-briefcase field-icon"></i>
-            <input type="text" id="profilePositionInput" class="profile-input" placeholder="Enter position" disabled>
-          </div>
-        </div>
-
-        <!-- Location -->
-        <div class="profile-field-group">
-          <label class="profile-label">Location</label>
-          <div class="profile-field">
-            <i class="fas fa-map-marker-alt field-icon"></i>
-            <input type="text" id="profileLocation" class="profile-input" placeholder="Enter location" disabled>
-          </div>
-        </div>
-
-        <!-- Hire Date -->
-        <div class="profile-field-group">
-          <label class="profile-label">Hire Date</label>
-          <div class="profile-field">
-            <i class="fas fa-calendar field-icon"></i>
-            <input type="date" id="profileHireDate" class="profile-input" disabled>
-          </div>
-        </div>
-
-        <!-- Action Buttons (Hidden by default) -->
-        <div class="profile-actions" id="profileActions" style="display: none;">
-          <button class="btn-cancel-profile" id="btnCancelProfile">
-            <i class="fas fa-times"></i> Cancel
-          </button>
-          <button class="btn-save-profile" id="btnSaveProfile">
-            <i class="fas fa-save"></i> Save Changes
-          </button>
-        </div>
-
-        <!-- Edit Button (Visible by default) -->
-        <div class="profile-actions-default" id="profileActionsDefault">
-          <button class="btn-edit-profile" id="btnEditProfile">
-            <i class="fas fa-edit"></i> Edit Profile
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-  <!-- Generate Payslip Section - Add this to dashboard.html -->
-<section class="content-section" id="generate-payslip">
-  <div class="generate-payslip-container">
-    <!-- Main Layout -->
-    <div class="generate-layout">
-      <!-- Left Column: Input Form -->
-      <div class="generate-form-section">
-        <div class="form-card">
-          <div class="form-card-header">
-            <i class="fas fa-calculator"></i>
-            <h3>Payroll Calculator</h3>
+      <!-- Dashboard Sections -->
+      <section class="content-section" id="overview">
+        <div class="overview-container">
+          <div class="hero-stats-grid">
+            <div class="hero-stat-card hours">
+              <div class="stat-icon"><i class="fas fa-clock"></i></div>
+              <div class="stat-content">
+                <span class="stat-label">This Month Hours</span>
+                <span class="stat-value" id="heroThisMonthHours">0.00</span>
+                <span class="stat-unit">hrs</span>
+              </div>
+            </div>
+            <div class="hero-stat-card netpay">
+              <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+              <div class="stat-content">
+                <span class="stat-label">Current Net Pay</span>
+                <span class="stat-value" id="heroCurrentNetPay">₱0.00</span>
+                <span class="stat-unit">this period</span>
+              </div>
+            </div>
+            <div class="hero-stat-card payslip">
+              <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div class="stat-content">
+                <span class="stat-label">Last Payslip</span>
+                <span class="stat-value" id="heroLastPayslip">₱0.00</span>
+                <span class="stat-unit">generated</span>
+              </div>
+              <div class="stat-date" id="lastPayslipDate">No record</div>
+            </div>
+            <div class="hero-stat-card ytd">
+              <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+              <div class="stat-content">
+                <span class="stat-label">Year-to-Date</span>
+                <span class="stat-value" id="heroYTDEarnings">₱0.00</span>
+                <span class="stat-unit">total earnings</span>
+              </div>
+            </div>
           </div>
 
-          <div class="form-card-body">
-            <!-- Employee Info Display -->
-
-            <!-- Period Selection -->
-            <div class="form-section-group">
-              <label class="form-section-label">Pay Period</label>
-              <div class="period-selectors">
-                <div class="select-wrapper">
-                  <label for="generateYear">Year</label>
-                  <select id="generateYear" class="form-select">
-                    <!-- Populated by JS -->
-                  </select>
-                </div>
-                <div class="select-wrapper">
-                  <label for="generateMonth">Month</label>
-                  <select id="generateMonth" class="form-select">
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
-                  </select>
-                </div>
-                <div class="select-wrapper">
-                  <label for="generateCutoff">Cutoff</label>
-                  <select id="generateCutoff" class="form-select">
-                    <option value="1">1st – 15th</option>
-                    <option value="2">16th – 30th/31st</option>
-                  </select>
+          <div class="visual-insights-grid">
+            <div class="insight-card last-7days">
+              <div class="insight-header">
+                <h3><i class="fas fa-calendar-week"></i>Last 7 Days Activity</h3>
+                <span class="insight-subtitle">Daily hours worked</span>
+              </div>
+              <div class="insight-body">
+                <canvas id="last7DaysChart"></canvas>
+                <div class="chart-stats">
+                  <div class="chart-stat">
+                    <span class="stat-label">Total:</span>
+                    <span class="stat-highlight" id="last7Total">0.00 hrs</span>
+                  </div>
+                  <div class="chart-stat">
+                    <span class="stat-label">Average:</span>
+                    <span class="stat-highlight" id="last7Avg">0.00 hrs</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Rate Input -->
-        <div class="form-section-group">
-          <label class="form-section-label">Rate Configuration</label>
-          <div class="rate-config">
-            <div class="rate-type-toggle">
-              <button type="button" class="rate-btn active" data-type="hourly">
-                <i class="fas fa-clock"></i> Per Hour
-              </button>
-              <button type="button" class="rate-btn" data-type="daily">
-                <i class="fas fa-calendar-day"></i> Per Day
-              </button>
-            </div>
-            
-            <!-- Rate Input Container -->
-            <div id="rateInputContainer" style="display: flex; flex-direction: column;">
-              <div class="rate-input-wrapper">
-                <span class="currency-symbol">₱</span>
-                <input 
-                  type="number" 
-                  id="rateInput" 
-                  class="rate-input" 
-                  placeholder="0.00" 
-                  step="0.01" 
-                  min="0"
-                >
-                <span class="rate-label" id="rateLabel">/hour</span>
+            <div class="insight-card deduction-mini">
+              <div class="insight-header">
+                <h3><i class="fas fa-chart-pie"></i>Deduction Breakdown</h3>
+                <span class="insight-subtitle">Current period</span>
               </div>
-              
-              <!-- Edit button will be inserted here by JavaScript for existing users -->
+              <div class="insight-body">
+                <canvas id="deductionMiniChart"></canvas>
+                <div class="deduction-mini-stats">
+                  <div class="mini-stat">
+                    <span class="stat-label">Gross:</span>
+                    <span class="stat-value" id="miniGrossPay">₱0.00</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="stat-label">Deductions:</span>
+                    <span class="stat-value deduction" id="miniTotalDeductions">₱0.00</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="stat-label">Net:</span>
+                    <span class="stat-value net" id="miniNetPay">₱0.00</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <!-- Status indicator for existing users -->
-            <small id="rateStatus" class="help-text" style="margin-top: 8px; display: none;">
-              <i class="fas fa-lock"></i> Using saved default rate
-            </small>
           </div>
-        </div>
 
-            <!-- Hours Summary (Auto-calculated) -->
-           <!-- Hours Summary (Auto-calculated) -->
-<div class="form-section-group">
-  <label class="form-section-label">Hours Summary</label>
-  
-  <div class="hours-summary-grid">
-    <div class="hours-item">
-      <div class="hours-icon regular">
-        <i class="fas fa-briefcase"></i>
-      </div>
-      <div class="hours-details">
-        <span class="hours-label">Regular Hours</span>
-        <span class="hours-value" id="summaryRegularHours">0.00</span>
-      </div>
-    </div>
-    
-    <div class="hours-item">
-      <div class="hours-icon overtime">
-        <i class="fas fa-hourglass-half"></i>
-      </div>
-      <div class="hours-details">
-        <span class="hours-label">Overtime Hours</span>
-        <span class="hours-value" id="summaryOvertimeHours">0.00</span>
-      </div>
-    </div>
-    
-    <div class="hours-item">
-      <div class="hours-icon night">
-        <i class="fas fa-moon"></i>
-      </div>
-      <div class="hours-details">
-        <span class="hours-label">Night Diff Hours</span>
-        <span class="hours-value" id="summaryNightHours">0.00</span>
-      </div>
-    </div>
-    
-    <div class="hours-item">
-      <div class="hours-icon holiday">
-        <i class="fas fa-gift"></i>
-      </div>
-      <div class="hours-details">
-        <span class="hours-label">Holiday Hours</span>
-        <span class="hours-value" id="summaryHolidayHours">0.00</span>
-      </div>
-    </div>
-  </div>
+          <div class="action-activity-grid">
+            <div class="action-card">
+              <div class="action-header">
+                <h3><i class="fas fa-bolt"></i>Quick Actions</h3>
+              </div>
+              <div class="action-body">
+                <button class="action-btn primary" onclick="document.querySelector('[data-page=input-duty]').click()">
+                  <i class="fas fa-plus-circle"></i>
+                  <span>Log Hours</span>
+                </button>
+                <button class="action-btn success" onclick="document.querySelector('[data-page=generate-payslip]').click()">
+                  <i class="fas fa-calculator"></i>
+                  <span>Generate Payslip</span>
+                </button>
+                <button class="action-btn info" onclick="document.querySelector('[data-page=view-duty-log]').click()">
+                  <i class="fas fa-history"></i>
+                  <span>View Records</span>
+                </button>
+                <button class="action-btn secondary" onclick="document.querySelector('[data-page=net-pay-trends]').click()">
+                  <i class="fas fa-chart-area"></i>
+                  <span>View Analytics</span>
+                </button>
+              </div>
+            </div>
 
-  <div class="hours-item total-worked-card">
-    <div class="hours-icon worked">
-      <i class="fas fa-check-circle"></i>
-    </div>
-    <div class="hours-details">
-      <span class="hours-label">Total Worked (Physical Hours)</span>
-      <span class="hours-value" id="summaryWorkedHours">0.00</span>
-    </div>
-  </div>
-</div>            <!-- Calculate Button -->
-            <button type="button" id="calculatePayslipBtn" class="btn-calculate">
-              <i class="fas fa-calculator"></i> Calculate Payslip
+            <div class="action-card">
+              <div class="action-header">
+                <h3><i class="fas fa-history"></i>Recent Duty Logs</h3>
+                <a href="#" class="view-all-link" onclick="document.querySelector('[data-page=view-duty-log]').click(); return false;">View All</a>
+              </div>
+              <div class="recent-logs-body" id="recentLogsContainer">
+                <div class="recent-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No duty records yet</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-empty-state" id="overviewEmptyState" style="display: none;">
+            <i class="fas fa-inbox"></i>
+            <h3>Get Started with DutySync</h3>
+            <p>Start by logging your work hours to see your earnings and analytics</p>
+            <button class="btn btn-primary" onclick="document.querySelector('[data-page=input-duty]').click()">
+              <i class="fas fa-plus-circle"></i> Log Your First Hours
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Right Column: Preview Card -->
-      <div class="generate-preview-section">
-        <div class="preview-card">
-          <div class="preview-header">
-            <div class="preview-logo">
-              <img src="../images/logo.png" alt="Logo" class="preview-logo-img">
-              <span>DutySync</span>
-            </div>
-            <div class="preview-badge">PAYSLIP</div>
-          </div>
-
-          <!-- Employee Info in Preview -->
-          <div class="preview-employee-info">
-            <div class="preview-employee-row">
-              <span class="info-label">Employee Name:</span>
-              <span class="info-value" id="previewEmployeeName">---</span>
-            </div>
-            <div class="preview-employee-row">
-              <span class="info-label">Position:</span>
-              <span class="info-value" id="previewEmployeePosition">---</span>
-            </div>
-            <div class="preview-employee-row">
-              <span class="info-label">Email:</span>
-              <span class="info-value" id="previewEmployeeEmail">---</span>
-            </div>
-          </div>
-
-          <div class="preview-period">
-            <span class="period-label">Pay Period:</span>
-            <span class="period-value" id="previewPeriod">Select period</span>
-          </div>
-
-<div class="preview-body">
-  <!-- Two Column Grid for Earnings and Deductions -->
-  <div class="preview-sections-grid">
-    
-    <!-- Earnings Section (Left Column) -->
-    <div class="preview-section">
-      <h4 class="preview-section-title">
-        <i class="fas fa-plus-circle"></i> Earnings
-      </h4>
-      <div class="preview-section-content">
-        <div class="preview-row">
-          <span>Basic Pay</span>
-          <span id="previewBasicPay">₱0.00</span>
-        </div>
-        <div class="preview-row">
-          <span>Overtime Pay</span>
-          <span id="previewOvertimePay">₱0.00</span>
-        </div>
-        <div class="preview-row">
-          <span>Night Differential</span>
-          <span id="previewNightDiff">₱0.00</span>
-        </div>
-        <div class="preview-row">
-          <span>Holiday Pay</span>
-          <span id="previewHolidayPay">₱0.00</span>
-        </div>
-        <div class="preview-row total">
-          <span>Gross Pay</span>
-          <span id="previewGrossPay">₱0.00</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Deductions Section (Right Column) -->
-    <div class="preview-section">
-      <h4 class="preview-section-title">
-        <i class="fas fa-minus-circle"></i> Deductions
-      </h4>
-      <div class="preview-section-content">
-        <div class="preview-row">
-          <span>SSS</span>
-          <span id="previewSSS">₱0.00</span>
-        </div>
-        <div class="preview-row">
-          <span>PhilHealth</span>
-          <span id="previewPhilHealth">₱0.00</span>
-        </div>
-        <div class="preview-row">
-          <span>Pag-IBIG</span>
-          <span id="previewPagibig">₱0.00</span>
-        </div>
-        <div class="preview-row">
-          <span>BIR Tax</span>
-          <span id="previewBIRTax">₱0.00</span>
-        </div>
-        <div class="preview-row total deduction">
-          <span>Total Deductions</span>
-          <span id="previewTotalDeductions">₱0.00</span>
-        </div>
-      </div>
-    </div>
-    
-  </div>
-
-  <!-- Net Pay (Full Width Below) -->
-  <div class="preview-net-pay">
-    <span class="net-label">NET PAY</span>
-    <span class="net-value" id="previewNetPay">₱0.00</span>
-  </div>
-</div>
-          <div class="preview-footer">
-            <button type="button" id="generatePdfBtn" class="btn-generate" disabled>
-              <i class="fas fa-file-pdf"></i> Generate Payslip
-            </button>
-          </div>
-        </div>
-
-        <!-- Status Messages -->
-        <div id="generateStatus" class="generate-status" style="display: none;">
-          <div class="status-content">
-            <i class="fas fa-spinner fa-spin"></i>
-            <span>Generating payslip...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Success Modal -->
-  <div id="payslipSuccessModal" class="modal-overlay">
-    <div class="modal-content success-modal">
-      <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
-      </div>
-      <h3>Payslip Generated!</h3>
-      <p>Your payslip has been successfully generated and saved.</p>
-      <div class="modal-buttons">
-        <button class="btn-modal btn-view" id="viewPayslipBtn">
-          <i class="fas fa-eye"></i> View Payslip
-        </button>
-        <button class="btn-modal btn-close" onclick="closeSuccessModal()">Close</button>
-      </div>
-    </div>
-  </div>
-
-<!-- Payslip History Section -->
-<div class="payslip-history-section" id="payslipHistorySection">
-  <div class="history-section-header">
-    <h3>
-      <i class="fas fa-history"></i>
-      Payslip History
-      <span class="history-count" id="historyCount">0</span>
-    </h3>
-  </div>
-
-  <!-- History Container (populated by JavaScript) -->
-  <div id="payslipHistoryContainer">
-    <!-- Cards will be dynamically generated here -->
-    <div class="history-empty-state">
-      <i class="fas fa-file-invoice" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
-      <h3>No Payslip History</h3>
-      <p>Generated payslips will appear here</p>
-    </div>
-  </div>
-</div>
-
-<!-- UPDATE THE SUCCESS MODAL TO REMOVE THE VIEW BUTTON SINCE WE'RE NOT USING FIREBASE STORAGE -->
-<!-- Keep the existing modal but update the buttons section: -->
-
-<div id="payslipSuccessModal" class="modal-overlay">
-  <div class="modal-content success-modal">
-    <div class="success-icon">
-      <i class="fas fa-check-circle"></i>
-    </div>
-    <h3>Payslip Generated!</h3>
-    <p>Your payslip has been successfully generated and saved to your history.</p>
-    <div class="modal-buttons">
-      <button class="btn-modal btn-close" onclick="closeSuccessModal()">
-        <i class="fas fa-check"></i> Done
-      </button>
-    </div>
-  </div>
-</div>
-
-</section>
-      <!-- Input Duty Section -->
       <section class="content-section" id="input-duty">
         <div class="calendar-graph-container">
           <div class="month-switcher">
@@ -546,22 +230,18 @@
             <button id="nextMonth">&gt;</button>
           </div>
           <div class="calendar-graph-wrapper">
-          
             <div class="calendar-wrapper">
               <h3 class="calendar-title">Work Hours Input</h3>
               <div id="calendarContainer" class="calendar-grid"></div>
             </div>
-
             <div class="graph-wrapper">
               <h3>Hours Worked</h3>
               <canvas id="completedTimeChart"></canvas>
-
               <div class="cutoff-hours-box">
                 <div class="cutoff-block">
                   <h4>Cutoff (1–15)</h4>
                   <p id="hours_1_15">0 hrs</p>
                 </div>
-
                 <div class="cutoff-block">
                   <h4>Cutoff (16–30)</h4>
                   <p id="hours_16_30">0 hrs</p>
@@ -571,118 +251,82 @@
           </div>
         </div>
 
-        <!-- Delete Confirmation Modal -->
         <div id="deleteConfirmationModal" class="confirmation-modal">
           <div class="confirmation-content">
-            <div class="confirmation-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
+            <div class="confirmation-icon"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 class="confirmation-title">Delete Entry?</h3>
-            <p class="confirmation-message">
-              This action cannot be undone. Are you sure you want to delete this duty record?
-            </p>
+            <p class="confirmation-message">This action cannot be undone. Are you sure you want to delete this duty record?</p>
             <div class="confirmation-buttons">
-              <button id="cancelDeleteBtn" class="conf-btn conf-btn-cancel">
-                <i class="fas fa-times"></i> Keep
-              </button>
-              <button id="confirmDeleteBtn" class="conf-btn conf-btn-danger">
-                <i class="fas fa-trash"></i> Delete
-              </button>
+              <button id="cancelDeleteBtn" class="conf-btn conf-btn-cancel"><i class="fas fa-times"></i> Keep</button>
+              <button id="confirmDeleteBtn" class="conf-btn conf-btn-danger"><i class="fas fa-trash"></i> Delete</button>
             </div>
           </div>
         </div>
 
-        <!-- Popup Modal -->
-        <!-- Popup Modal - CLEAN AUTO VERSION -->
-<div id="popupOverlay" class="popup-overlay">
-  <div id="dutyPopup" class="popup-card">
-    <div class="popup-header">
-      <h3>Log Work Duty</h3>
-    </div>
-    
-    <!-- Error Message Display -->
-    <div id="popupError" class="popup-error" style="display: none;"></div>
-    
-    <div class="popup-content">
-      <!-- Date Section -->
-      <div class="popup-section">
-        <label class="section-label">Date</label>
-        <input type="date" id="popupDate" readonly class="date-input">
-      </div>
-
-      <!-- Time Section -->
-      <div class="popup-section">
-        <label class="section-label">Work Hours</label>
-        <div class="time-input-group">
-          <div class="time-input-wrapper">
-            <label for="popupTimeIn" class="input-label">Time In <span class="required">*</span></label>
-            <input type="time" id="popupTimeIn" placeholder="HH:MM" class="time-input">
-            <small class="help-text">Start time</small>
-          </div>
-          <div class="time-separator">→</div>
-          <div class="time-input-wrapper">
-            <label for="popupTimeOut" class="input-label">Time Out <span class="required">*</span></label>
-            <input type="time" id="popupTimeOut" placeholder="HH:MM" class="time-input">
-            <small class="help-text">End time</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Day Type Section -->
-      <div class="popup-section">
-        <label class="section-label">Day Type</label>
-        <select id="popupDayType" class="select-input">
-          <option>Regular</option>
-          <option>Regular Holiday (130%)</option>
-          <option>Special Non-Working Holiday (200%)</option>
-        </select>
-      </div>
-
-      <!-- AUTO PREVIEW SECTION -->
-      <div class="popup-section">
-        <label class="section-label">Automatic Calculation Preview</label>
-        <div class="auto-preview-box">
-          <div class="preview-row">
-            <span class="preview-label">
-              <i class="fas fa-sun"></i> Regular Hours
-            </span>
-            <span class="preview-value" id="previewRegular">0.00 hrs</span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">
-              <i class="fas fa-moon"></i> Night Diff (10PM-6AM)
-            </span>
-            <span class="preview-value night" id="previewNight">0.00 hrs</span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">
-              <i class="fas fa-clock"></i> Overtime (>8 hrs)
-            </span>
-            <span class="preview-value overtime" id="previewOT">0.00 hrs</span>
-          </div>
-          <div class="preview-row total">
-            <span class="preview-label">
-              <i class="fas fa-check-circle"></i> Total Hours
-            </span>
-            <span class="preview-value" id="previewTotal">0.00 hrs</span>
+        <div id="popupOverlay" class="popup-overlay">
+          <div id="dutyPopup" class="popup-card">
+            <div class="popup-header"><h3>Log Work Duty</h3></div>
+            <div id="popupError" class="popup-error" style="display: none;"></div>
+            <div class="popup-content">
+              <div class="popup-section">
+                <label class="section-label">Date</label>
+                <input type="date" id="popupDate" readonly class="date-input">
+              </div>
+              <div class="popup-section">
+                <label class="section-label">Work Hours</label>
+                <div class="time-input-group">
+                  <div class="time-input-wrapper">
+                    <label for="popupTimeIn" class="input-label">Time In <span class="required">*</span></label>
+                    <input type="time" id="popupTimeIn" placeholder="HH:MM" class="time-input">
+                    <small class="help-text">Start time</small>
+                  </div>
+                  <div class="time-separator">→</div>
+                  <div class="time-input-wrapper">
+                    <label for="popupTimeOut" class="input-label">Time Out <span class="required">*</span></label>
+                    <input type="time" id="popupTimeOut" placeholder="HH:MM" class="time-input">
+                    <small class="help-text">End time</small>
+                  </div>
+                </div>
+              </div>
+              <div class="popup-section">
+                <label class="section-label">Day Type</label>
+                <select id="popupDayType" class="select-input">
+                  <option>Regular</option>
+                  <option>Regular Holiday (130%)</option>
+                  <option>Special Non-Working Holiday (200%)</option>
+                </select>
+              </div>
+              <div class="popup-section">
+                <label class="section-label">Automatic Calculation Preview</label>
+                <div class="auto-preview-box">
+                  <div class="preview-row">
+                    <span class="preview-label"><i class="fas fa-sun"></i> Regular Hours</span>
+                    <span class="preview-value" id="previewRegular">0.00 hrs</span>
+                  </div>
+                  <div class="preview-row">
+                    <span class="preview-label"><i class="fas fa-moon"></i> Night Diff (10PM-6AM)</span>
+                    <span class="preview-value night" id="previewNight">0.00 hrs</span>
+                  </div>
+                  <div class="preview-row">
+                    <span class="preview-label"><i class="fas fa-clock"></i> Overtime (>8 hrs)</span>
+                    <span class="preview-value overtime" id="previewOT">0.00 hrs</span>
+                  </div>
+                  <div class="preview-row total">
+                    <span class="preview-label"><i class="fas fa-check-circle"></i> Total Hours</span>
+                    <span class="preview-value" id="previewTotal">0.00 hrs</span>
+                  </div>
+                </div>
+                <small class="help-text" style="margin-top: 8px; display: block;"><i class="fas fa-info-circle"></i> All calculations are automatic based on your time entries</small>
+              </div>
+            </div>
+            <div class="popup-buttons">
+              <button id="savePopupDuty" class="popup-btn popup-btn-save">Save</button>
+              <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
+            </div>
           </div>
         </div>
-        <small class="help-text" style="margin-top: 8px; display: block;">
-          <i class="fas fa-info-circle"></i> All calculations are automatic based on your time entries
-        </small>
-      </div>
-    </div>
-
-    <!-- Buttons -->
-    <div class="popup-buttons">
-      <button id="savePopupDuty" class="popup-btn popup-btn-save">Save</button>
-      <button id="cancelPopupDuty" class="popup-btn popup-btn-cancel">Cancel</button>
-    </div>
-  </div>
-</div>
       </section>
 
-      <!-- View Duty Log Section -->
       <section class="content-section" id="view-duty-log">
         <div class="duty-log-container">
           <div class="duty-log-header">
@@ -691,10 +335,35 @@
               <input type="month" id="monthFilter" class="month-filter">
             </div>
           </div>
+          <div class="mini-dashboard" id="miniDashboard">
+            <div class="dashboard-card">
+              <div class="card-label">Total Hour</div>
+              <div class="card-value" id="dashTotalHours">0.00</div>
+            </div>
+            <div class="dashboard-card">
+              <div class="card-label">Regular Hour</div>
+              <div class="card-value" id="dashRegularHours">0.00</div>
+            </div>
+            <div class="dashboard-card">
+              <div class="card-label">Night Differential</div>
+              <div class="card-value night-shift" id="dashNightHours">0.00</div>
+            </div>
+            <div class="dashboard-card">
+              <div class="card-label">Special Day Hour</div>
+              <div class="card-value special-day" id="dashSpecialDayHours">0.00</div>
+            </div>
+            <div class="dashboard-card">
+              <div class="card-label">Over Time Hour</div>
+              <div class="card-value overtime" id="dashOverTimeHours">0.00</div>
+            </div>
+            <div class="dashboard-card">
+              <div class="card-label">Total work availability</div>
+              <div class="card-value percentage" id="dashAvailability">%0.00</div>
+            </div>
+          </div>
+        </div>
 
-          <!-- Table and Dashboard Layout -->
-          <div class="duty-content-layout">
-            <!-- Table -->
+        <div class="duty-content-layout">
           <div class="duty-table-wrapper">
             <table class="duty-table" id="dutyTable">
               <thead>
@@ -709,52 +378,12 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="dutyTableBody">
-                  <!-- Populated by JavaScript -->
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Mini Dashboard (Below Table) -->
-            <div class="mini-dashboard" id="miniDashboard">
-              <div class="dashboard-card">
-                <div class="card-label">Total Hour</div>
-                <div class="card-value" id="dashTotalHours">0.00</div>
-              </div>
-              
-              <div class="dashboard-card">
-                <div class="card-label">Regular Hour</div>
-                <div class="card-value" id="dashRegularHours">0.00</div>
-              </div>
-              
-              <div class="dashboard-card">
-                <div class="card-label">Night Differential</div>
-                <div class="card-value night-shift" id="dashNightHours">0.00</div>
-              </div>
-              
-              <div class="dashboard-card">
-                <div class="card-label">Special Day Hour</div>
-                <div class="card-value special-day" id="dashSpecialDayHours">0.00</div>
-              </div>
-              
-              <div class="dashboard-card">
-                <div class="card-label">Over Time Hour</div>
-                <div class="card-value overtime" id="dashOverTimeHours">0.00</div>
-              </div>
-              
-              <div class="dashboard-card">
-                <div class="card-label">Total work availability</div>
-                <div class="card-value percentage" id="dashAvailability">%0.00</div>
-              </div>
-            </div>
+              <tbody id="dutyTableBody"></tbody>
+            </table>
           </div>
 
-          <!-- Mobile Card View (Hidden on Desktop) -->
-          <div class="duty-cards-wrapper" id="dutyCardsWrapper">
-            <!-- Populated by JavaScript -->
-          </div>
+          <div class="duty-cards-wrapper" id="dutyCardsWrapper"></div>
 
-          <!-- Empty State (Fallback) -->
           <div class="duty-empty-state" id="dutyEmptyState" style="display: none;">
             <i class="fas fa-calendar-times"></i>
             <h3>No Duty Records</h3>
@@ -765,873 +394,1267 @@
           </div>
         </div>
 
-        <!-- Edit Duty Modal -->
-        <!-- Edit Duty Modal - AUTO VERSION -->
-<div id="dutyLogEditModal" class="popup-overlay">
-  <div class="popup-card">
-    <div class="popup-header">
-      <h3>Edit Duty Record</h3>
-    </div>
-    
-    <div id="editDutyError" class="popup-error" style="display: none;"></div>
-    
-    <div class="popup-content">
-      <input type="hidden" id="editDutyId">
-      
-      <div class="popup-section">
-        <label class="section-label">Date</label>
-        <input type="date" id="editDutyDate" class="date-input" readonly>
-      </div>
-
-      <div class="popup-section">
-        <label class="section-label">Work Hours</label>
-        <div class="time-input-group">
-          <div class="time-input-wrapper">
-            <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
-            <input type="time" id="editDutyTimeIn" class="time-input">
-            <small class="help-text">Start time</small>
-          </div>
-          <div class="time-separator">→</div>
-          <div class="time-input-wrapper">
-            <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
-            <input type="time" id="editDutyTimeOut" class="time-input">
-            <small class="help-text">End time</small>
-          </div>
-        </div>
-      </div>
-
-      <div class="popup-section">
-        <label class="section-label">Day Type</label>
-        <select id="editDutyDayType" class="select-input">
-          <option>Regular</option>
-          <option>Regular Holiday (130%)</option>
-          <option>Special Non-Working Holiday (200%)</option>
-        </select>
-      </div>
-
-      <!-- AUTO PREVIEW SECTION -->
-      <div class="popup-section">
-        <label class="section-label">Automatic Calculation Preview</label>
-        <div class="auto-preview-box">
-          <div class="preview-row">
-            <span class="preview-label">
-              <i class="fas fa-sun"></i> Regular Hours
-            </span>
-            <span class="preview-value" id="editPreviewRegular">0.00 hrs</span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">
-              <i class="fas fa-moon"></i> Night Diff (10PM-6AM)
-            </span>
-            <span class="preview-value night" id="editPreviewNight">0.00 hrs</span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">
-              <i class="fas fa-clock"></i> Overtime (>8 hrs)
-            </span>
-            <span class="preview-value overtime" id="editPreviewOT">0.00 hrs</span>
-          </div>
-          <div class="preview-row total">
-            <span class="preview-label">
-              <i class="fas fa-check-circle"></i> Total Hours
-            </span>
-            <span class="preview-value" id="editPreviewTotal">0.00 hrs</span>
+        <div id="dutyLogEditModal" class="popup-overlay">
+          <div class="popup-card">
+            <div class="popup-header"><h3>Edit Duty Record</h3></div>
+            <div id="editDutyError" class="popup-error" style="display: none;"></div>
+            <div class="popup-content">
+              <input type="hidden" id="editDutyId">
+              <div class="popup-section">
+                <label class="section-label">Date</label>
+                <input type="date" id="editDutyDate" class="date-input" readonly>
+              </div>
+              <div class="popup-section">
+                <label class="section-label">Work Hours</label>
+                <div class="time-input-group">
+                  <div class="time-input-wrapper">
+                    <label for="editDutyTimeIn" class="input-label">Time In <span class="required">*</span></label>
+                    <input type="time" id="editDutyTimeIn" class="time-input">
+                    <small class="help-text">Start time</small>
+                  </div>
+                  <div class="time-separator">→</div>
+                  <div class="time-input-wrapper">
+                    <label for="editDutyTimeOut" class="input-label">Time Out <span class="required">*</span></label>
+                    <input type="time" id="editDutyTimeOut" class="time-input">
+                    <small class="help-text">End time</small>
+                  </div>
+                </div>
+              </div>
+              <div class="popup-section">
+                <label class="section-label">Day Type</label>
+                <select id="editDutyDayType" class="select-input">
+                  <option>Regular</option>
+                  <option>Regular Holiday (130%)</option>
+                  <option>Special Non-Working Holiday (200%)</option>
+                </select>
+              </div>
+              <div class="popup-section">
+                <label class="section-label">Automatic Calculation Preview</label>
+                <div class="auto-preview-box">
+                  <div class="preview-row">
+                    <span class="preview-label"><i class="fas fa-sun"></i> Regular Hours</span>
+                    <span class="preview-value" id="editPreviewRegular">0.00 hrs</span>
+                  </div>
+                  <div class="preview-row">
+                    <span class="preview-label"><i class="fas fa-moon"></i> Night Diff (10PM-6AM)</span>
+                    <span class="preview-value night" id="editPreviewNight">0.00 hrs</span>
+                  </div>
+                  <div class="preview-row">
+                    <span class="preview-label"><i class="fas fa-clock"></i> Overtime (>8 hrs)</span>
+                    <span class="preview-value overtime" id="editPreviewOT">0.00 hrs</span>
+                  </div>
+                  <div class="preview-row total">
+                    <span class="preview-label"><i class="fas fa-check-circle"></i> Total Hours</span>
+                    <span class="preview-value" id="editPreviewTotal">0.00 hrs</span>
+                  </div>
+                </div>
+                <small class="help-text" style="margin-top: 8px; display: block;"><i class="fas fa-info-circle"></i> All calculations are automatic based on your time entries</small>
+              </div>
+            </div>
+            <div class="popup-buttons">
+              <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
+              <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
+            </div>
           </div>
         </div>
-        <small class="help-text" style="margin-top: 8px; display: block;">
-          <i class="fas fa-info-circle"></i> All calculations are automatic based on your time entries
-        </small>
-      </div>
-    </div>
 
-    <div class="popup-buttons">
-      <button onclick="saveEditedDuty()" class="popup-btn popup-btn-update">Update</button>
-      <button onclick="closeEditModal()" class="popup-btn popup-btn-cancel">Cancel</button>
-    </div>
-  </div>
-</div>
-
-        <!-- Delete Confirmation Modal -->
         <div id="dutyLogDeleteModal" class="confirmation-modal">
           <div class="confirmation-content">
-            <div class="confirmation-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
+            <div class="confirmation-icon"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 class="confirmation-title">Delete Entry?</h3>
-            <p class="confirmation-message">
-              This action cannot be undone. Are you sure you want to delete this duty record?
-            </p>
+            <p class="confirmation-message">This action cannot be undone. Are you sure you want to delete this duty record?</p>
             <div class="confirmation-buttons">
-              <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel">
-                <i class="fas fa-times"></i> Keep
-              </button>
-              <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger">
-                <i class="fas fa-trash"></i> Delete
-              </button>
+              <button id="cancelDutyLogDelete" class="conf-btn conf-btn-cancel"><i class="fas fa-times"></i> Keep</button>
+              <button id="confirmDutyLogDelete" class="conf-btn conf-btn-danger"><i class="fas fa-trash"></i> Delete</button>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- Payslip Section -->
+      <section class="content-section" id="generate-payslip">
+        <div class="generate-payslip-container">
+          <div class="generate-layout">
+            <div class="generate-form-section">
+              <div class="form-card">
+                <div class="form-card-header">
+                  <i class="fas fa-calculator"></i>
+                  <h3>Payroll Calculator</h3>
+                </div>
+                <div class="form-card-body">
+                  <div class="form-section-group">
+                    <label class="form-section-label">Pay Period</label>
+                    <div class="period-selectors">
+                      <div class="select-wrapper">
+                        <label for="generateYear">Year</label>
+                        <select id="generateYear" class="form-select"></select>
+                      </div>
+                      <div class="select-wrapper">
+                        <label for="generateMonth">Month</label>
+                        <select id="generateMonth" class="form-select">
+                          <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+                          <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+                          <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+                          <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                        </select>
+                      </div>
+                      <div class="select-wrapper">
+                        <label for="generateCutoff">Cutoff</label>
+                        <select id="generateCutoff" class="form-select">
+                          <option value="1">1st – 15th</option>
+                          <option value="2">16th – 30th/31st</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
 
-    <!-- Deduction Breakdown Section -->
-<section class="content-section" id="deduction-breakdown">
-  <div class="deduction-breakdown-container">
-    
-    <!-- Header with Period Selector -->
-    <div class="breakdown-header">
-      <h2 class="section-title">
-        <i></i> Deduction Breakdown
-      </h2>
-      <div class="period-selector-group">
-        <select id="breakdownMonth" class="breakdown-select">
-          <option value="all">All Months</option>
-          <option value="1">January</option>
-          <option value="2">February</option>
-          <option value="3">March</option>
-          <option value="4">April</option>
-          <option value="5">May</option>
-          <option value="6">June</option>
-          <option value="7">July</option>
-          <option value="8">August</option>
-          <option value="9">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">December</option>
-        </select>
-        <select id="breakdownYear" class="breakdown-select">
-          <!-- Populated by JS -->
-        </select>
-      </div>
-    </div>
+                  <div class="form-section-group">
+                    <label class="form-section-label">Rate Configuration</label>
+                    <div class="rate-config">
+                      <div class="rate-type-toggle">
+                        <button type="button" class="rate-btn active" data-type="hourly"><i class="fas fa-clock"></i> Per Hour</button>
+                        <button type="button" class="rate-btn" data-type="daily"><i class="fas fa-calendar-day"></i> Per Day</button>
+                      </div>
+                      <div id="rateInputContainer" style="display: flex; flex-direction: column;">
+                        <div class="rate-input-wrapper">
+                          <span class="currency-symbol">₱</span>
+                          <input type="number" id="rateInput" class="rate-input" placeholder="0.00" step="0.01" min="0">
+                          <span class="rate-label" id="rateLabel">/hour</span>
+                        </div>
+                      </div>
+                      <small id="rateStatus" class="help-text" style="margin-top: 8px; display: none;"><i class="fas fa-lock"></i> Using saved default rate</small>
+                    </div>
+                  </div>
 
-    <!-- Summary Cards -->
-    <div class="deduction-summary-cards">
-      <div class="deduction-card total">
-        <div class="card-icon">
-          <i class="fas fa-wallet"></i>
-        </div>
-        <div class="card-content">
-          <span class="card-label">Total Deductions</span>
-          <span class="card-value" id="totalDeductions">₱0.00</span>
-          <span class="card-trend" id="totalTrend"></span>
-        </div>
-      </div>
+                  <div class="form-section-group">
+                    <label class="form-section-label">Hours Summary</label>
+                    <div class="hours-summary-grid">
+                      <div class="hours-item">
+                        <div class="hours-icon regular"><i class="fas fa-briefcase"></i></div>
+                        <div class="hours-details">
+                          <span class="hours-label">Regular Hours</span>
+                          <span class="hours-value" id="summaryRegularHours">0.00</span>
+                        </div>
+                      </div>
+                      <div class="hours-item">
+                        <div class="hours-icon overtime"><i class="fas fa-hourglass-half"></i></div>
+                        <div class="hours-details">
+                          <span class="hours-label">Overtime Hours</span>
+                          <span class="hours-value" id="summaryOvertimeHours">0.00</span>
+                        </div>
+                      </div>
+                      <div class="hours-item">
+                        <div class="hours-icon night"><i class="fas fa-moon"></i></div>
+                        <div class="hours-details">
+                          <span class="hours-label">Night Diff Hours</span>
+                          <span class="hours-value" id="summaryNightHours">0.00</span>
+                        </div>
+                      </div>
+                      <div class="hours-item">
+                        <div class="hours-icon holiday"><i class="fas fa-gift"></i></div>
+                        <div class="hours-details">
+                          <span class="hours-label">Holiday Hours</span>
+                          <span class="hours-value" id="summaryHolidayHours">0.00</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="hours-item total-worked-card">
+                      <div class="hours-icon worked"><i class="fas fa-check-circle"></i></div>
+                      <div class="hours-details">
+                        <span class="hours-label">Total Worked (Physical Hours)</span>
+                        <span class="hours-value" id="summaryWorkedHours">0.00</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" id="calculatePayslipBtn" class="btn-calculate"><i class="fas fa-calculator"></i> Calculate Payslip</button>
+                </div>
+              </div>
+            </div>
 
-      <div class="deduction-card sss">
-        <div class="card-icon">
-          <i class="fas fa-shield-alt"></i>
-        </div>
-        <div class="card-content">
-          <span class="card-label">
-            SSS
-            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Social Security System - Retirement, disability, and sickness benefits"></i>
-          </span>
-          <span class="card-value" id="sssDeduction">₱0.00</span>
-          <span class="card-percentage" id="sssPercent">0%</span>
-        </div>
-      </div>
+            <div class="generate-preview-section">
+              <div class="preview-card">
+                <div class="preview-header">
+                  <div class="preview-logo">
+                    <img src="../images/logo.png" alt="Logo" class="preview-logo-img">
+                    <span>DutySync</span>
+                  </div>
+                  <div class="preview-badge">PAYSLIP</div>
+                </div>
 
-      <div class="deduction-card philhealth">
-        <div class="card-icon">
-          <i class="fas fa-heartbeat"></i>
-        </div>
-        <div class="card-content">
-          <span class="card-label">
-            PhilHealth
-            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Philippine Health Insurance - Medical and hospitalization coverage"></i>
-          </span>
-          <span class="card-value" id="philhealthDeduction">₱0.00</span>
-          <span class="card-percentage" id="philhealthPercent">0%</span>
-        </div>
-      </div>
+                <div class="preview-employee-info">
+                  <div class="preview-employee-row">
+                    <span class="info-label">Employee Name:</span>
+                    <span class="info-value" id="previewEmployeeName">---</span>
+                  </div>
+                  <div class="preview-employee-row">
+                    <span class="info-label">Position:</span>
+                    <span class="info-value" id="previewEmployeePosition">---</span>
+                  </div>
+                  <div class="preview-employee-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="previewEmployeeEmail">---</span>
+                  </div>
+                </div>
 
-      <div class="deduction-card pagibig">
-        <div class="card-icon">
-          <i class="fas fa-home"></i>
-        </div>
-        <div class="card-content">
-          <span class="card-label">
-            Pag-IBIG
-            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Home Development Mutual Fund - Housing loans and savings"></i>
-          </span>
-          <span class="card-value" id="pagibigDeduction">₱0.00</span>
-          <span class="card-percentage" id="pagibigPercent">0%</span>
-        </div>
-      </div>
+                <div class="preview-period">
+                  <span class="period-label">Pay Period:</span>
+                  <span class="period-value" id="previewPeriod">Select period</span>
+                </div>
 
-      <div class="deduction-card tax">
-        <div class="card-icon">
-          <i class="fas fa-file-invoice-dollar"></i>
-        </div>
-        <div class="card-content">
-          <span class="card-label">
-            BIR Tax
-            <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Bureau of Internal Revenue - Withholding tax based on income brackets"></i>
-          </span>
-          <span class="card-value" id="taxDeduction">₱0.00</span>
-          <span class="card-percentage" id="taxPercent">0%</span>
-        </div>
-      </div>
-    </div>
+                <div class="preview-body">
+                  <div class="preview-sections-grid">
+                    <div class="preview-section">
+                      <h4 class="preview-section-title"><i class="fas fa-plus-circle"></i> Earnings</h4>
+                      <div class="preview-section-content">
+                        <div class="preview-row"><span>Basic Pay</span><span id="previewBasicPay">₱ 0.00</span></div>
+                        <div class="preview-row"><span>Overtime Pay</span><span id="previewOvertimePay">₱ 0.00</span></div>
+                        <div class="preview-row"><span>Night Differential</span><span id="previewNightDiff">₱ 0.00</span></div>
+                        <div class="preview-row"><span>Holiday Pay</span><span id="previewHolidayPay">₱ 0.00</span></div>
+                        <div class="preview-row total"><span>Gross Pay</span><span id="previewGrossPay">₱ 0.00</span></div>
+                      </div>
+                    </div>
 
-    <!-- Charts Section -->
-    <div class="charts-container">
-      
-      <!-- Donut Chart -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3>
+                    <div class="preview-section">
+                      <h4 class="preview-section-title"><i class="fas fa-minus-circle"></i> Deductions</h4>
+                      <div class="preview-section-content">
+                        <div class="preview-row"><span>SSS</span><span id="previewSSS">₱ 0.00</span></div>
+                        <div class="preview-row"><span>PhilHealth</span><span id="previewPhilHealth">₱ 0.00</span></div>
+                        <div class="preview-row"><span>Pag-IBIG</span><span id="previewPagibig">₱ 0.00</span></div>
+                        <div class="preview-row"><span>BIR Tax</span><span id="previewBIRTax">₱ 0.00</span></div>
+                        <div class="preview-row total deduction"><span>Total Deductions</span><span id="previewTotalDeductions">₱ 0.00</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="preview-net-pay">
+                    <span class="net-label">NET PAY</span>
+                    <span class="net-value" id="previewNetPay">₱0.00</span>
+                  </div>
+                </div>
+
+                <div class="preview-footer">
+                  <button type="button" id="generatePdfBtn" class="btn-generate" disabled><i class="fas fa-file-pdf"></i> Generate Payslip</button>
+                </div>
+              </div>
+
+              <div id="generateStatus" class="generate-status" style="display: none;">
+                <div class="status-content">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <span>Generating payslip...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="payslipSuccessModal" class="modal-overlay">
+            <div class="modal-content success-modal">
+              <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+              <h3>Payslip Generated!</h3>
+              <p>Your payslip has been successfully generated and saved to your history.</p>
+              <div class="modal-buttons">
+                <button class="btn-modal btn-close" onclick="closeSuccessModal()"><i class="fas fa-check"></i> Done</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="payslip-history-section" id="payslipHistorySection">
+            <div class="history-section-header">
+              <h3><i class="fas fa-history"></i> Payslip History <span class="history-count" id="historyCount">0</span></h3>
+            </div>
+            <div id="payslipHistoryContainer">
+              <div class="history-empty-state">
+                <i class="fas fa-file-invoice" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                <h3>No Payslip History</h3>
+                <p>Generated payslips will appear here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Analytics Sections -->
+      <section class="content-section" id="net-pay-trends">
+        <div class="netpay-trends-container">
+          <div class="netpay-header">
+            <h2 class="section-title">Net Pay Trends</h2>
+            <div class="netpay-period-selector">
+              <select id="netpayYear" class="netpay-select"></select>
+            </div>
+          </div>
+
+          <div class="netpay-comparison-cards" id="netPayComparisonCards">
+            <div class="netpay-comparison-card current">
+              <div class="comparison-card-header">
+                <div class="comparison-card-icon"><i class="fas fa-wallet"></i></div>
+                <div class="comparison-badge increase" id="comparisonBadge"><i class="fas fa-arrow-up"></i> +0%</div>
+              </div>
+              <div class="comparison-card-body">
+                <span class="comparison-label">Current Period</span>
+                <span class="comparison-value" id="currentNetPay">₱0.00</span>
+                <span class="comparison-subtitle" id="currentPeriodLabel">Select a period</span>
+              </div>
+            </div>
+
+            <div class="netpay-comparison-card previous">
+              <div class="comparison-card-header">
+                <div class="comparison-card-icon"><i class="fas fa-history"></i></div>
+              </div>
+              <div class="comparison-card-body">
+                <span class="comparison-label">Previous Period</span>
+                <span class="comparison-value" id="previousNetPay">₱0.00</span>
+                <span class="comparison-subtitle" id="previousPeriodLabel">No previous data</span>
+              </div>
+            </div>
+
+            <div class="netpay-comparison-card average">
+              <div class="comparison-card-header">
+                <div class="comparison-card-icon"><i class="fas fa-calculator"></i></div>
+              </div>
+              <div class="comparison-card-body">
+                <span class="comparison-label">Average Net Pay</span>
+                <span class="comparison-value" id="averageNetPay">₱0.00</span>
+                <span class="comparison-subtitle">Per pay period</span>
+              </div>
+            </div>
+
+            <div class="netpay-comparison-card ytd">
+              <div class="comparison-card-header">
+                <div class="comparison-card-icon"><i class="fas fa-calendar-check"></i></div>
+              </div>
+              <div class="comparison-card-body">
+                <span class="comparison-label">Year-to-Date Total</span>
+                <span class="comparison-value" id="ytdNetPay">₱0.00</span>
+                <span class="comparison-subtitle" id="ytdCount">0 periods</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="netpay-trend-chart-card" id="netPayTrendChartCard">
+            <div class="trend-chart-header">
+              <h3><i class="fas fa-chart-area"></i> Net Pay Progression</h3>
+              <div class="chart-view-toggle">
+                <button class="toggle-btn active" id="toggle6months">6 Periods</button>
+                <button class="toggle-btn" id="toggle12months">12 Periods</button>
+              </div>
+            </div>
+            <div class="trend-chart-body">
+              <canvas id="netPayTrendChart"></canvas>
+            </div>
+          </div>
+
+          <div class="netpay-insights-grid" id="netPayInsightsGrid">
+            <div class="insight-card hours">
+              <div class="insight-header">
+                <div class="insight-icon"><i class="fas fa-clock"></i></div>
+                <span class="insight-title">Work Activity</span>
+              </div>
+              <div class="insight-body">
+                <div class="insight-row">
+                  <span class="insight-row-label">Total Periods Worked</span>
+                  <span class="insight-row-value" id="totalPeriodsWorked">0</span>
+                </div>
+                <div class="insight-row">
+                  <span class="insight-row-label">Best Month</span>
+                  <span class="insight-row-value" id="bestMonthLabel">N/A</span>
+                </div>
+                <div class="insight-row">
+                  <span class="insight-row-label">Best Month Value</span>
+                  <span class="insight-row-value highlight" id="bestMonthValue">₱0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-card earnings">
+              <div class="insight-header">
+                <div class="insight-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <span class="insight-title">Earnings Summary</span>
+              </div>
+              <div class="insight-body">
+                <div class="insight-row">
+                  <span class="insight-row-label">Total Gross Pay</span>
+                  <span class="insight-row-value" id="totalEarningsGross">₱0.00</span>
+                </div>
+                <div class="insight-row">
+                  <span class="insight-row-label">Total Deductions</span>
+                  <span class="insight-row-value" id="totalDeductionsInsight">₱0.00</span>
+                </div>
+                <div class="insight-row">
+                  <span class="insight-row-label">Total Net Pay</span>
+                  <span class="insight-row-value highlight" id="totalEarningsNet">₱0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-card projection">
+              <div class="insight-header">
+                <div class="insight-icon"><i class="fas fa-chart-bar"></i></div>
+                <span class="insight-title">Period Comparison</span>
+              </div>
+              <div class="insight-body">
+                <div class="insight-row">
+                  <span class="insight-row-label">Lowest Month</span>
+                  <span class="insight-row-value" id="worstMonthLabel">N/A</span>
+                </div>
+                <div class="insight-row">
+                  <span class="insight-row-label">Lowest Month Value</span>
+                  <span class="insight-row-value" id="worstMonthValue">₱0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="projection-card" id="netPayProjectionCard">
+            <div class="projection-content">
+              <div class="projection-icon"><i class="fas fa-rocket"></i></div>
+              <div class="projection-details">
+                <h3>Annual Income Projection</h3>
+                <p class="projection-subtitle">Based on your recent earnings trend</p>
+                <div class="projection-value" id="projectedAnnualIncome">₱0.00</div>
+                <p class="projection-note"><i class="fas fa-info-circle"></i> Projection calculated from average of last 3 pay periods × 24 periods</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="netpay-table-card" id="netPayTableCard">
+            <div class="netpay-table-header">
+              <h3><i class="fas fa-table"></i> Detailed Net Pay History</h3>
+              <button class="btn-export-netpay" id="exportNetPayBtn"><i class="fas fa-download"></i> Export Data</button>
+            </div>
+            <div class="netpay-table-wrapper">
+              <table class="netpay-table">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th>Gross Pay</th>
+                    <th>Deductions</th>
+                    <th>Net Pay</th>
+                    <th>Trend</th>
+                  </tr>
+                </thead>
+                <tbody id="netPayTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="netpay-empty-state" id="netPayEmptyState" style="display: none;">
+            <i class="fas fa-chart-line"></i>
+            <h3>No Net Pay Data Available</h3>
+            <p>Generate payslips to see your net pay trends and projections</p>
+            <button class="btn-generate-payslip" onclick="document.querySelector('[data-page=\'generate-payslip\']').click()">
+              <i class="fas fa-plus"></i> Generate Payslip
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section" id="deduction-breakdown">
+        <div class="deduction-breakdown-container">
+          <div class="breakdown-header">
+            <h2 class="section-title"><i></i> Deduction Breakdown</h2>
+            <div class="period-selector-group">
+              <select id="breakdownMonth" class="breakdown-select">
+                <option value="all">All Months</option>
+                <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+                <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+                <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+                <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+              </select>
+              <select id="breakdownYear" class="breakdown-select"></select>
+            </div>
+          </div>
+
+          <div class="deduction-summary-cards">
+            <div class="deduction-card total">
+              <div class="card-icon"><i class="fas fa-wallet"></i></div>
+              <div class="card-content">
+                <span class="card-label">Total Deductions</span>
+                <span class="card-value" id="totalDeductions">₱0.00</span>
+                <span class="card-trend" id="totalTrend"></span>
+              </div>
+            </div>
+
+            <div class="deduction-card sss">
+              <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+              <div class="card-content">
+                <span class="card-label">SSS <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Social Security System - Retirement, disability, and sickness benefits"></i></span>
+                <span class="card-value" id="sssDeduction">₱0.00</span>
+                <span class="card-percentage" id="sssPercent">0%</span>
+              </div>
+            </div>
+
+            <div class="deduction-card philhealth">
+              <div class="card-icon"><i class="fas fa-heartbeat"></i></div>
+              <div class="card-content">
+                <span class="card-label">PhilHealth <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Philippine Health Insurance - Medical and hospitalization coverage"></i></span>
+                <span class="card-value" id="philhealthDeduction">₱0.00</span>
+                <span class="card-percentage" id="philhealthPercent">0%</span>
+              </div>
+            </div>
+
+            <div class="deduction-card pagibig">
+              <div class="card-icon"><i class="fas fa-home"></i></div>
+              <div class="card-content">
+                <span class="card-label">Pag-IBIG <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Home Development Mutual Fund - Housing loans and savings"></i></span>
+                <span class="card-value" id="pagibigDeduction">₱0.00</span>
+                <span class="card-percentage" id="pagibigPercent">0%</span>
+              </div>
+            </div>
+
+            <div class="deduction-card tax">
+              <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div class="card-content">
+                <span class="card-label">BIR Tax <i class="fas fa-info-circle tooltip-trigger" data-tooltip="Bureau of Internal Revenue - Withholding tax based on income brackets"></i></span>
+                <span class="card-value" id="taxDeduction">₱0.00</span>
+                <span class="card-percentage" id="taxPercent">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-container">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3><i class="fas fa-chart-pie"></i> Deduction Distribution</h3>
+                <span class="chart-subtitle">Current Period Breakdown</span>
+              </div>
+              <div class="chart-body">
+                <canvas id="deductionDonutChart"></canvas>
+                <div class="chart-legend" id="donutLegend"></div>
+              </div>
+            </div>
+
+            <div class="chart-card wide">
+              <div class="chart-header">
+                <h3><i class="fas fa-chart-line"></i> 6-Month Deduction Trends</h3>
+                <span class="chart-subtitle">Historical Overview</span>
+              </div>
+              <div class="chart-body">
+                <canvas id="deductionTrendChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="ratio-card">
+            <div class="ratio-content">
+              <div class="ratio-icon"><i class="fas fa-percentage"></i></div>
+              <div class="ratio-details">
+                <h3>Take-Home Pay Ratio</h3>
+                <p class="ratio-description">Percentage of gross income after deductions</p>
+                <div class="ratio-bar-container">
+                  <div class="ratio-bar" id="ratioBar"></div>
+                </div>
+                <div class="ratio-stats">
+                  <div class="stat-item">
+                    <span class="stat-label">Gross Pay:</span>
+                    <span class="stat-value" id="grossPayDisplay">₱0.00</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Net Pay:</span>
+                    <span class="stat-value highlight" id="netPayDisplay">₱0.00</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">You Keep:</span>
+                    <span class="stat-value highlight" id="keepPercentage">0%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="breakdown-table-card">
+            <div class="table-header">
+              <h3><i class="fas fa-table"></i> Historical Breakdown</h3>
+              <button class="btn-export" id="exportBreakdownBtn"><i class="fas fa-download"></i> Export Data</button>
+            </div>
+            <div class="table-wrapper">
+              <table class="breakdown-table">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th>Gross Pay</th>
+                    <th>SSS</th>
+                    <th>PhilHealth</th>
+                    <th>Pag-IBIG</th>
+                    <th>BIR Tax</th>
+                    <th>Total Deductions</th>
+                    <th>Net Pay</th>
+                  </tr>
+                </thead>
+                <tbody id="breakdownTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="breakdown-empty-state" id="breakdownEmptyState" style="display: none;">
             <i class="fas fa-chart-pie"></i>
-            Deduction Distribution
-          </h3>
-          <span class="chart-subtitle">Current Period Breakdown</span>
-        </div>
-        <div class="chart-body">
-          <canvas id="deductionDonutChart"></canvas>
-          <div class="chart-legend" id="donutLegend"></div>
-        </div>
-      </div>
-
-      <!-- Trend Line Chart -->
-      <div class="chart-card wide">
-        <div class="chart-header">
-          <h3>
-            <i class="fas fa-chart-line"></i>
-            6-Month Deduction Trends
-          </h3>
-          <span class="chart-subtitle">Historical Overview</span>
-        </div>
-        <div class="chart-body">
-          <canvas id="deductionTrendChart"></canvas>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Gross-to-Net Ratio Card -->
-    <div class="ratio-card">
-      <div class="ratio-content">
-        <div class="ratio-icon">
-          <i class="fas fa-percentage"></i>
-        </div>
-        <div class="ratio-details">
-          <h3>Take-Home Pay Ratio</h3>
-          <p class="ratio-description">Percentage of gross income after deductions</p>
-          <div class="ratio-bar-container">
-            <div class="ratio-bar" id="ratioBar"></div>
+            <h3>No Deduction Data Available</h3>
+            <p>Generate payslips to see your deduction breakdown and trends</p>
+            <button class="btn-generate-payslip" onclick="document.querySelector('[data-page=\'generate-payslip\']').click()">
+              <i class="fas fa-plus"></i> Generate Payslip
+            </button>
           </div>
-          <div class="ratio-stats">
-            <div class="stat-item">
-              <span class="stat-label">Gross Pay:</span>
-              <span class="stat-value" id="grossPayDisplay">₱0.00</span>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="content-section" id="settings">
+        <div class="settings-wrapper">
+          <div class="card settings-card">
+            <div class="card-header">
+              <h3><i class="fas fa-calculator"></i> Payroll Configuration</h3>
+              <p class="settings-subtitle">Manage base pay & multipliers</p>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Net Pay:</span>
-              <span class="stat-value highlight" id="netPayDisplay">₱0.00</span>
+
+            <div class="settings-group">
+              <h4 class="group-title">Base Rates</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Hourly Rate (PHP)</label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-clock"></i>
+                    <input type="number" id="hourlyRateInput" placeholder="0.00" step="0.01" min="0">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Daily Rate (PHP)</label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-calendar-day"></i>
+                    <input type="number" id="dailyRateInput" placeholder="0.00" step="0.01" min="0">
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-primary full-width" id="updateRateBtn"><i class="fas fa-save"></i> Save Base Rates</button>
+              <div id="rateStatusMessage" class="status-msg"></div>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">You Keep:</span>
-              <span class="stat-value highlight" id="keepPercentage">0%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Detailed Breakdown Table -->
-    <div class="breakdown-table-card">
-      <div class="table-header">
-        <h3>
-          <i class="fas fa-table"></i>
-          Historical Breakdown
-        </h3>
-        <button class="btn-export" id="exportBreakdownBtn">
-          <i class="fas fa-download"></i> Export Data
-        </button>
-      </div>
-      <div class="table-wrapper">
-        <table class="breakdown-table">
-          <thead>
-            <tr>
-              <th>Period</th>
-              <th>Gross Pay</th>
-              <th>SSS</th>
-              <th>PhilHealth</th>
-              <th>Pag-IBIG</th>
-              <th>BIR Tax</th>
-              <th>Total Deductions</th>
-              <th>Net Pay</th>
-            </tr>
-          </thead>
-          <tbody id="breakdownTableBody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
+            <hr class="settings-divider">
 
-    <!-- Empty State -->
-    <div class="breakdown-empty-state" id="breakdownEmptyState" style="display: none;">
-      <i class="fas fa-chart-pie"></i>
-      <h3>No Deduction Data Available</h3>
-      <p>Generate payslips to see your deduction breakdown and trends</p>
-      <button class="btn-generate-payslip" onclick="document.querySelector('[data-page=\'generate-payslip\']').click()">
-        <i class="fas fa-plus"></i> Generate Payslip
-      </button>
-    </div>
-
-  </div>
-</section>
-
-<!-- Net Pay Trends Section -->
-<section class="content-section" id="net-pay-trends">
-  <div class="netpay-trends-container">
-    
-    <!-- Header with Year Filter -->
-    <div class="netpay-header">
-      <h2 class="section-title">
-         Net Pay Trends
-      </h2>
-      <div class="netpay-period-selector">
-        <select id="netpayYear" class="netpay-select">
-          <!-- Populated by JS -->
-        </select>
-      </div>
-    </div>
-
-    <!-- Comparison Cards -->
-    <div class="netpay-comparison-cards" id="netPayComparisonCards">
-      <!-- Current Period Card -->
-      <div class="netpay-comparison-card current">
-        <div class="comparison-card-header">
-          <div class="comparison-card-icon">
-            <i class="fas fa-wallet"></i>
-          </div>
-          <div class="comparison-badge increase" id="comparisonBadge">
-            <i class="fas fa-arrow-up"></i> +0%
-          </div>
-        </div>
-        <div class="comparison-card-body">
-          <span class="comparison-label">Current Period</span>
-          <span class="comparison-value" id="currentNetPay">₱0.00</span>
-          <span class="comparison-subtitle" id="currentPeriodLabel">Select a period</span>
-        </div>
-      </div>
-
-      <!-- Previous Period Card -->
-      <div class="netpay-comparison-card previous">
-        <div class="comparison-card-header">
-          <div class="comparison-card-icon">
-            <i class="fas fa-history"></i>
-          </div>
-        </div>
-        <div class="comparison-card-body">
-          <span class="comparison-label">Previous Period</span>
-          <span class="comparison-value" id="previousNetPay">₱0.00</span>
-          <span class="comparison-subtitle" id="previousPeriodLabel">No previous data</span>
-        </div>
-      </div>
-
-      <!-- Average Card -->
-      <div class="netpay-comparison-card average">
-        <div class="comparison-card-header">
-          <div class="comparison-card-icon">
-            <i class="fas fa-calculator"></i>
-          </div>
-        </div>
-        <div class="comparison-card-body">
-          <span class="comparison-label">Average Net Pay</span>
-          <span class="comparison-value" id="averageNetPay">₱0.00</span>
-          <span class="comparison-subtitle">Per pay period</span>
-        </div>
-      </div>
-
-      <!-- YTD Total Card -->
-      <div class="netpay-comparison-card ytd">
-        <div class="comparison-card-header">
-          <div class="comparison-card-icon">
-            <i class="fas fa-calendar-check"></i>
-          </div>
-        </div>
-        <div class="comparison-card-body">
-          <span class="comparison-label">Year-to-Date Total</span>
-          <span class="comparison-value" id="ytdNetPay">₱0.00</span>
-          <span class="comparison-subtitle" id="ytdCount">0 periods</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Trend Chart -->
-    <div class="netpay-trend-chart-card" id="netPayTrendChartCard">
-      <div class="trend-chart-header">
-        <h3>
-          <i class="fas fa-chart-area"></i>
-          Net Pay Progression
-        </h3>
-        <div class="chart-view-toggle">
-          <button class="toggle-btn active" id="toggle6months">6 Periods</button>
-          <button class="toggle-btn" id="toggle12months">12 Periods</button>
-        </div>
-      </div>
-      <div class="trend-chart-body">
-        <canvas id="netPayTrendChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Insights Grid -->
-    <div class="netpay-insights-grid" id="netPayInsightsGrid">
-      
-      <!-- Hours Correlation Card -->
-      <div class="insight-card hours">
-        <div class="insight-header">
-          <div class="insight-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <span class="insight-title">Work Activity</span>
-        </div>
-        <div class="insight-body">
-          <div class="insight-row">
-            <span class="insight-row-label">Total Periods Worked</span>
-            <span class="insight-row-value" id="totalPeriodsWorked">0</span>
-          </div>
-          <div class="insight-row">
-            <span class="insight-row-label">Best Month</span>
-            <span class="insight-row-value" id="bestMonthLabel">N/A</span>
-          </div>
-          <div class="insight-row">
-            <span class="insight-row-label">Best Month Value</span>
-            <span class="insight-row-value highlight" id="bestMonthValue">₱0.00</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Earnings Breakdown Card -->
-      <div class="insight-card earnings">
-        <div class="insight-header">
-          <div class="insight-icon">
-            <i class="fas fa-money-bill-wave"></i>
-          </div>
-          <span class="insight-title">Earnings Summary</span>
-        </div>
-        <div class="insight-body">
-          <div class="insight-row">
-            <span class="insight-row-label">Total Gross Pay</span>
-            <span class="insight-row-value" id="totalEarningsGross">₱0.00</span>
-          </div>
-          <div class="insight-row">
-            <span class="insight-row-label">Total Deductions</span>
-            <span class="insight-row-value" id="totalDeductionsInsight">₱0.00</span>
-          </div>
-          <div class="insight-row">
-            <span class="insight-row-label">Total Net Pay</span>
-            <span class="insight-row-value highlight" id="totalEarningsNet">₱0.00</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lowest Period Card -->
-      <div class="insight-card projection">
-        <div class="insight-header">
-          <div class="insight-icon">
-            <i class="fas fa-chart-bar"></i>
-          </div>
-          <span class="insight-title">Period Comparison</span>
-        </div>
-        <div class="insight-body">
-          <div class="insight-row">
-            <span class="insight-row-label">Lowest Month</span>
-            <span class="insight-row-value" id="worstMonthLabel">N/A</span>
-          </div>
-          <div class="insight-row">
-            <span class="insight-row-label">Lowest Month Value</span>
-            <span class="insight-row-value" id="worstMonthValue">₱0.00</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Projection Card -->
-    <div class="projection-card" id="netPayProjectionCard">
-      <div class="projection-content">
-        <div class="projection-icon">
-          <i class="fas fa-rocket"></i>
-        </div>
-        <div class="projection-details">
-          <h3>Annual Income Projection</h3>
-          <p class="projection-subtitle">Based on your recent earnings trend</p>
-          <div class="projection-value" id="projectedAnnualIncome">₱0.00</div>
-          <p class="projection-note">
-            <i class="fas fa-info-circle"></i> 
-            Projection calculated from average of last 3 pay periods × 24 periods
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Detailed Table -->
-    <div class="netpay-table-card" id="netPayTableCard">
-      <div class="netpay-table-header">
-        <h3>
-          <i class="fas fa-table"></i>
-          Detailed Net Pay History
-        </h3>
-        <button class="btn-export-netpay" id="exportNetPayBtn">
-          <i class="fas fa-download"></i> Export Data
-        </button>
-      </div>
-      <div class="netpay-table-wrapper">
-        <table class="netpay-table">
-          <thead>
-            <tr>
-              <th>Period</th>
-              <th>Gross Pay</th>
-              <th>Deductions</th>
-              <th>Net Pay</th>
-              <th>Trend</th>
-            </tr>
-          </thead>
-          <tbody id="netPayTableBody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div class="netpay-empty-state" id="netPayEmptyState" style="display: none;">
-      <i class="fas fa-chart-line"></i>
-      <h3>No Net Pay Data Available</h3>
-      <p>Generate payslips to see your net pay trends and projections</p>
-      <button class="btn-generate-payslip" onclick="document.querySelector('[data-page=\'generate-payslip\']').click()">
-        <i class="fas fa-plus"></i> Generate Payslip
-      </button>
-    </div>
-
-  </div>
-</section>
-
-<section class="content-section" id="settings">
-  <div class="settings-wrapper">
-    
-    <div class="card settings-card">
-      <div class="card-header">
-        <h3><i class="fas fa-calculator"></i> Payroll Configuration</h3>
-        <p class="settings-subtitle">Manage base pay & multipliers</p>
-      </div>
-
-      <div class="settings-group">
-        <h4 class="group-title">Base Rates</h4>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Hourly Rate (PHP)</label>
-            <div class="input-with-icon">
-              <i class="fas fa-clock"></i>
-              <input type="number" id="hourlyRateInput" placeholder="0.00" step="0.01" min="0">
+            <div class="settings-group">
+              <h4 class="group-title">Premium Multipliers</h4>
+              <div class="form-group">
+                <label>Overtime (x Base) <i class="fas fa-info-circle tooltip-icon" title="Standard: 1.25"></i></label>
+                <div class="input-with-icon">
+                  <i class="fas fa-stopwatch"></i>
+                  <input type="number" id="overtimeRateInput" placeholder="1.25" step="0.01" min="0">
+                </div>
+                <small class="helper-text">1.25 = 125% of hourly rate</small>
+              </div>
+              <div class="form-group">
+                <label>Night Differential (x Base) <i class="fas fa-info-circle tooltip-icon" title="Standard: 0.10"></i></label>
+                <div class="input-with-icon">
+                  <i class="fas fa-moon"></i>
+                  <input type="number" id="nightDiffRateInput" placeholder="0.10" step="0.01" min="0">
+                </div>
+                <small class="helper-text">0.10 = 10% additional per hour</small>
+              </div>
+              
+              <div class="btn-group">
+                <button class="btn btn-primary" id="savePremiumRatesBtn"><i class="fas fa-save"></i> Save</button>
+                <button class="btn btn-outline" id="resetPremiumRatesBtn"><i class="fas fa-redo"></i> Reset</button>
+              </div>
+              <div id="premiumRatesStatusMessage" class="status-msg"></div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Daily Rate (PHP)</label>
-            <div class="input-with-icon">
-              <i class="fas fa-calendar-day"></i>
-              <input type="number" id="dailyRateInput" placeholder="0.00" step="0.01" min="0">
+
+          <div class="card settings-card">
+            <div class="card-header">
+              <h3><i class="fas fa-user-cog"></i> Account & Preferences</h3>
+              <p class="settings-subtitle">Appearance & Security</p>
+            </div>
+
+            <input type="checkbox" id="themeCheckbox" style="display: none;">
+
+            <div class="settings-group">
+              <label class="section-label">Appearance</label>
+              <div class="theme-selector-container">
+                <div class="theme-option light-option" onclick="document.getElementById('themeCheckbox').checked = false; document.getElementById('themeCheckbox').dispatchEvent(new Event('change'));">
+                  <div class="theme-preview">
+                    <div class="preview-screen light-screen"><i class="fas fa-sun"></i></div>
+                  </div>
+                  <span class="theme-label">Light</span>
+                </div>
+
+                <div class="theme-option dark-option" onclick="document.getElementById('themeCheckbox').checked = true; document.getElementById('themeCheckbox').dispatchEvent(new Event('change'));">
+                  <div class="theme-preview">
+                    <div class="preview-screen dark-screen"><i class="fas fa-moon"></i></div>
+                  </div>
+                  <span class="theme-label">Dark</span>
+                </div>
+              </div>
+            </div>
+
+            <hr class="settings-divider">
+
+            <div class="settings-group">
+              <label class="section-label">Change Password</label>
+              <div class="form-group">
+                <input type="password" id="currentPassword" placeholder="Current password">
+              </div>
+              <div class="form-group">
+                <input type="password" id="newPassword" placeholder="New password">
+              </div>
+              <button class="btn btn-primary full-width" id="updatePasswordBtn">Update Password</button>
+            </div>
+
+            <hr class="settings-divider">
+
+            <div class="settings-group danger-zone">
+              <label class="section-label text-danger">Danger Zone</label>
+              <div class="danger-actions">
+                 <button class="btn btn-danger" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button class="btn btn-danger-outline" onclick="deleteAccount()"><i class="fas fa-trash-alt"></i> Delete Account</button>
+              </div>
+            </div>
+            
+            <div class="settings-footer">
+              <button class="btn btn-subtle" id="aboutBtn"><i class="fas fa-info-circle"></i> About DutySync</button>
             </div>
           </div>
         </div>
-        <button class="btn btn-primary full-width" id="updateRateBtn">
-          <i class="fas fa-save"></i> Save Base Rates
-        </button>
-        <div id="rateStatusMessage" class="status-msg"></div>
-      </div>
+      </section>
 
-      <hr class="settings-divider">
-
-      <div class="settings-group">
-        <h4 class="group-title">Premium Multipliers</h4>
-        <div class="form-group">
-          <label>
-            Overtime (x Base)
-            <i class="fas fa-info-circle tooltip-icon" title="Standard: 1.25"></i>
-          </label>
-          <div class="input-with-icon">
-            <i class="fas fa-stopwatch"></i>
-            <input type="number" id="overtimeRateInput" placeholder="1.25" step="0.01" min="0">
-          </div>
-          <small class="helper-text">1.25 = 125% of hourly rate</small>
-        </div>
-        <div class="form-group">
-          <label>
-            Night Differential (x Base)
-            <i class="fas fa-info-circle tooltip-icon" title="Standard: 0.10"></i>
-          </label>
-          <div class="input-with-icon">
-            <i class="fas fa-moon"></i>
-            <input type="number" id="nightDiffRateInput" placeholder="0.10" step="0.01" min="0">
-          </div>
-          <small class="helper-text">0.10 = 10% additional per hour</small>
-        </div>
-        
-        <div class="btn-group">
-          <button class="btn btn-primary" id="savePremiumRatesBtn">
-            <i class="fas fa-save"></i> Save
-          </button>
-          <button class="btn btn-outline" id="resetPremiumRatesBtn">
-            <i class="fas fa-redo"></i> Reset
-          </button>
-        </div>
-        <div id="premiumRatesStatusMessage" class="status-msg"></div>
-      </div>
-    </div>
-
-    <div class="card settings-card">
-      <div class="card-header">
-        <h3><i class="fas fa-user-cog"></i> Account & Preferences</h3>
-        <p class="settings-subtitle">Appearance & Security</p>
-      </div>
-
-      <input type="checkbox" id="themeCheckbox" style="display: none;">
-
-      <div class="settings-group">
-        <label class="section-label">Appearance</label>
-        <div class="theme-selector-container">
+      <section class="content-section" id="help">
+        <div class="help-container">
           
-          <div class="theme-option light-option" onclick="document.getElementById('themeCheckbox').checked = false; document.getElementById('themeCheckbox').dispatchEvent(new Event('change'));">
-            <div class="theme-preview">
-              <div class="preview-screen light-screen">
-                <i class="fas fa-sun"></i>
-              </div>
-            </div>
-            <span class="theme-label">Light</span>
+          <!-- Header -->
+          <div class="help-header">
+            <h1 class="help-title">Help & Support Center</h1>
+            <p class="help-subtitle">Get started with DutySync or find answers to common questions</p>
           </div>
 
-          <div class="theme-option dark-option" onclick="document.getElementById('themeCheckbox').checked = true; document.getElementById('themeCheckbox').dispatchEvent(new Event('change'));">
-            <div class="theme-preview">
-              <div class="preview-screen dark-screen">
-                <i class="fas fa-moon"></i>
+          <!-- Quick Navigation Tabs -->
+          <div class="help-tabs">
+            <button class="help-tab-btn active" data-tab="quick-start">
+              <i class="fas fa-rocket"></i> Quick Start
+            </button>
+            <button class="help-tab-btn" data-tab="features">
+              <i class="fas fa-star"></i> Features
+            </button>
+            <button class="help-tab-btn" data-tab="faqs">
+              <i class="fas fa-question-circle"></i> FAQs
+            </button>
+            <button class="help-tab-btn" data-tab="troubleshooting">
+              <i class="fas fa-wrench"></i> Troubleshooting
+            </button>
+          </div>
+
+          <!-- QUICK START TAB -->
+          <div class="help-tab-content active" id="quick-start">
+            <div class="quick-start-grid">
+              
+              <!-- Step 1 -->
+              <div class="quick-start-card">
+                <div class="step-number">1</div>
+                <h3 class="step-title">Set Your Pay Rate</h3>
+                <div class="step-content">
+                  <p>Go to <strong>Settings</strong> and enter your hourly or daily rate under "Payroll Configuration".</p>
+                  <ul class="step-list">
+                    <li>Click <strong>Settings</strong> in the sidebar</li>
+                    <li>Enter your <strong>Hourly Rate</strong> or <strong>Daily Rate</strong></li>
+                    <li>Adjust premium multipliers (Overtime, Night Diff) if needed</li>
+                    <li>Click <strong>Save Base Rates</strong></li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="quick-start-card">
+                <div class="step-number">2</div>
+                <h3 class="step-title">Log Your Work Hours</h3>
+                <div class="step-content">
+                  <p>Record your daily work hours in the <strong>Input Duty</strong> section.</p>
+                  <ul class="step-list">
+                    <li>Click <strong>Dashboard → Input Duty</strong></li>
+                    <li>Click on a date in the calendar</li>
+                    <li>Enter <strong>Time In</strong> and <strong>Time Out</strong></li>
+                    <li>Select <strong>Day Type</strong> (Regular, Holiday, etc.)</li>
+                    <li>Review the auto-calculated hours</li>
+                    <li>Click <strong>Save</strong></li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="quick-start-card">
+                <div class="step-number">3</div>
+                <h3 class="step-title">Generate Your Payslip</h3>
+                <div class="step-content">
+                  <p>Calculate and generate your payslip with automatic deductions.</p>
+                  <ul class="step-list">
+                    <li>Click <strong>Payslip</strong> in the sidebar</li>
+                    <li>Select the <strong>Pay Period</strong> (Year, Month, Cutoff)</li>
+                    <li>Review the hours summary</li>
+                    <li>Click <strong>Calculate Payslip</strong></li>
+                    <li>Review earnings and deductions</li>
+                    <li>Click <strong>Generate Payslip</strong> to save as PDF</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="quick-start-card">
+                <div class="step-number">4</div>
+                <h3 class="step-title">Track Your Analytics</h3>
+                <div class="step-content">
+                  <p>Monitor your earnings trends and deduction breakdown.</p>
+                  <ul class="step-list">
+                    <li>Click <strong>Analytics</strong> in the sidebar</li>
+                    <li>View <strong>Net Pay Trends</strong> for income analysis</li>
+                    <li>Check <strong>Deduction Breakdown</strong> by type</li>
+                    <li>Export reports for your records</li>
+                    <li>Compare periods and identify patterns</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="quick-start-tips">
+              <h3><i class="fas fa-lightbulb"></i> Pro Tips</h3>
+              <ul>
+                <li>Use the <strong>Overview</strong> dashboard to see your current month's summary at a glance</li>
+                <li>The system automatically calculates <strong>overtime</strong> (over 8 hours) and <strong>night differential</strong> (10PM-6AM)</li>
+                <li>Each cutoff period covers <strong>1-15</strong> and <strong>16-30/31</strong> of the month</li>
+                <li>You can edit or delete duty entries anytime from the <strong>View Duty Log</strong> section</li>
+                <li>Premium rates follow <strong>Philippine Labor Law Standards</strong> by default</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- FEATURES TAB -->
+          <div class="help-tab-content" id="features">
+            <div class="features-grid">
+              
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3>Duty Logging</h3>
+                <p>Log work hours with time in/out. The system automatically calculates regular hours, overtime, and night differential.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <h3>Auto-Calculation</h3>
+                <p>Automatic shift breakdown based on time entries. No manual calculations needed—the system handles it all.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3>Payslip Generation</h3>
+                <p>Generate professional payslips as PDF with complete earnings and deduction breakdown.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3>Deduction Breakdown</h3>
+                <p>View detailed breakdown of SSS, PhilHealth, Pag-IBIG, and BIR Tax deductions with visual charts.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-chart-area"></i>
+                </div>
+                <h3>Income Trends</h3>
+                <p>Track net pay trends across months and years. Identify patterns and project annual income.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-history"></i>
+                </div>
+                <h3>Payslip History</h3>
+                <p>Access all generated payslips with one click. Download and save them whenever needed.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-sun"></i>
+                </div>
+                <h3>Dark & Light Mode</h3>
+                <p>Switch between dark and light themes in Settings for comfortable viewing anytime.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Mobile Responsive</h3>
+                <p>Fully responsive design works seamlessly on desktop, tablet, and mobile devices.</p>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- FAQs TAB -->
+          <div class="help-tab-content" id="faqs">
+            <div class="faq-section">
+              
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>How do I log my work hours?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Navigate to <strong>Dashboard → Input Duty</strong>, click on the date you want to log, enter your time in and time out, and the system will automatically calculate your hours. You can select the day type (Regular, Holiday, etc.) as needed.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>What is considered overtime?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Any hours worked beyond 8 hours in a single day are considered overtime. The system automatically calculates this and applies a <strong>1.25x multiplier</strong> (125% of your base rate) to overtime hours, following Philippine Labor Law.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>What is night differential?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Night differential applies to hours worked between <strong>10:00 PM and 6:00 AM</strong>. The system adds <strong>10% of your base rate</strong> to these hours. You can adjust this percentage in Settings under Premium Multipliers.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>How do I change my pay rate?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Go to <strong>Settings → Payroll Configuration</strong> and enter your new hourly or daily rate. You can also adjust premium multipliers (Overtime and Night Differential) here. Click "Save Base Rates" to confirm.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>Can I edit or delete a duty entry?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Yes! Go to <strong>Dashboard → View Duty Log</strong>, find the entry you want to modify, and click the <strong>Edit</strong> or <strong>Delete</strong> button. You'll see a preview of the auto-calculated hours before saving.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>What deductions are included in my payslip?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Your payslip includes mandatory deductions as per Philippine law:
+                  <ul style="margin-top: 10px; margin-left: 20px; list-style: disc;">
+                    <li><strong>SSS</strong> - Social Security System contributions</li>
+                    <li><strong>PhilHealth</strong> - Health insurance (5% of gross pay)</li>
+                    <li><strong>Pag-IBIG</strong> - Housing loan fund (1-2% of gross pay)</li>
+                    <li><strong>BIR Tax</strong> - Income tax withheld based on your bracket</li>
+                  </ul>
+                  </p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>How often can I generate a payslip?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>You can generate one payslip per cutoff period (1-15 and 16-30/31 of each month). The system prevents duplicate payslips for the same period. You can regenerate a payslip if needed and overwrite the previous version.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>What is the cutoff period?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>The cutoff period divides each month into two pay periods: <strong>1st Cutoff (1-15)</strong> and <strong>2nd Cutoff (16-30/31)</strong>. You generate separate payslips for each cutoff period.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>Can I download my payslips?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Yes! All generated payslips are saved in your <strong>Payslip History</strong>. Click the <strong>Download PDF</strong> button next to any payslip to save it to your device.</p>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-question">
+                  <i class="fas fa-chevron-right"></i>
+                  <span>How do I view my income trends?</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Click <strong>Analytics → Net Pay Trends</strong> to see charts and graphs of your earnings over time. Filter by year and compare your current period with previous periods. You can also export data for your records.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- TROUBLESHOOTING TAB -->
+          <div class="help-tab-content" id="troubleshooting">
+            <div class="troubleshooting-grid">
+              
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Hours Not Showing</h3>
+                <p><strong>Problem:</strong> Logged hours don't appear in your summary.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Refresh the page (Ctrl+R or Cmd+R)</li>
+                  <li>Check if the date is within the selected month filter</li>
+                  <li>Ensure you clicked "Save" after logging the hours</li>
+                  <li>Try logging out and back in</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Payslip Won't Calculate</h3>
+                <p><strong>Problem:</strong> The "Calculate Payslip" button isn't working.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Ensure you've logged at least one duty entry for the period</li>
+                  <li>Check that your pay rate is set in Settings</li>
+                  <li>Verify the pay period (year, month, cutoff) is correct</li>
+                  <li>Make sure you entered a valid rate (greater than 0)</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Deductions Look Wrong</h3>
+                <p><strong>Problem:</strong> Deduction amounts don't seem accurate.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Verify your gross pay is calculated correctly</li>
+                  <li>Check SSS contribution against the 2025 table</li>
+                  <li>Confirm PhilHealth rate (5% of gross, max 100,000)</li>
+                  <li>Review premium multipliers in Settings</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Can't Edit Profile Photo</h3>
+                <p><strong>Problem:</strong> Photo upload fails or doesn't update.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Ensure the image is under 5MB</li>
+                  <li>Use common formats (JPG, PNG, GIF)</li>
+                  <li>Check your internet connection</li>
+                  <li>Try a different image file</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Dark Mode Not Working</h3>
+                <p><strong>Problem:</strong> Theme toggle doesn't change appearance.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Click the theme selector in Settings</li>
+                  <li>Refresh the page to apply changes</li>
+                  <li>Check your browser's dark mode setting</li>
+                  <li>Clear browser cache and cookies</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Duty Entry Shows Wrong Hours</h3>
+                <p><strong>Problem:</strong> Auto-calculated hours don't match expectations.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Verify time format is correct (24-hour, HH:MM)</li>
+                  <li>Ensure time out is after time in</li>
+                  <li>Check for overnight shifts (handles 10PM-6AM correctly)</li>
+                  <li>Review shift length calculation in the preview</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Can't Login</h3>
+                <p><strong>Problem:</strong> Unable to access your account.</p>
+                <p><strong>Solution:</strong></p>
+                <ul>
+                  <li>Verify your email address is correct</li>
+                  <li>Check your password (case-sensitive)</li>
+                  <li>Try the "Forgot Password" option</li>
+                  <li>Clear browser cookies and try again</li>
+                  <li>Use a different browser if issues persist</li>
+                </ul>
+              </div>
+
+              <div class="troubleshooting-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Need More Help?</h3>
+                <p><strong>Still stuck?</strong> Here are additional resources:</p>
+                <ul>
+                  <li>Review the DutySync About page for system info</li>
+                  <li>Check your browser console for error messages (F12)</li>
+                  <li>Ensure your browser is up to date</li>
+                  <li>Try accessing from a different device</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- FLOATING CONTACT BUBBLE -->
+          <div class="contact-bubble" id="contactBubble">
+            <div class="bubble-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="bubble-tooltip">Need help?</div>
+          </div>
+
+          <div class="contact-popup" id="contactPopup">
+            <div class="contact-popup-content">
+              <button class="popup-close" id="popupClose">
+                <i class="fas fa-times"></i>
+              </button>
+              
+              <div class="popup-header">
+                <h3>Get in Touch</h3>
+              </div>
+
+              <p class="popup-message">
+                Found a bug or have suggestions? Let's connect! Choose your preferred platform below.
+              </p>
+
+              <div class="popup-info">
+                <div class="popup-item">
+                  <i class="fas fa-user"></i>
+                  <span>Keil Rizher R. Valida</span>
+                </div>
+                <div class="popup-item">
+                  <i class="fas fa-code"></i>
+                  <span>Full Stack Developer</span>
+                </div>
+                <div class="popup-item">
+                  <i class="fas fa-tag"></i>
+                  <span>DutySync v1.0.0</span>
+                </div>
+              </div>
+
+              <div class="popup-actions">
+                <a href="mailto:keilrizher@example.com" class="popup-btn email-btn">
+                  <i class="fas fa-envelope"></i>
+                  <span>Email</span>
+                </a>
+                <a href="https://m.me/keilrizher" target="_blank" class="popup-btn messenger-btn">
+                  <i class="fab fa-facebook-messenger"></i>
+                  <span>Messenger</span>
+                </a>
+                <a href="https://github.com/yourusername" target="_blank" class="popup-btn github-btn">
+                  <i class="fab fa-github"></i>
+                  <span>GitHub</span>
+                </a>
+                <a href="https://yourwebsite.com" target="_blank" class="popup-btn website-btn">
+                  <i class="fas fa-globe"></i>
+                  <span>Website</span>
+                </a>
               </div>
             </div>
-            <span class="theme-label">Dark</span>
+          </div>
+      </section>
+
+      <!-- Profile Section -->
+      <section class="content-section" id="profile">
+        <div class="profile-container">
+          <div class="profile-header-card">
+            <div class="profile-banner"></div>
+            <div class="profile-info-section">
+              <div class="profile-avatar-wrapper">
+                <div class="profile-avatar-large" id="profileAvatarLarge">--</div>
+                <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                <button class="avatar-edit-btn" id="avatarEditBtn" type="button"><i class="fas fa-camera"></i></button>
+              </div>
+              <div class="profile-header-info">
+                <h2 class="profile-name" id="profileName">Loading...</h2>
+                <p class="profile-email" id="profileEmail">Loading...</p>
+                <div class="profile-badges">
+                  <span class="profile-badge" id="profilePosition">Manager</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-details-card">
+            <div class="profile-card-header"><h3>Personal Information</h3></div>
+
+            <div class="profile-form" id="profileForm">
+              <div class="profile-field-group">
+                <label class="profile-label">Full Name</label>
+                <div class="profile-field">
+                  <i class="fas fa-user field-icon"></i>
+                  <input type="text" id="profileFullName" class="profile-input" disabled>
+                </div>
+              </div>
+
+              <div class="profile-field-group">
+                <label class="profile-label">Email Address</label>
+                <div class="profile-field">
+                  <i class="fas fa-envelope field-icon"></i>
+                  <input type="email" id="profileEmailInput" class="profile-input" disabled>
+                </div>
+              </div>
+
+              <div class="profile-field-group">
+                <label class="profile-label">Phone Number</label>
+                <div class="profile-field">
+                  <i class="fas fa-phone field-icon"></i>
+                  <input type="tel" id="profilePhone" class="profile-input" placeholder="Enter phone number" disabled>
+                </div>
+              </div>
+
+              <div class="profile-field-group">
+                <label class="profile-label">Position</label>
+                <div class="profile-field">
+                  <i class="fas fa-briefcase field-icon"></i>
+                  <input type="text" id="profilePositionInput" class="profile-input" placeholder="Enter position" disabled>
+                </div>
+              </div>
+
+              <div class="profile-field-group">
+                <label class="profile-label">Location</label>
+                <div class="profile-field">
+                  <i class="fas fa-map-marker-alt field-icon"></i>
+                  <input type="text" id="profileLocation" class="profile-input" placeholder="Enter location" disabled>
+                </div>
+              </div>
+
+              <div class="profile-field-group">
+                <label class="profile-label">Hire Date</label>
+                <div class="profile-field">
+                  <i class="fas fa-calendar field-icon"></i>
+                  <input type="date" id="profileHireDate" class="profile-input" disabled>
+                </div>
+              </div>
+
+              <div class="profile-actions" id="profileActions" style="display: none;">
+                <button class="btn-cancel-profile" id="btnCancelProfile"><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn-save-profile" id="btnSaveProfile"><i class="fas fa-save"></i> Save Changes</button>
+              </div>
+
+              <div class="profile-actions-default" id="profileActionsDefault">
+                <button class="btn-edit-profile" id="btnEditProfile"><i class="fas fa-edit"></i> Edit Profile</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <hr class="settings-divider">
-
-      <div class="settings-group">
-        <label class="section-label">Change Password</label>
-        <div class="form-group">
-          <input type="password" id="currentPassword" placeholder="Current password">
-        </div>
-        <div class="form-group">
-          <input type="password" id="newPassword" placeholder="New password">
-        </div>
-        <button class="btn btn-primary full-width" id="updatePasswordBtn">Update Password</button>
-      </div>
-
-      <hr class="settings-divider">
-
-      <div class="settings-group danger-zone">
-        <label class="section-label text-danger">Danger Zone</label>
-        <div class="danger-actions">
-           <button class="btn btn-danger" id="logoutBtn">
-              <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
-          <button class="btn btn-danger-outline" onclick="deleteAccount()">
-              <i class="fas fa-trash-alt"></i> Delete Account
-          </button>
-        </div>
-      </div>
-      
-      <div class="settings-footer">
-        <button class="btn btn-subtle" id="aboutBtn">
-          <i class="fas fa-info-circle"></i> About DutySync
-        </button>
-      </div>
+      </section>
     </div>
 
-  </div>
-</section>
-
-
-      <!-- Other Sections -->
-<!-- OVERVIEW SECTION - Place this inside the <section class="content-section" id="overview"> tag in dashboard.html -->
-  <section class="content-section" id="overview">
-    <div class="overview-container">
-      
-      <!-- Section 1: Hero Stats -->
-      <div class="hero-stats-grid">
-        <div class="hero-stat-card hours">
-          <div class="stat-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <div class="stat-content">
-            <span class="stat-label">This Month Hours</span>
-            <span class="stat-value" id="heroThisMonthHours">0.00</span>
-            <span class="stat-unit">hrs</span>
-          </div>
-          <div class="stat-badge" id="hoursChange">+0%</div>
-        </div>
-
-        <div class="hero-stat-card netpay">
-          <div class="stat-icon">
-            <i class="fas fa-wallet"></i>
-          </div>
-          <div class="stat-content">
-            <span class="stat-label">Current Net Pay</span>
-            <span class="stat-value" id="heroCurrentNetPay">₱0.00</span>
-            <span class="stat-unit">this period</span>
-          </div>
-          <div class="stat-badge positive" id="netPayChange">+0%</div>
-        </div>
-
-        <div class="hero-stat-card payslip">
-          <div class="stat-icon">
-            <i class="fas fa-file-invoice-dollar"></i>
-          </div>
-          <div class="stat-content">
-            <span class="stat-label">Last Payslip</span>
-            <span class="stat-value" id="heroLastPayslip">₱0.00</span>
-            <span class="stat-unit">generated</span>
-          </div>
-          <div class="stat-date" id="lastPayslipDate">No record</div>
-        </div>
-
-        <div class="hero-stat-card ytd">
-          <div class="stat-icon">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <div class="stat-content">
-            <span class="stat-label">Year-to-Date</span>
-            <span class="stat-value" id="heroYTDEarnings">₱0.00</span>
-            <span class="stat-unit">total earnings</span>
-          </div>
-          <div class="stat-badge" id="ytdCount">0 periods</div>
-        </div>
-      </div>
-
-      <!-- Section 2: Visual Insights -->
-      <div class="visual-insights-grid">
-        
-        <!-- Last 7 Days Work Chart -->
-        <div class="insight-card last-7days">
-          <div class="insight-header">
-            <h3>
-              <i class="fas fa-calendar-week"></i>
-              Last 7 Days Activity
-            </h3>
-            <span class="insight-subtitle">Daily hours worked</span>
-          </div>
-          <div class="insight-body">
-            <canvas id="last7DaysChart"></canvas>
-            <div class="chart-stats">
-              <div class="chart-stat">
-                <span class="stat-label">Total:</span>
-                <span class="stat-highlight" id="last7Total">0.00 hrs</span>
-              </div>
-              <div class="chart-stat">
-                <span class="stat-label">Average:</span>
-                <span class="stat-highlight" id="last7Avg">0.00 hrs</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mini Deduction Breakdown -->
-        <div class="insight-card deduction-mini">
-          <div class="insight-header">
-            <h3>
-              <i class="fas fa-chart-pie"></i>
-              Deduction Breakdown
-            </h3>
-            <span class="insight-subtitle">Current period</span>
-          </div>
-          <div class="insight-body">
-            <canvas id="deductionMiniChart"></canvas>
-            <div class="deduction-mini-stats">
-              <div class="mini-stat">
-                <span class="stat-label">Gross:</span>
-                <span class="stat-value" id="miniGrossPay">₱0.00</span>
-              </div>
-              <div class="mini-stat">
-                <span class="stat-label">Deductions:</span>
-                <span class="stat-value deduction" id="miniTotalDeductions">₱0.00</span>
-              </div>
-              <div class="mini-stat">
-                <span class="stat-label">Net:</span>
-                <span class="stat-value net" id="miniNetPay">₱0.00</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 3: Quick Actions & Recent Activity -->
-      <div class="action-activity-grid">
-        
-        <!-- Quick Actions -->
-        <div class="action-card">
-          <div class="action-header">
-            <h3>
-              <i class="fas fa-bolt"></i>
-              Quick Actions
-            </h3>
-          </div>
-          <div class="action-body">
-            <button class="action-btn primary" onclick="document.querySelector('[data-page=input-duty]').click()">
-                <i class="fas fa-plus-circle"></i>
-                <span>Log Hours</span>
-            </button>
-            <button class="action-btn success" onclick="document.querySelector('[data-page=generate-payslip]').click()">
-              <i class="fas fa-calculator"></i>
-              <span>Generate Payslip</span>
-            </button>
-            <button class="action-btn info" onclick="document.querySelector('[data-page=view-duty-log]').click()">
-              <i class="fas fa-history"></i>
-              <span>View Records</span>
-            </button>
-            <button class="action-btn secondary" onclick="document.querySelector('[data-page=net-pay-trends]').click()">
-              <i class="fas fa-chart-area"></i>
-              <span>View Analytics</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Recent Duty Logs -->
-        <div class="action-card">
-          <div class="action-header">
-            <h3>
-              <i class="fas fa-history"></i>
-              Recent Duty Logs
-            </h3>
-          <a href="#" class="view-all-link" onclick="document.querySelector('[data-page=view-duty-log]').click(); return false;">
-            View All
-          </a>
-          </div>
-          <div class="recent-logs-body" id="recentLogsContainer">
-            <div class="recent-empty">
-              <i class="fas fa-inbox"></i>
-              <p>No duty records yet</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State (shown when no data) -->
-      <div class="overview-empty-state" id="overviewEmptyState" style="display: none;">
-        <i class="fas fa-inbox"></i>
-        <h3>Get Started with DutySync</h3>
-        <p>Start by logging your work hours to see your earnings and analytics</p>
-        <button class="btn btn-primary" onclick="document.querySelector('[data-page=input-duty]').click()">
-          <i class="fas fa-plus-circle"></i> Log Your First Hours
-        </button>
-      </div>
-
-    </div>
-  </section>
-      
-      <section class="content-section" id="help"><div class="card"><p>Help content here...</p></div></section></div>
-    
-    <!-- Logout Modal -->
+    <!-- Modals -->
     <div id="logoutModal" class="modal">
       <div class="modal-content">
         <h3>Logout Confirmation</h3>
@@ -1643,210 +1666,139 @@
       </div>
     </div>
 
-<!-- About Modal -->
-<div class="about-modal-overlay" id="aboutModalOverlay">
-  <button class="about-close-btn" id="aboutCloseBtn">&times;</button>
-  
-  <div class="about-modal-content">
-    <!-- Header -->
-    <div class="about-header">
-      <div class="about-logo">
-        <img src="../images/logo.png" class="about-logo-img">
-      </div>
-      <h2 class="about-title">DutySync</h2>
-      <p class="about-subtitle">Version 1.0</p>
-    </div>
+    <div class="about-modal-overlay" id="aboutModalOverlay">
+      <button class="about-close-btn" id="aboutCloseBtn">&times;</button>
+      <div class="about-modal-content">
+        <div class="about-header">
+          <div class="about-logo"><img src="../images/logo.png" class="about-logo-img"></div>
+          <h2 class="about-title">DutySync</h2>
+          <p class="about-subtitle">Version 1.0</p>
+        </div>
 
-    <!-- Description -->
-    <div class="about-description">
-      <p><strong>DutySync</strong> is a web-based system designed to help employees, especially working students, efficiently log their work hours and track their payroll.</p>
-      <p style="margin-top: 10px;">The system allows users to input daily time in and time out, select duty types and automatically calculates gross and net pay with appropriate deductions.</p>
-    </div>
+        <div class="about-description">
+          <p><strong>DutySync</strong> is a web-based system designed to help employees, especially working students, efficiently log their work hours and track their payroll.</p>
+          <p style="margin-top: 10px;">The system allows users to input daily time in and time out, select duty types and automatically calculates gross and net pay with appropriate deductions.</p>
+        </div>
 
-<!-- Mission & Vision --> 
-<div class="mission-vision">
-  <div class="mission-card">
-    <div class="card-icon">
-      <i class="fas fa-bullseye fa-2x "></i> <!-- changed from fa-target to fa-bullseye -->
-    </div>
-    <h3 class="card-title">Our Mission</h3>
-    <p class="card-text">To provide an easy, reliable system that helps employees track hours, track their payroll data, and manage their compensation with transparency and transparency.</p>
-  </div>
-  <div class="vision-card">
-    <div class="card-icon">
-      <i class="fas fa-lightbulb fa-2x"></i>
-    </div>
-    <h3 class="card-title">Our Vision</h3>
-    <p class="card-text">To be the go-to platform that makes time tracking and payroll management simple, accurate, and accessible to every employee.</p>
-  </div>
-</div>
-
-
-    <!-- Team Section -->
-    <div class="team-section">
-      <h3 class="section-title">DEVELOPMENT TEAM</h3>
-      <div class="team-grid">
-        <div class="team-member">
-          <img src="../images/projectmanager.png" alt="Bathan, Mar Jerome S." class="member-avatar">
-          <div class="member-info">
-            <h4>Bathan, Mar Jerome S.</h4>
-            <div class="member-role">Project Manager</div>
-            <p class="member-description">Oversees the entire project, ensures the team meets deadlines, 
-            manages resources, coordinates tasks, and communicates with 
-            stakeholders to keep the project aligned with goals.</p>
+        <div class="mission-vision">
+          <div class="mission-card">
+            <div class="card-icon"><i class="fas fa-bullseye fa-2x "></i></div>
+            <h3 class="card-title">Our Mission</h3>
+            <p class="card-text">To provide an easy, reliable system that helps employees track hours, track their payroll data, and manage their compensation with transparency and transparency.</p>
+          </div>
+          <div class="vision-card">
+            <div class="card-icon"><i class="fas fa-lightbulb fa-2x"></i></div>
+            <h3 class="card-title">Our Vision</h3>
+            <p class="card-text">To be the go-to platform that makes time tracking and payroll management simple, accurate, and accessible to every employee.</p>
           </div>
         </div>
 
-        <div class="team-member">
-          <img src="../images/systemanalyst.png" alt="Bunquin, Ruwie Charles A." class="member-avatar">
-          <div class="member-info">
-            <h4>Bunquin, Ruwie Charles A.</h4>
-            <div class="member-role">System Analyst</div>
-            <p class="member-description">Gathers and analyzes user requirements, studies existing processes, 
-            identifies system needs, and creates detailed specifications to guide
-            the development of the system.</p>
+        <div class="team-section">
+          <h3 class="section-title">DEVELOPMENT TEAM</h3>
+          <div class="team-grid">
+            <div class="team-member">
+              <img src="../images/projectmanager.png" alt="Bathan, Mar Jerome S." class="member-avatar">
+              <div class="member-info">
+                <h4>Bathan, Mar Jerome S.</h4>
+                <div class="member-role">Project Manager</div>
+                <p class="member-description">Oversees the entire project, ensures the team meets deadlines, manages resources, coordinates tasks, and communicates with stakeholders to keep the project aligned with goals.</p>
+              </div>
+            </div>
+
+            <div class="team-member">
+              <img src="../images/systemanalyst.png" alt="Bunquin, Ruwie Charles A." class="member-avatar">
+              <div class="member-info">
+                <h4>Bunquin, Ruwie Charles A.</h4>
+                <div class="member-role">System Analyst</div>
+                <p class="member-description">Gathers and analyzes user requirements, studies existing processes, identifies system needs, and creates detailed specifications to guide the development of the system.</p>
+              </div>
+            </div>
+
+            <div class="team-member">
+              <img src="../images/systemdesigner.png" alt="Macalalad, Roldan" class="member-avatar">
+              <div class="member-info">
+                <h4>Macalalad, Roldan</h4>
+                <div class="member-role">UI/UX Designer</div>
+                <p class="member-description">Transforms requirements into a system blueprint, designs the system architecture, database structure, user interface flow, and ensures the system is efficient, scalable, and user-friendly.</p>
+              </div>
+            </div>
+
+            <div class="team-member">
+              <img src="../images/developer.png" alt="Valida, Keil Rizher R." class="member-avatar">
+              <div class="member-info">
+                <h4>Valida, Keil Rizher R.</h4>
+                <div class="member-role">Full Stack Developer</div>
+                <p class="member-description">Develops the system from a scratch to implementation, writes clean and efficient code, integrates core features, resolves bugs, and collaborates with the team to ensure smooth system performance.</p>
+              </div>
+            </div>
+
+            <div class="team-member">
+              <img src="../images/qualityassurance.png" alt="Bedar, Jomar Ichiro M." class="member-avatar">
+              <div class="member-info">
+                <h4>Bedar, Jomar Ichiro M.</h4>
+                <div class="member-role">Quality Assurance</div>
+                <p class="member-description">Tests the system to find defects, verifies that all features work as intended, ensures system reliability and performance, and confirms the final product meets the required standards.</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="team-member">
-          <img src="../images/systemdesigner.png" alt="Macalalad, Roldan" class="member-avatar">
-          <div class="member-info">
-            <h4>Macalalad, Roldan</h4>
-            <div class="member-role">UI/UX Designer</div>
-            <p class="member-description">Transforms requirements into a system blueprint, designs the system architecture,
-            database structure, user interface flow, and ensures the system is efficient,
-            scalable, and user-friendly.</p>
+        <div class="tech-section">
+          <h3 class="section-title">TECHNOLOGIES USED</h3>
+          <div class="tech-breakdown">
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fab fa-html5"></i> HTML</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #E34C26, #FF6B35);"></div></div>
+              <div class="tech-breakdown-percent">100%</div>
+            </div>
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fab fa-css3-alt"></i> CSS</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #563D7C, #9C27B0);"></div></div>
+              <div class="tech-breakdown-percent">100%</div>
+            </div>
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fab fa-js-square"></i> JavaScript</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #F7DF1E, #F1D40F);"></div></div>
+              <div class="tech-breakdown-percent">100%</div>
+            </div>
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fas fa-fire"></i> Firebase</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 70%; background: linear-gradient(90deg, #FFCA28, #FF6F00);"></div></div>
+              <div class="tech-breakdown-percent">70%</div>
+            </div>
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fas fa-chart-line"></i> Chart.js</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 40%; background: linear-gradient(90deg, #FF6384, #FF9FF3);"></div></div>
+              <div class="tech-breakdown-percent">40%</div>
+            </div>
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fas fa-file-pdf"></i> jsPDF</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 30%; background: linear-gradient(90deg, #36A2EB, #00CFFF);"></div></div>
+              <div class="tech-breakdown-percent">30%</div>
+            </div>
+            <div class="tech-breakdown-item">
+              <div class="tech-breakdown-label"><i class="fas fa-pencil-alt"></i> Figma</div>
+              <div class="tech-breakdown-bar"><div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #A259FF, #FF61F6);"></div></div>
+              <div class="tech-breakdown-percent">100%</div>
+            </div>
+          </div>
+
+          <h4 class="section-subtitle">TOOLS / PLATFORMS USED</h4>
+          <ul class="tools-used">
+            <li><i class="fab fa-github"></i> GitHub</li>
+            <li><i class="fas fa-code"></i> VS Code</li>
+            <li><i class="fas fa-fire"></i> Firebase Console</li>
+            <li><i class="fas fa-wrench"></i> Chrome DevTools</li>
+          </ul>
+
+          <div class="about-footer">
+            <p>&copy; 2025 DutySync. All rights reserved.</p>
           </div>
         </div>
-
-        <div class="team-member">
-          <img src="../images/developer.png" alt="Valida, Keil Rizher R." class="member-avatar">
-          <div class="member-info">
-            <h4>Valida, Keil Rizher R.</h4>
-            <div class="member-role">Full Stack Developer</div>
-            <p class="member-description">Develops the system from a scratch to implementation, writes clean and 
-              efficient code, integrates core features, resolves bugs, and collaborates with the team to ensure 
-              smooth system performance.</p>
-          </div>
-        </div>
-
-        <div class="team-member">
-          <img src="../images/qualityassurance.png" alt="Bedar, Jomar Ichiro M." class="member-avatar">
-          <div class="member-info">
-            <h4>Bedar, Jomar Ichiro M.</h4>
-            <div class="member-role">Quality Assurance</div>
-            <p class="member-description">Tests the system to find defects, verifies that all features work as intended,
-            ensures system reliability and performance, 
-            and confirms the final product meets the required standards.</p>
-          </div>
-        </div>
       </div>
     </div>
+  </main>
 
-   <!-- Tech Stack -->
-<div class="tech-section">
-  <h3 class="section-title">TECHNOLOGIES USED</h3>
-  <div class="tech-breakdown">
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fab fa-html5"></i> HTML
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #E34C26, #FF6B35);"></div>
-      </div>
-      <div class="tech-breakdown-percent">100%</div>
-    </div>
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fab fa-css3-alt"></i> CSS
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #563D7C, #9C27B0);"></div>
-      </div>
-      <div class="tech-breakdown-percent">100%</div>
-    </div>
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fab fa-js-square"></i> JavaScript
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #F7DF1E, #F1D40F);"></div>
-      </div>
-      <div class="tech-breakdown-percent">100%</div>
-    </div>
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fas fa-fire"></i> Firebase Firestore
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 70%; background: linear-gradient(90deg, #FFCA28, #FF6F00);"></div>
-      </div>
-      <div class="tech-breakdown-percent">70%</div>
-    </div>
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fas fa-chart-line"></i> Chart.js
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 40%; background: linear-gradient(90deg, #FF6384, #FF9FF3);"></div>
-      </div>
-      <div class="tech-breakdown-percent">40%</div>
-    </div>
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fas fa-file-pdf"></i> jsPDF
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 30%; background: linear-gradient(90deg, #36A2EB, #00CFFF);"></div>
-      </div>
-      <div class="tech-breakdown-percent">30%</div>
-    </div>
-
-    <div class="tech-breakdown-item">
-      <div class="tech-breakdown-label">
-        <i class="fas fa-pencil-alt"></i> Figma
-      </div>
-      <div class="tech-breakdown-bar">
-        <div class="tech-breakdown-fill" style="width: 100%; background: linear-gradient(90deg, #A259FF, #FF61F6);"></div>
-      </div>
-      <div class="tech-breakdown-percent">100%</div>
-    </div>
-
-  </div>
-
-<h4 class="section-subtitle">TOOLS / PLATFORMS USED</h4>
-<ul class="tools-used">
-  <li>
-    <i class="fab fa-github"></i>
-    GitHub
-  </li>
-  <li>
-    <i class="fas fa-code"></i>
-    VS Code
-  </li>
-  <li>
-    <i class="fas fa-fire"></i>
-    Firebase Console
-  </li>
-  <li>
-    <i class="fas fa-wrench"></i>
-    Chrome DevTools
-  </li>
-</ul>
-
-    <!-- Footer -->
-    <div class="about-footer">
-      <p>&copy; 2025 DutySync. All rights reserved.</p>
-    </div>
-  </div>
-</div>
-  <!-- Firebase + JS -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -1855,11 +1807,10 @@
   <script src="../js/inputduty.js"></script>
   <script src="../js/viewdutylog.js"></script>
   <script src="../js/profile.js"></script>
-  <script src="../js/viewpayslip.js"></script>
   <script src="../js/generate.js"></script>
   <script src="../js/deduction-breakdown.js"></script>
   <script src="../js/netpaytrends.js"></script>
   <script src="../js/overview.js"></script>
-
+  <script src="../js/help.js"></script>
 </body>
 </html>

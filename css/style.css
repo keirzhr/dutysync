@@ -941,6 +941,18 @@ footer::before {
   margin-top: 10px;
   font-size: 12px;
 }
+
+.btn-subtle:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-subtle i {
+  font-size: 12px;
+}
+
 .btn-subtle:hover {
   color: var(--text-primary);
   text-decoration: underline;

@@ -1120,3 +1120,96 @@
 .duty-table-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
+
+/* Add this CSS to your viewdutylog.css file */
+
+.duty-table-wrapper {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: block;
+  max-height: calc(8 * 48px + 60px);
+  overflow-y: auto;
+}
+
+[data-theme="dark"] .duty-table-wrapper {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.duty-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.duty-table thead {
+  background-color: rgb(34, 34, 54);
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.duty-table th {
+  padding: 16px 12px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.duty-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.duty-table tbody tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.duty-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.duty-table td {
+  padding: 14px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.duty-table td strong {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Scrollbar styling */
+.duty-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.duty-table-wrapper::-webkit-scrollbar-track {
+  background: var(--dark-bg-alt);
+  border-radius: 4px;
+}
+
+.duty-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.duty-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Firefox scrollbar */
+.duty-table-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--dark-bg-alt);
+}

@@ -1,19 +1,19 @@
-/* Generate Payslip Styles */
+/* Main Layout - NOW RESPONSIVE */
 .generate-payslip-container {
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 20px; /* ADD THIS: Container padding */
+  max-width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Main Layout */
 .generate-layout {
   display: grid;
-  grid-template-columns: 1fr 620px;
+  grid-template-columns: minmax(300px, 1fr) minmax(300px, 600px); /* CHANGED: Flexible columns */
   gap: 24px;
   align-items: stretch;
+  max-width: 100%; /* ADD THIS */
 }
 
 /* Form Card */
-/* Update these classes */
 .form-card {
   background: var(--card-bg);
   border-radius: 16px;
@@ -21,7 +21,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 100%; /* Forces it to fill the grid height */
+  height: 100%;
+  min-width: 0; /* ADD THIS: Allows content to shrink below its minimum content size */
 }
 
 .form-card-body {
@@ -31,7 +32,6 @@
   flex-direction: column;
 }
 
-/* Add this to push the Calculate button to the very bottom */
 .btn-calculate {
   width: 100%;
   padding: 16px 24px;
@@ -47,21 +47,14 @@
   justify-content: center;
   gap: 10px;
   transition: all 0.3s ease;
-  margin-top: auto; /* ADDED: This pushes the button to the bottom */
+  margin-top: auto;
 }
 
 .generate-form-section {
   display: flex;
   flex-direction: column;
+  min-width: 0; /* ADD THIS */
 }
-
-.form-card-body {
-  flex: 1;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-}
-
 
 .form-card-header {
   display: flex;
@@ -80,7 +73,6 @@
   font-size: 18px;
   font-weight: 600;
 }
-
 
 /* Form Section Groups */
 .form-section-group {
@@ -108,6 +100,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0; /* ADD THIS */
 }
 
 .select-wrapper label {
@@ -209,6 +202,7 @@
   font-weight: 600;
   padding: 12px 0;
   outline: none;
+  min-width: 0; /* ADD THIS */
 }
 
 .rate-input::placeholder {
@@ -237,14 +231,14 @@
   background: var(--dark-bg);
   border-radius: 12px;
   border: 1px solid var(--border-color);
+  min-width: 0; /* ADD THIS */
 }
 
-/* New Style for the Total Worked Card at Bottom */
 .hours-item.total-worked-card {
   margin-top: 12px;
   width: 100%;
-  border-color: var(--primary-color); /* Optional: Highlight border */
-  background: rgba(16, 185, 129, 0.05); /* Optional: Very light green tint */
+  border-color: var(--primary-color);
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .hours-icon {
@@ -261,7 +255,6 @@
 .hours-icon.regular { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 .hours-icon.overtime { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .hours-icon.night { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
-/* .hours-icon.total removed */
 .hours-icon.holiday { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
 .hours-icon.worked { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 
@@ -269,6 +262,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0; /* ADD THIS */
+  flex: 1; /* ADD THIS */
 }
 
 .hours-label {
@@ -282,54 +277,39 @@
   color: var(--text-primary);
 }
 
-/* Calculate Button */
-.btn-calculate {
-  width: 100%;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.3s ease;
-}
-
 .btn-calculate:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(90, 112, 176, 0.35);
 }
 
 /* Preview Card */
-/* Update these classes */
 .preview-card {
   background: var(--card-bg);
   border-radius: 16px;
   border: 1px solid var(--border-color);
   overflow: hidden;
-  display: flex;          /* ADDED */
-  flex-direction: column; /* ADDED */
-  height: 100%;           /* ADDED */
-  /* Remove 'position: sticky' if you want them strictly side-by-side equal height */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0; /* ADD THIS */
+}
+
+.generate-preview-section {
+  min-width: 0; /* ADD THIS */
 }
 
 .preview-body {
   padding: 20px 24px;
-  flex: 1; /* ADDED: This makes the middle section grow to fill empty space */
+  flex: 1;
 }
 
-/* Ensure footer sticks to bottom */
 .preview-footer {
   padding: 20px 24px;
   background: var(--dark-bg);
   border-top: 1px solid var(--border-color);
-  margin-top: auto; /* Ensures it sits at the bottom */
+  margin-top: auto;
 }
+
 .preview-header {
   display: flex;
   justify-content: space-between;
@@ -421,10 +401,6 @@
   color: var(--primary-color);
 }
 
-.preview-body {
-  padding: 20px 24px;
-}
-
 /* Two Column Layout for Earnings and Deductions */
 .preview-sections-grid {
   display: grid;
@@ -436,6 +412,7 @@
 .preview-section {
   display: flex;
   flex-direction: column;
+  min-width: 0; /* ADD THIS */
 }
 
 .preview-section-title {
@@ -458,12 +435,11 @@
   gap: 2px;
 }
 
-/* Find this block in generate.css and update it */
 .preview-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0; /* INCREASED: Changed from 10px 0 to 12px 0 */
+  padding: 12px 0;
   font-size: 13px;
   color: var(--text-primary);
   border-bottom: 1px dashed var(--border-color);
@@ -486,8 +462,8 @@
 .preview-row.total {
   font-weight: 700;
   font-size: 16px;
-  padding-top: 15px; /* INCREASED: Changed from 12px to 15px */
-  margin-top: 10px; /* INCREASED: Changed from 8px to 10px */
+  padding-top: 15px;
+  margin-top: 10px;
   border-top: 2px solid var(--border-color);
   border-bottom: none;
 }
@@ -529,13 +505,6 @@
   font-size: 25px;
   font-weight: 800;
   color: white;
-}
-
-/* Preview Footer */
-.preview-footer {
-  padding: 20px 24px;
-  background: var(--dark-bg);
-  border-top: 1px solid var(--border-color);
 }
 
 .btn-generate {
@@ -621,17 +590,10 @@
   margin-bottom: 24px;
 }
 
-
-
 .btn-view { background: var(--primary-color) !important; }
 .btn-close { background: var(--text-secondary) !important; }
 
-
-/* ========================================
-   PAYSLIP HISTORY SECTION STYLES
-   ======================================== */
-
-/* History Section Container */
+/* History Section */
 .payslip-history-section {
   margin-top: 40px;
   padding-top: 40px;
@@ -668,14 +630,12 @@
   font-weight: 600;
 }
 
-/* History Container */
 #payslipHistoryContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
-/* History Card */
 .history-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -692,7 +652,6 @@
   border-color: var(--primary-color);
 }
 
-/* History Card Header */
 .history-card-header {
   display: flex;
   justify-content: space-between;
@@ -729,7 +688,6 @@
   letter-spacing: 0.5px;
 }
 
-/* History Card Body */
 .history-card-body {
   padding: 20px;
   flex: 1;
@@ -776,7 +734,6 @@
   font-weight: 700;
 }
 
-/* History Card Footer */
 .history-card-footer {
   padding: 16px 20px;
   background: var(--dark-bg);
@@ -813,27 +770,6 @@
   cursor: not-allowed;
 }
 
-.btn-delete-history {
-  padding: 12px 16px;
-  background: transparent;
-  color: #ef4444;
-  border: 1px solid #ef4444;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.btn-delete-history:hover {
-  background: #ef4444;
-  color: white;
-  transform: translateY(-2px);
-}
-
-/* Empty State */
 .history-empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -902,56 +838,6 @@
   font-weight: 500;
 }
 
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  #payslipHistoryContainer {
-    grid-template-columns: 1fr;
-  }
-
-  .history-card-footer {
-    flex-direction: column;
-  }
-
-  .btn-download-history,
-  .btn-delete-history {
-    width: 100%;
-  }
-
-  .history-section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .toast {
-    right: 10px;
-    left: 10px;
-    min-width: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .payslip-history-section {
-    margin-top: 30px;
-    padding-top: 30px;
-  }
-
-  .history-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .period-text {
-    font-size: 13px;
-  }
-
-  .history-badge {
-    align-self: flex-start;
-  }
-}
-
 /* Modal Overlay */
 .modal-overlay {
   display: none;
@@ -993,33 +879,143 @@
 
 .btn-modal:hover { transform: translateY(-2px); }
 
-/* Responsive */
+/* ========================================
+   RESPONSIVE BREAKPOINTS - KEY FIX
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .generate-layout {
+    grid-template-columns: minmax(280px, 1fr) minmax(280px, 500px);
+  }
+}
+
 @media (max-width: 1024px) {
-  .generate-layout { grid-template-columns: 1fr; }
-  .preview-card { position: static; }
+  .generate-payslip-container {
+    padding: 16px;
+  }
+  
+  .generate-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .preview-card {
+    position: static;
+  }
 }
 
 @media (max-width: 768px) {
-  .period-selectors { grid-template-columns: 1fr; gap: 12px; }
-  .hours-summary-grid { grid-template-columns: 1fr; }
-  .form-card-body, .preview-body { padding: 16px; }
-  .preview-net-pay { margin: 0 -16px; padding: 16px; }
-  .net-value { font-size: 24px; }
-  .preview-footer, .form-card-header { padding: 16px; }
-  .rate-type-toggle { flex-direction: column; }
-  .preview-employee-info { padding: 12px 16px; }
+  .generate-payslip-container {
+    padding: 12px;
+  }
   
-  /* Stack columns on mobile */
+  .period-selectors {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .hours-summary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-card-body,
+  .preview-body {
+    padding: 16px;
+  }
+  
+  .preview-net-pay {
+    margin: 0 -16px;
+    padding: 16px;
+  }
+  
+  .net-value {
+    font-size: 24px;
+  }
+  
+  .preview-footer,
+  .form-card-header {
+    padding: 16px;
+  }
+  
+  .rate-type-toggle {
+    flex-direction: column;
+  }
+  
+  .preview-employee-info {
+    padding: 12px 16px;
+  }
+  
   .preview-sections-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
+  
+  #payslipHistoryContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .history-card-footer {
+    flex-direction: column;
+  }
+
+  .history-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .toast {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+  }
 }
 
 @media (max-width: 480px) {
-  .hours-item { padding: 12px; }
-  .hours-icon { width: 36px; height: 36px; font-size: 14px; }
-  .hours-value { font-size: 16px; }
-  .preview-row { font-size: 12px; }
-  .btn-calculate, .btn-generate { padding: 14px 20px; font-size: 14px; }
+  .generate-payslip-container {
+    padding: 8px;
+  }
+  
+  .hours-item {
+    padding: 12px;
+  }
+  
+  .hours-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .hours-value {
+    font-size: 16px;
+  }
+  
+  .preview-row {
+    font-size: 12px;
+  }
+  
+  .btn-calculate,
+  .btn-generate {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+  
+  .payslip-history-section {
+    margin-top: 30px;
+    padding-top: 30px;
+  }
+
+  .history-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .period-text {
+    font-size: 13px;
+  }
+
+  .history-badge {
+    align-self: flex-start;
+  }
 }
