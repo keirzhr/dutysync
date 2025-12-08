@@ -1,5 +1,4 @@
-/* ===== VIEW DUTY LOG STYLES ===== */
-
+/* View Duty Log Container */
 .duty-log-container {
   width: 100%;
   max-width: 1400px;
@@ -22,6 +21,7 @@
   margin-top: 4px;
   font-weight: 400;
 }
+
 .section-title {
   font-size: 24px;
   font-weight: 700;
@@ -29,7 +29,7 @@
   margin: 0;
 }
 
-/* ===== MONTH FILTER ===== */
+/* Month Filter */
 .duty-log-controls {
   display: flex;
   gap: 12px;
@@ -68,7 +68,7 @@
   background-color: var(--dark-bg-alt);
 }
 
-/* ===== LAYOUT: TABLE ONLY ===== */
+/* Layout */
 .duty-content-layout {
   display: flex;
   flex-direction: column;
@@ -84,19 +84,22 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: block;
+  max-height: calc(8 * 48px + 60px);
+  overflow-y: auto;
 }
 
 [data-theme="dark"] .duty-table-wrapper {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Table Styles */
 .duty-table {
   width: 100%;
   border-collapse: collapse;
 }
 
 .duty-table thead {
-  background-color: var(--hover-bg);
+  background-color: rgb(34, 34, 54);
   border-bottom: 2px solid var(--border-color);
   position: sticky;
   top: 0;
@@ -108,7 +111,7 @@
   text-align: left;
   font-size: 13px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -211,7 +214,7 @@
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
 
-/* ===== MINI DASHBOARD (BOTTOM) ===== */
+/* Mini Dashboard */
 .mini-dashboard {
   display: grid;
   margin-bottom: 20px;
@@ -264,58 +267,33 @@
   color: #5a70b0;
 }
 
-.card-value.night-shift {
-  color: #17a2b8;
-}
+.card-value.night-shift { color: #17a2b8; }
+.card-value.special-day { color: #28a745; }
+.card-value.overtime { color: #dc3545; }
+.card-value.percentage { color: #ffc107; }
 
-.card-value.special-day {
-  color: #28a745;
-}
-
-.card-value.overtime {
-  color: #dc3545;
-}
-
-.card-value.percentage {
-  color: #ffc107;
-}
-
-/* ===== MOBILE CARD VIEW (HIDDEN ON DESKTOP) ===== */
-/* =========================================== */
-/* ===== FINAL SWIPEABLE CARD DESIGN ===== */
-/* =========================================== */
-
-/* 1. The Swipe Container (The Parent) */
+/* Swipeable Cards (Mobile) */
 #dutyCardsWrapper {
-  display: flex;           /* Side-by-side layout */
-  flex-wrap: nowrap;       /* CRITICAL: Prevents stacking */
-  overflow-x: auto;        /* Enables horizontal scroll */
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 16px;
-  width: 100%;             /* Forces container to fit screen width */
-  padding: 10px 4px 24px 4px; /* Extra bottom padding for shadow */
-  
-  /* Snap Physics */
+  width: 100%;
+  padding: 10px 4px 24px 4px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  
-  /* Hide Scrollbar */
   scrollbar-width: none;
 }
+
 #dutyCardsWrapper::-webkit-scrollbar { display: none; }
 
-/* 2. The Card (The Child) */
 .duty-card {
-  /* Dimensions */
-  min-width: 85vw;      /* 85% of screen width */
-  max-width: 380px;     /* Cap size on larger screens */
-  flex-shrink: 0;       /* CRITICAL: Prevents card from squishing */
-  scroll-snap-align: center; /* Centers card on stop */
-
-  /* Theme Colors */
-  background-color: var(--card-bg); /* Matches your theme now */
+  min-width: 85vw;
+  max-width: 380px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  background-color: var(--card-bg);
   border: 1px solid var(--border-color);
-  
-  /* Styling */
   border-radius: 24px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   display: flex;
@@ -324,7 +302,6 @@
   overflow: hidden;
 }
 
-/* Left Color Strip */
 .duty-card::before {
   content: '';
   position: absolute;
@@ -333,30 +310,28 @@
   background: var(--primary-color);
 }
 
-/* --- Header --- */
 .duty-card-header {
   padding: 16px 20px 10px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px dashed var(--border-color); /* Themed border */
+  border-bottom: 1px dashed var(--border-color);
 }
 
 .date-day {
   font-size: 18px;
   font-weight: 800;
-  color: var(--text-primary); /* Themed Text */
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .date-full {
   font-size: 12px;
-  color: var(--text-secondary); /* Themed Text */
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* --- Body (Columns) --- */
 .duty-card-body {
   display: flex;
   padding: 20px;
@@ -364,7 +339,6 @@
   align-items: center;
 }
 
-/* Timeline Column */
 .col-timeline {
   flex: 1;
   display: flex;
@@ -374,13 +348,12 @@
   padding-left: 12px;
 }
 
-/* Line connector */
 .col-timeline::before {
   content: '';
   position: absolute;
   left: 3px; top: 8px; bottom: 8px;
   width: 2px;
-  background: var(--border-color); /* Themed line color */
+  background: var(--border-color);
   z-index: 0;
 }
 
@@ -392,7 +365,7 @@
   left: -4px; top: 4px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: var(--card-bg); /* Matches card background */
+  background: var(--card-bg);
   border: 3px solid var(--primary-color);
 }
 
@@ -409,11 +382,10 @@
   color: var(--text-primary);
 }
 
-/* Stats Column (The Box) */
 .col-stats {
   flex: 0 0 100px;
-  background: var(--primary-color); /* Uses your primary color */
-  color: #fff; /* Keep text white inside the colored box */
+  background: var(--primary-color);
+  color: #fff;
   border-radius: 16px;
   padding: 15px 10px;
   text-align: center;
@@ -441,10 +413,9 @@
   color: #fff;
 }
 
-/* --- Footer --- */
 .duty-card-footer {
   padding: 12px 20px;
-  background-color: var(--body-bg); /* Slightly distinct bg from card */
+  background-color: var(--body-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -465,7 +436,7 @@
   color: var(--text-secondary);
 }
 
-/* ===== POPUP OVERLAY ===== */
+/* Popup Overlay */
 .popup-overlay {
   display: none;
   position: fixed;
@@ -486,36 +457,26 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* ===== POPUP CARD - MATCHING INPUT DUTY SIZE ===== */
+/* Popup Card */
 .popup-card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 20px;
   width: 90%;
-  max-width: 400px; /* Matching input duty */
+  max-width: 400px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   animation: popupSlideIn 0.3s ease;
 }
 
 @keyframes popupSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .popup-header {
@@ -541,9 +502,7 @@
   margin-bottom: 12px;
 }
 
-.popup-section:last-child {
-  margin-bottom: 0;
-}
+.popup-section:last-child { margin-bottom: 0; }
 
 .section-label {
   display: block;
@@ -633,21 +592,11 @@
   animation: slideDown 0.3s ease;
 }
 
-.popup-error::before {
-  content: "⚠ ";
-  font-size: 16px;
-  flex-shrink: 0;
-}
+.popup-error::before { content: "⚠ "; font-size: 16px; flex-shrink: 0; }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .popup-buttons {
@@ -675,9 +624,7 @@
   justify-content: center;
 }
 
-.popup-btn i {
-  font-size: 14px;
-}
+.popup-btn i { font-size: 14px; }
 
 .popup-btn-save {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -723,24 +670,12 @@
   transform: translateY(-1px);
 }
 
-.popup-content::-webkit-scrollbar {
-  width: 6px;
-}
+.popup-content::-webkit-scrollbar { width: 6px; }
+.popup-content::-webkit-scrollbar-track { background: transparent; }
+.popup-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+.popup-content::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
-.popup-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.popup-content::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
-}
-
-.popup-content::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
-}
-
-/* ===== CONFIRMATION MODAL ===== */
+/* Confirmation Modal */
 .confirmation-modal {
   display: none;
   position: fixed;
@@ -773,14 +708,8 @@
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .confirmation-icon {
@@ -833,9 +762,7 @@
   justify-content: center;
 }
 
-.conf-btn i {
-  font-size: 14px;
-}
+.conf-btn i { font-size: 14px; }
 
 .conf-btn-cancel {
   background-color: var(--hover-bg);
@@ -860,11 +787,9 @@
   transform: translateY(-1px);
 }
 
-.conf-btn-danger:active {
-  transform: translateY(0);
-}
+.conf-btn-danger:active { transform: translateY(0); }
 
-/* ===== EMPTY STATE (FALLBACK) ===== */
+/* Empty State */
 .duty-empty-state {
   display: flex;
   flex-direction: column;
@@ -919,297 +844,65 @@
   box-shadow: 0 4px 12px rgba(90, 112, 176, 0.3);
 }
 
-.btn-add-duty i {
-  font-size: 14px;
-}
+.btn-add-duty i { font-size: 14px; }
 
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
+/* Table Scrollbar */
+.duty-table-wrapper::-webkit-scrollbar { width: 8px; }
+.duty-table-wrapper::-webkit-scrollbar-track { background: var(--dark-bg-alt); border-radius: 4px; }
+.duty-table-wrapper::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+.duty-table-wrapper::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+.duty-table-wrapper { scrollbar-width: thin; scrollbar-color: var(--border-color) var(--dark-bg-alt); }
 
+/* Responsive Design - Consolidated */
 @media (max-width: 1024px) {
-  .mini-dashboard {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .mini-dashboard { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 1085px) {
-  .duty-log-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .section-title {
-    font-size: 20px;
-  }
-
-  .duty-log-controls {
-    width: 100%;
-  }
-
-  .month-filter {
-    width: 100%;
-  }
-
-  .duty-table-wrapper {
-    display: none !important;
-  }
-
-  .duty-cards-wrapper {
-    display: flex !important;
-  }
-
-  .mini-dashboard {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .duty-empty-state {
-    padding: 40px 16px;
-  }
-
-  .duty-empty-state i {
-    font-size: 48px;
-  }
-
-  .duty-empty-state h3 {
-    font-size: 18px;
-  }
-
-  .duty-empty-state p {
-    font-size: 13px;
-  }
+  .duty-log-header { flex-direction: column; align-items: flex-start; }
+  .section-title { font-size: 20px; }
+  .duty-log-controls { width: 100%; }
+  .month-filter { width: 100%; }
+  .duty-table-wrapper { display: none !important; }
+  .duty-cards-wrapper { display: flex !important; }
+  .mini-dashboard { grid-template-columns: repeat(2, 1fr); }
+  .duty-empty-state { padding: 40px 16px; }
+  .duty-empty-state i { font-size: 48px; }
+  .duty-empty-state h3 { font-size: 18px; }
+  .duty-empty-state p { font-size: 13px; }
 }
 
 @media (min-width: 969px) {
-  .duty-cards-wrapper {
-    display: none !important;
-  }
-
-  .duty-table-wrapper {
-    display: block !important;
-  }
+  .duty-cards-wrapper { display: none !important; }
+  .duty-table-wrapper { display: block !important; }
 }
 
 @media (max-width: 600px) {
-  .popup-card {
-    padding: 16px;
-    max-width: 95%;
-  }
-
-  .popup-header h3 {
-    font-size: 18px;
-  }
-
-  .popup-content {
-    padding: 16px 0;
-    max-height: 50vh;
-  }
-
-  .time-input-group {
-    gap: 8px;
-  }
-
-  .time-separator {
-    font-size: 16px;
-  }
-
-  .popup-buttons {
-    padding: 12px 0 0 0;
-    gap: 8px;
-  }
-
-  .popup-btn {
-    padding: 9px 16px;
-    font-size: 12px;
-    min-width: 70px;
-  }
-
-  .section-label {
-    font-size: 11px;
-  }
-
-  .input-label {
-    font-size: 11px;
-  }
+  .popup-card { padding: 16px; max-width: 95%; }
+  .popup-header h3 { font-size: 18px; }
+  .popup-content { padding: 16px 0; max-height: 50vh; }
+  .time-input-group { gap: 8px; }
+  .time-separator { font-size: 16px; }
+  .popup-buttons { padding: 12px 0 0 0; gap: 8px; }
+  .popup-btn { padding: 9px 16px; font-size: 12px; min-width: 70px; }
+  .section-label { font-size: 11px; }
+  .input-label { font-size: 11px; }
 }
 
 @media (max-width: 480px) {
-  .mini-dashboard {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-card {
-    padding: 12px;
-  }
-
-  .card-label {
-    font-size: 11px;
-  }
-
-  .card-value {
-    font-size: 18px;
-  }
-
-  .duty-card .card-row {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .duty-card .card-row strong {
-    min-width: 70px;
-    font-size: 11px;
-  }
-
-  .duty-card .card-actions {
-    padding: 10px 12px;
-  }
-
-  .duty-card .card-actions .action-btn {
-    padding: 8px;
-    font-size: 11px;
-  }
-
-  .popup-card {
-    width: 90%;
-    max-width: none;
-  }
-
-  .popup-header h3 {
-    font-size: 20px;
-  }
-
-  .popup-content {
-    padding: 14px 0;
-    max-height: 50vh;
-  }
-
-  .popup-buttons {
-    padding: 12px 0 0 0;
-    gap: 8px;
-  }
-
-  .popup-btn {
-    padding: 8px 14px;
-    font-size: 12px;
-    flex: 1;
-  }
-
-  .time-input-group {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .time-separator {
-    display: none;
-  }
-}
-
-.duty-table-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.duty-table-wrapper::-webkit-scrollbar-track {
-  background: var(--dark-bg-alt);
-  border-radius: 4px;
-}
-
-.duty-table-wrapper::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
-}
-
-.duty-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
-}
-
-/* Add this CSS to your viewdutylog.css file */
-
-.duty-table-wrapper {
-  flex: 1;
-  min-width: 0;
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: block;
-  max-height: calc(8 * 48px + 60px);
-  overflow-y: auto;
-}
-
-[data-theme="dark"] .duty-table-wrapper {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.duty-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.duty-table thead {
-  background-color: rgb(34, 34, 54);
-  border-bottom: 2px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.duty-table th {
-  padding: 16px 12px;
-  text-align: left;
-  font-size: 13px;
-  font-weight: 700;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.duty-table tbody tr {
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s ease;
-}
-
-.duty-table tbody tr:hover {
-  background-color: var(--hover-bg);
-}
-
-.duty-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.duty-table td {
-  padding: 14px 12px;
-  font-size: 14px;
-  color: var(--text-primary);
-  vertical-align: middle;
-}
-
-.duty-table td strong {
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-/* Scrollbar styling */
-.duty-table-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.duty-table-wrapper::-webkit-scrollbar-track {
-  background: var(--dark-bg-alt);
-  border-radius: 4px;
-}
-
-.duty-table-wrapper::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
-}
-
-.duty-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
-}
-
-/* Firefox scrollbar */
-.duty-table-wrapper {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) var(--dark-bg-alt);
+  .mini-dashboard { grid-template-columns: 1fr; }
+  .dashboard-card { padding: 12px; }
+  .card-label { font-size: 11px; }
+  .card-value { font-size: 18px; }
+  .duty-card .card-row { padding: 10px 12px; font-size: 12px; }
+  .duty-card .card-row strong { min-width: 70px; font-size: 11px; }
+  .duty-card .card-actions { padding: 10px 12px; }
+  .duty-card .card-actions .action-btn { padding: 8px; font-size: 11px; }
+  .popup-card { width: 90%; max-width: none; }
+  .popup-header h3 { font-size: 20px; }
+  .popup-content { padding: 14px 0; max-height: 50vh; }
+  .popup-buttons { padding: 12px 0 0 0; gap: 8px; }
+  .popup-btn { padding: 8px 14px; font-size: 12px; flex: 1; }
+  .time-input-group { flex-direction: column; gap: 12px; align-items: stretch; }
+  .time-separator { display: none; }
 }

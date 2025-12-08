@@ -269,7 +269,6 @@
   background-color: var(--dark-bg-alt);
 }
 
-/* FIX: Remove autofill white background */
 .profile-input:-webkit-autofill,
 .profile-input:-webkit-autofill:hover,
 .profile-input:-webkit-autofill:focus,

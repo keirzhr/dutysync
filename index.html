@@ -34,8 +34,8 @@
         }
 
         .loading-logo {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             background: url('images/logo.png') center center no-repeat;
             background-size: contain;
             animation: fade 1.5s infinite;
@@ -48,47 +48,57 @@
 
         .login-container {
             background: #0a0e1a;
-            border-radius: 20px;
-            padding: 40px 50px;
+            border-radius: 16px;
+            padding: 32px 36px;
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(90, 112, 176, 0.2);
         }
 
+        .login-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .login-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .login-container::-webkit-scrollbar-thumb {
+            background: rgba(90, 112, 176, 0.5);
+            border-radius: 10px;
+        }
+
         .header-section {
             text-align: center;
-            margin-bottom: 23px;
+            margin-bottom: 20px;
         }
         .logo {
-          width: 80px;
-          height: 80px;
-          margin: 0 auto 10px;
+          width: 70px;
+          height: 70px;
+          margin: 0 auto 8px;
           background: url('images/logo.png') center center no-repeat;
           background-size: contain;
-          border-radius: 16px;
+          border-radius: 12px;
         }
         .logo-text {
             color: #FFFFFF;
-            font-size: 32px;
+            font-size: 26px;
             font-weight: 600;
             text-align: center;
         }
-        h1 {
-            color: #FFFFFF;
-            font-size: 32px;
-            font-weight: 600;
-            margin: 0;
-        }
         .form-group {
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         label {
             display: block;
             color: #FFFFFF;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .input-wrapper {
             position: relative;
@@ -96,24 +106,24 @@
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 14px;
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
             color: #FFFFFF;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
         input[type="password"],
         input[type="text"] {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 14px;
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
             color: #FFFFFF;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
@@ -126,6 +136,7 @@
         }
         input::placeholder {
             color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
         }
 
         input[type="text"] {
@@ -152,7 +163,7 @@
 
         .toggle-password {
             position: absolute;
-            right: 16px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
@@ -164,8 +175,8 @@
 
         .toggle-password svg {
             stroke: rgba(255, 255, 255, 0.5);
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             transition: stroke 0.3s ease, transform 0.2s ease;
         }
 
@@ -180,11 +191,11 @@
 
         .forgot-password {
             text-align: right;
-            margin-top: 8px;
+            margin-top: 6px;
         }
         .forgot-password a {
             color: #A1B5F4;
-            font-size: 13px;
+            font-size: 12px;
             text-decoration: none;
             font-weight: 400;
             transition: color 0.3s ease;
@@ -195,15 +206,15 @@
         }
         .sign-in-btn {
             width: 100%;
-            padding: 12px;
+            padding: 11px;
             background: #0066FF;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 6px;
             transition: all 0.3s ease;
         }
         .sign-in-btn:hover {
@@ -216,7 +227,7 @@
         .divider {
             display: flex;
             align-items: center;
-            margin: 16px 0 12px 0;
+            margin: 14px 0 10px 0;
         }
         .divider::before,
         .divider::after {
@@ -227,19 +238,19 @@
         }
         .divider span {
             color: rgba(255, 255, 255, 0.5);
-            font-size: 13px;
-            padding: 0 16px;
+            font-size: 12px;
+            padding: 0 14px;
             font-weight: 400;
         }
         .social-login {
             display: flex;
             justify-content: center;
-            gap: 14px;
+            gap: 12px;
             margin-top: 0;
         }
         .social-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: none;
             background: transparent;
@@ -255,14 +266,14 @@
             background: rgba(255, 255, 255, 0.05);
         }
         .social-btn svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
         }
         .signup-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 18px;
             color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
+            font-size: 13px;
         }
         .signup-link a {
             color: #FFFFFF;
@@ -274,33 +285,86 @@
             color: #A1B5F4;
             text-decoration: none;
         }
-        .error-message {
-            color: #ff4444;
+        
+        /* Toast Styles */
+        .toast {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
             font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        .success-message {
-            color: #44ff44;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
         }
+        
+        .toast-error {
+            background: rgba(220, 38, 38, 0.95);
+            border-left: 3px solid #f87171;
+        }
+        
+        .toast-success {
+            background: rgba(22, 163, 74, 0.95);
+            border-left: 3px solid #4ade80;
+        }
+        
         @media (max-width: 800px) {
             .login-container {
-                padding: 40px 40px;
-                max-width: 600px;
+                padding: 28px 32px;
+                max-width: 450px;
+            }
+            
+            .toast {
+                top: 12px;
+                right: 12px;
+                left: 12px;
+                max-width: none;
             }
         }
         @media (max-width: 600px) {
-            .login-container {
-                padding: 32px 28px;
-                max-width: 100%;
+            body {
+                padding: 16px;
             }
+            
+            .login-container {
+                padding: 24px 28px;
+                max-width: 100%;
+                max-height: 88vh;
+            }
+            
             .logo-text {
-                font-size: 28px;
+                font-size: 24px;
+            }
+            
+            .toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                font-size: 13px;
+                padding: 10px 14px;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            .login-container {
+                max-height: 92vh;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .login-container {
+                max-height: 94vh;
             }
         }
     </style>
@@ -333,7 +397,7 @@
                 <div class="input-wrapper">
                   <input type="password" id="password" placeholder="Enter your password" required>
                   <button type="button" class="toggle-password" onclick="togglePassword()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                       <circle cx="12" cy="12" r="3"></circle>
                     </svg>
@@ -344,8 +408,6 @@
                     <a href="pages/forgotpass.html">Forgot Password?</a>
                 </div>
             </div>
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
             <button type="submit" class="sign-in-btn">Sign In</button>
         </form>
         
@@ -384,10 +446,31 @@
             measurementId: "G-70X2MGERZC"
         };
 
-    // Initialize Firebase v8
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    // Toast notification function
+    function showToast(message, type = 'error') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3500);
+    }
 
     // Toggle password visibility
     function togglePassword() {
@@ -405,73 +488,63 @@
 
     window.togglePassword = togglePassword;
 
-    // Show/hide messages
-    function showMessage(elementId, message) {
-        const element = document.getElementById(elementId);
-        element.textContent = message;
-        element.style.display = 'block';
-        
-        // Hide other messages
-        const otherId = elementId === 'errorMessage' ? 'successMessage' : 'errorMessage';
-        document.getElementById(otherId).style.display = 'none';
+    // Loading screen functions
+    function showLoading() {
+        document.getElementById("loading-screen").style.display = "flex";
     }
 
-    function hideMessages() {
-        document.getElementById('errorMessage').style.display = 'none';
-        document.getElementById('successMessage').style.display = 'none';
+    function hideLoading() {
+        document.getElementById("loading-screen").style.display = "none";
     }
 
     // Email/password login
     const loginForm = document.getElementById("loginForm");
     loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        hideMessages();
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
-        document.getElementById("loading-screen").style.display = "flex";
+        if (!email || !password) {
+            showToast('Please enter both email and password');
+            return;
+        }
+
+        showLoading();
 
         auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Successful login
-            console.log('Logged in:', userCredential.user);
-            showMessage('successMessage', 'Login successful! Redirecting...');
+            showToast('Login successful! Redirecting...', 'success');
             setTimeout(() => {
                 window.location.href = "pages/dashboard.html";
             }, 1500);
         })
         .catch((error) => {
             console.error('Login error', error);
-            document.getElementById("loading-screen").style.display = "none";
-            
-            // Show specific error messages
-            switch(error.code) {
-                case 'auth/user-not-found':
-                    showMessage('errorMessage', 'No account found with this email.');
-                    break;
-                case 'auth/wrong-password':
-                    showMessage('errorMessage', 'Incorrect password. Please try again.');
-                    break;
-                case 'auth/invalid-email':
-                    showMessage('errorMessage', 'Invalid email address.');
-                    break;
-                case 'auth/user-disabled':
-                    showMessage('errorMessage', 'This account has been disabled.');
-                    break;
-                case 'auth/too-many-requests':
-                    showMessage('errorMessage', 'Too many failed attempts. Please try again later.');
-                    break;
-                default:
-                    showMessage('errorMessage', 'Login failed: ' + error.message);
+            hideLoading();
+
+            if (error.code === 'auth/invalid-credential' || 
+                error.code === 'auth/user-not-found' || 
+                error.code === 'auth/wrong-password' ||
+                error.code.includes('INVALID_LOGIN')) {
+                showToast('Invalid email or password');
+            } else if (error.code === 'auth/too-many-requests') {
+                showToast('Too many failed attempts. Try again later.');
+            } else if (error.code === 'auth/invalid-email') {
+                showToast('Please enter a valid email address');
+            } else if (error.code === 'auth/user-disabled') {
+                showToast('This account has been disabled');
+            } else if (error.code === 'auth/operation-not-allowed') {
+                showToast('Email/password login is not enabled');
+            } else {
+                showToast('Login failed. Please try again.');
             }
         });
     });
 
     // Social login functions
     function signInWithGoogle() {
-        hideMessages();
-        document.getElementById("loading-screen").style.display = "flex";
+        showLoading();
         
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
@@ -479,22 +552,21 @@
         
         auth.signInWithPopup(provider)
             .then((result) => {
-                console.log('Google sign in successful:', result.user);
-                showMessage('successMessage', 'Google login successful! Redirecting...');
+                showToast('Google login successful! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = "pages/dashboard.html";
                 }, 1500);
             })
             .catch((error) => {
                 console.error('Google sign in error:', error);
-                document.getElementById("loading-screen").style.display = "none";
+                hideLoading();
                 
                 if (error.code === 'auth/popup-blocked') {
-                    showMessage('errorMessage', 'Popup blocked by browser. Please allow popups and try again.');
+                    showToast('Popup blocked by browser. Please allow popups and try again.');
                 } else if (error.code === 'auth/cancelled-popup-request') {
-                    showMessage('errorMessage', 'Popup was cancelled. Please try again.');
+                    showToast('Popup was cancelled. Please try again.');
                 } else {
-                    showMessage('errorMessage', 'Google login failed: ' + error.message);
+                    showToast('Google login failed');
                 }
             });
     }

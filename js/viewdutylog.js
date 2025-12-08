@@ -251,13 +251,22 @@ function openEditModal(record) {
     document.getElementById('editDutyId').value = record.id;
     const dateInput = document.getElementById('editDutyDate');
     dateInput.value = record.date;
-    dateInput.readOnly = true;
     document.getElementById('editDutyTimeIn').value = record.timeIn;
     document.getElementById('editDutyTimeOut').value = record.timeOut;
     document.getElementById('editDutyDayType').value = record.dayType || 'Regular';
+    
     updateEditPreview();
-    document.getElementById('editDutyTimeIn').addEventListener('input', updateEditPreview);
-    document.getElementById('editDutyTimeOut').addEventListener('input', updateEditPreview);
+    
+    const timeInInput = document.getElementById('editDutyTimeIn');
+    const timeOutInput = document.getElementById('editDutyTimeOut');
+    
+    timeInInput.removeEventListener('input', updateEditPreview);
+    timeOutInput.removeEventListener('input', updateEditPreview);
+    
+    // Add fresh event listeners
+    timeInInput.addEventListener('input', updateEditPreview);
+    timeOutInput.addEventListener('input', updateEditPreview);
+    
     modal.classList.add('active');
 }
 

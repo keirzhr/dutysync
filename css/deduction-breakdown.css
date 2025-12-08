@@ -6,7 +6,7 @@
   padding: 0;
 }
 
-/* ===== HEADER ===== */
+/* Header */
 .breakdown-header {
   display: flex;
   justify-content: space-between;
@@ -63,7 +63,6 @@
   box-shadow: 0 0 0 3px rgba(90, 112, 176, 0.1);
 }
 
-/* FIX: Prevent white background on options */
 .breakdown-select option {
   background-color: var(--card-bg) !important;
   color: var(--text-primary) !important;
@@ -75,7 +74,7 @@
   color: white !important;
 }
 
-/* ===== SUMMARY CARDS ===== */
+/* Summary Cards */
 .deduction-summary-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -116,7 +115,6 @@
   opacity: 0.05;
 }
 
-/* Card Type Colors */
 .deduction-card.total::before { background: var(--primary-color); }
 .deduction-card.sss::before { background: #3b82f6; }
 .deduction-card.philhealth::before { background: #10b981; }
@@ -244,7 +242,7 @@
   color: var(--text-secondary);
 }
 
-/* ===== CHARTS CONTAINER ===== */
+/* Charts Container */
 .charts-container {
   display: grid;
   grid-template-columns: 400px 1fr;
@@ -290,49 +288,20 @@
   display: block;
 }
 
-/* --- Chart Card Body --- */
 .chart-body {
-  padding: 16px; /* Reduced padding slightly for better mobile fit */
-  height: 300px; /* Base height */
-  width: 100%;   /* Ensure it fills the container */
+  padding: 16px;
+  height: 300px;
+  width: 100%;
   position: relative;
-  overflow: hidden; /* Prevent canvas overflow */
+  overflow: hidden;
 }
 
-/* --- Chart Legend (For Donut) --- */
 .chart-legend {
   margin-top: 16px;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-}
-
-/* ===== RESPONSIVE FIXES ===== */
-@media (max-width: 768px) {
-  /* Fix Chart Container Grid */
-  .charts-container {
-    display: flex; /* Switch to flex column for mobile */
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .chart-card {
-    width: 100%; /* Force full width */
-    margin-bottom: 16px;
-  }
-
-  /* Adjust Chart Body for Mobile */
-  .chart-body {
-    height: 250px; /* Slightly shorter on mobile to fit screen better */
-    padding: 12px;
-  }
-
-  /* Fix Legend Wrapping */
-  .chart-legend {
-    gap: 8px;
-    font-size: 12px;
-  }
 }
 
 #deductionDonutChart {
@@ -376,7 +345,7 @@
   color: var(--text-primary);
 }
 
-/* ===== RATIO CARD ===== */
+/* Ratio Card */
 .ratio-card {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border-radius: 16px;
@@ -473,7 +442,7 @@
   font-size: 22px;
 }
 
-/* ===== BREAKDOWN TABLE ===== */
+/* Breakdown Table */
 .breakdown-table-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -575,7 +544,7 @@
   font-weight: 600;
 }
 
-/* ===== EMPTY STATE ===== */
+/* Empty State */
 .breakdown-empty-state {
   display: flex;
   flex-direction: column;
@@ -629,63 +598,84 @@
   box-shadow: 0 4px 12px rgba(90, 112, 176, 0.3);
 }
 
-/* ===== RESPONSIVE ===== */
+/* Responsive */
 @media (max-width: 1200px) {
   .charts-container {
     grid-template-columns: 1fr;
   }
-
+  
   .chart-card.wide {
     grid-column: span 1;
   }
 }
 
 @media (max-width: 768px) {
+    .charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .chart-card {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  
+  .chart-body {
+    height: 250px;
+    padding: 12px;
+  }
+  
+  .chart-legend {
+    gap: 8px;
+    font-size: 12px;
+  }
+
   .breakdown-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
+  
   .period-selector-group {
     width: 100%;
   }
-
+  
   .breakdown-select {
     flex: 1;
   }
-
+  
   .deduction-summary-cards {
     grid-template-columns: 1fr;
   }
-
+  
   .charts-container {
     grid-template-columns: 1fr;
   }
-
+  
   .ratio-content {
     flex-direction: column;
     text-align: center;
   }
-
+  
   .ratio-stats {
     grid-template-columns: 1fr;
   }
-
+  
   .table-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-
+  
   .btn-export {
     width: 100%;
     justify-content: center;
   }
-
+  
   .breakdown-table {
     font-size: 12px;
   }
-
+  
   .breakdown-table th,
   .breakdown-table td {
     padding: 12px 8px;
@@ -696,35 +686,35 @@
   .deduction-card {
     padding: 16px;
   }
-
+  
   .card-icon {
     width: 48px;
     height: 48px;
     font-size: 20px;
   }
-
+  
   .card-value {
     font-size: 20px;
   }
-
+  
   .ratio-card {
     padding: 24px 20px;
   }
-
+  
   .ratio-icon {
     width: 64px;
     height: 64px;
     font-size: 28px;
   }
-
+  
   .ratio-bar-container {
     height: 28px;
   }
-
+  
   .stat-value {
     font-size: 16px;
   }
-
+  
   .stat-value.highlight {
     font-size: 18px;
   }

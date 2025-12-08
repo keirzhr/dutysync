@@ -320,8 +320,15 @@ function openPopup(dateStr) {
         document.getElementById('cancelPopupDuty').addEventListener('click', closePopup);
     }
 
-    document.getElementById('popupTimeIn').addEventListener('input', updateTimePreview);
-    document.getElementById('popupTimeOut').addEventListener('input', updateTimePreview);
+    // Get references to inputs
+    const timeInInput = document.getElementById('popupTimeIn');
+    const timeOutInput = document.getElementById('popupTimeOut');
+    
+    timeInInput.removeEventListener('input', updateTimePreview);
+    timeOutInput.removeEventListener('input', updateTimePreview);
+    timeInInput.addEventListener('input', updateTimePreview);
+    timeOutInput.addEventListener('input', updateTimePreview);
+    
     document.getElementById('popupOverlay').classList.add('active');
 }
 
