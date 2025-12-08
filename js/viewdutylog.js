@@ -1,11 +1,7 @@
-console.log("📋 viewdutylog.js loaded (FIXED Auto-Calculate Display)");
-
-// --- Global Variables ---
 let dutyLogRecords = [];
 let unsubscribeDutyLog = null;
 let selectedMonth = null;
 
-// --- Initialize Month Filter to Current Month ---
 function initializeMonthFilter() {
     const monthFilterInput = document.getElementById('monthFilter');
     if (!monthFilterInput) return;
@@ -14,17 +10,13 @@ function initializeMonthFilter() {
     const currentMonth = today.toISOString().slice(0, 7);
     monthFilterInput.value = currentMonth;
     selectedMonth = currentMonth;
-    console.log("📅 Month filter initialized to:", currentMonth);
 }
 
-// --- Auth State Observer ---
 auth.onAuthStateChanged(async user => {
     if (user) {
-        console.log("👤 User detected:", user.uid);
         initializeMonthFilter();
         setupRealtimeDutyListener(user.uid);
     } else {
-        console.log("👤 No user logged in.");
         if (unsubscribeDutyLog) {
             unsubscribeDutyLog();
             unsubscribeDutyLog = null;
@@ -32,19 +24,15 @@ auth.onAuthStateChanged(async user => {
     }
 });
 
-// --- Month Filter Change Event ---
 const monthFilterInput = document.getElementById('monthFilter');
 if (monthFilterInput) {
     monthFilterInput.addEventListener('change', (e) => {
         selectedMonth = e.target.value;
-        console.log("📅 Month filter changed to:", selectedMonth);
         renderDutyLog();
     });
 }
 
-// --- Setup Real-time Firestore Listener ---
 function setupRealtimeDutyListener(userId) {
-    console.log("📡 Setting up real-time listener...");
     if (unsubscribeDutyLog) unsubscribeDutyLog();
 
     unsubscribeDutyLog = db.collection("duties")
@@ -54,15 +42,10 @@ function setupRealtimeDutyListener(userId) {
                 const data = { id: doc.id, ...doc.data() };
                 return data;
             });
-            console.log(`✅ Fetched ${dutyLogRecords.length} records total.`);
             renderDutyLog();
-        }, error => {
-            console.error("❌ Real-time listener error:", error);
-            alert("Error fetching data. Check console for details.");
         });
 }
 
-// --- Filter Records by Selected Month ---
 function filterRecordsByMonth(records) {
     if (!selectedMonth) {
         const today = new Date();
@@ -71,7 +54,6 @@ function filterRecordsByMonth(records) {
     return records.filter(record => record.date && record.date.slice(0, 7) === selectedMonth);
 }
 
-// --- Format Date Helper ---
 function formatDate(dateStr) {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -79,16 +61,10 @@ function formatDate(dateStr) {
     return date.toLocaleDateString('en-US', options);
 }
 
-// --- MAIN RENDER FUNCTION ---
 function renderDutyLog() {
-    console.log("🎨 Rendering UI...");
-
     const filteredRecords = filterRecordsByMonth(dutyLogRecords);
     const sortedRecords = [...filteredRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    console.log(`📊 Displaying ${sortedRecords.length} records for month: ${selectedMonth}`);
-
-    // 1. Desktop Table
     const tbody = document.getElementById('dutyTableBody');
     if (tbody) {
         if (sortedRecords.length === 0) {
@@ -98,14 +74,10 @@ function renderDutyLog() {
         }
     }
 
-    // 2. Dashboard Stats
     renderMiniDashboard(sortedRecords);
-
-    // 3. Mobile Cards
     renderMobileCards(sortedRecords);
 }
 
-// --- Render Empty State ---
 function renderEmptyTableState(tbody) {
     tbody.innerHTML = `
         <tr class="empty-row">
@@ -117,17 +89,14 @@ function renderEmptyTableState(tbody) {
     `;
 }
 
-// --- Render Desktop Table (FIXED) ---
 function renderDesktopTable(tbody, records) {
     tbody.innerHTML = '';
     records.forEach(record => {
-        const row = document.createElement('tr');
-        
-        // Handle both old and new data structures
         const totalHours = record.totalHours || record.hours || 0;
         const nightHours = record.nightHours || 0;
         const overtimeHours = record.overtimeHours || record.overTime || 0;
 
+        const row = document.createElement('tr');
         row.innerHTML = `
             <td data-label="Date">${formatDate(record.date)}</td>
             <td data-label="Time In">${record.timeIn}</td>
@@ -151,7 +120,6 @@ function renderDesktopTable(tbody, records) {
     });
 }
 
-// --- Render Mobile Cards ---
 function renderMobileCards(records) {
     const cardsWrapper = document.getElementById('dutyCardsWrapper');
     if (!cardsWrapper) return;
@@ -166,22 +134,16 @@ function renderMobileCards(records) {
     records.forEach(record => {
         const card = document.createElement('div');
         card.className = 'duty-card';
-        
         const dayTypeClass = (record.dayType || 'regular').toLowerCase().replace(/ /g, '-');
-        
         const dateObj = new Date(record.date);
         const dayNumber = dateObj.getDate();
         const dateString = dateObj.toLocaleDateString('en-US', { month: 'short', year: 'numeric', weekday: 'short' });
-
-        // Handle both old and new data structures
         const totalHours = record.totalHours || record.hours || 0;
         const nightHours = record.nightHours || 0;
         const overtimeHours = record.overtimeHours || record.overTime || 0;
-
         const otDisplay = overtimeHours > 0 
             ? `<div class="stat-ot">+${overtimeHours.toFixed(2)} OT</div>` 
             : `<div class="stat-ot" style="opacity:0.5">No OT</div>`;
-
         const nightDisplay = nightHours > 0
             ? `<div class="stat-night">🌙 ${nightHours.toFixed(2)} Night</div>`
             : '';
@@ -194,9 +156,7 @@ function renderMobileCards(records) {
                 </div>
                 <span class="status-badge ${dayTypeClass}">${record.dayType || 'Regular'}</span>
             </div>
-
             <div class="duty-card-body">
-                
                 <div class="col-timeline">
                     <div class="time-node">
                         <span class="time-label">Time In</span>
@@ -207,7 +167,6 @@ function renderMobileCards(records) {
                         <span class="time-value">${record.timeOut}</span>
                     </div>
                 </div>
-
                 <div class="col-stats">
                     <span class="stat-big">${totalHours.toFixed(2)}</span>
                     <span class="stat-label">Hrs</span>
@@ -215,7 +174,6 @@ function renderMobileCards(records) {
                     ${nightDisplay}
                 </div>
             </div>
-
             <div class="duty-card-footer">
                 <div class="rate-text">
                     <i class="fas fa-robot"></i> Auto-Calculated
@@ -230,35 +188,27 @@ function renderMobileCards(records) {
                 </div>
             </div>
         `;
-        
         cardsWrapper.appendChild(card);
     });
-    
-    cardsWrapper.style.display = 'flex'; 
+    cardsWrapper.style.display = 'flex';
 }
 
-// --- Render Mini Dashboard Stats (FIXED) ---
 function renderMiniDashboard(records) {
     let totalHours = 0;
-    let basicHours = 0; // Renamed from regularHours for clarity
+    let basicHours = 0;
     let nightHours = 0;
     let specialDayHours = 0;
     let overTimeHours = 0;
 
     records.forEach(record => {
-        // 1. Get the raw values
         const total = record.totalHours || record.hours || 0;
         const night = record.nightHours || 0;
         const overtime = record.overtimeHours || record.overTime || 0;
         const dayType = record.dayType || 'Regular';
-
-        // 2. Calculate the 'Basic Pay' hours (Total Duration - Overtime)
-        // This ensures we don't double count the OT hours in the 'Regular' bucket
         const basic = Math.max(0, total - overtime);
 
-        // 3. Accumulate
         totalHours += total;
-        basicHours += basic; // Add to our new Basic/Regular bucket
+        basicHours += basic;
         nightHours += night;
         overTimeHours += overtime;
 
@@ -267,27 +217,25 @@ function renderMiniDashboard(records) {
         }
     });
 
-    const expectedHours = 22 * 8; // Approx 22 working days
+    const expectedHours = 22 * 8;
     const availability = expectedHours > 0 ? (totalHours / expectedHours) * 100 : 0;
 
     const setText = (id, val) => {
         const el = document.getElementById(id);
-        if(el) el.textContent = val;
+        if (el) el.textContent = val;
     };
 
-    // Update the UI
     setText('dashTotalHours', totalHours.toFixed(2));
-    setText('dashRegularHours', basicHours.toFixed(2)); // Now displays Basic Hours (8.00)
+    setText('dashRegularHours', basicHours.toFixed(2));
     setText('dashNightHours', nightHours.toFixed(2));
     setText('dashSpecialDayHours', specialDayHours.toFixed(2));
     setText('dashOverTimeHours', overTimeHours.toFixed(2));
     setText('dashAvailability', '%' + availability.toFixed(2));
 }
 
-// --- Edit/Delete Functions ---
 window.editDutyRecord = function(id) {
     const record = dutyLogRecords.find(r => r.id === id);
-    if (!record) return console.error("Record not found:", id);
+    if (!record) return;
     openEditModal(record);
 };
 
@@ -307,14 +255,9 @@ function openEditModal(record) {
     document.getElementById('editDutyTimeIn').value = record.timeIn;
     document.getElementById('editDutyTimeOut').value = record.timeOut;
     document.getElementById('editDutyDayType').value = record.dayType || 'Regular';
-    
-    // Show current auto-calculated values
     updateEditPreview();
-    
-    // Add live preview listeners
     document.getElementById('editDutyTimeIn').addEventListener('input', updateEditPreview);
     document.getElementById('editDutyTimeOut').addEventListener('input', updateEditPreview);
-    
     modal.classList.add('active');
 }
 
@@ -331,7 +274,6 @@ function updateEditPreview() {
     }
 }
 
-// Reuse the same calculation logic
 function calculateShiftBreakdown(timeIn, timeOut) {
     if (!timeIn || !timeOut) return {
         regularHours: 0,
@@ -342,26 +284,18 @@ function calculateShiftBreakdown(timeIn, timeOut) {
 
     const [inH, inM] = timeIn.split(":").map(Number);
     const [outH, outM] = timeOut.split(":").map(Number);
-
     let startMinutes = inH * 60 + inM;
     let endMinutes = outH * 60 + outM;
-
-    if (endMinutes <= startMinutes) {
-        endMinutes += 24 * 60;
-    }
-
+    if (endMinutes <= startMinutes) endMinutes += 24 * 60;
     const totalMinutes = endMinutes - startMinutes;
     const totalHours = totalMinutes / 60;
-
     const nightStart = 22 * 60;
     const nightEnd = 6 * 60;
-
     let regularMinutes = 0;
     let nightMinutes = 0;
 
     for (let i = 0; i < totalMinutes; i++) {
         let currentMinute = (startMinutes + i) % (24 * 60);
-        
         if (currentMinute >= nightStart || currentMinute < nightEnd) {
             nightMinutes++;
         } else {
@@ -405,10 +339,16 @@ window.saveEditedDuty = async function() {
     const timeOut = document.getElementById('editDutyTimeOut').value;
     const dayType = document.getElementById('editDutyDayType').value;
 
-    if (!date || !timeIn || !timeOut) return showEditError("Date, Time In, and Time Out are required");
+    if (!date || !timeIn || !timeOut) {
+        showEditError("Date, Time In, and Time Out are required");
+        return;
+    }
     
     const breakdown = calculateShiftBreakdown(timeIn, timeOut);
-    if (breakdown.totalHours < 0.5) return showEditError("Shift must be at least 30 minutes");
+    if (breakdown.totalHours < 0.5) {
+        showEditError("Shift must be at least 30 minutes");
+        return;
+    }
 
     try {
         await db.collection("duties").doc(id).update({
@@ -422,7 +362,6 @@ window.saveEditedDuty = async function() {
         });
         closeEditModal();
     } catch (error) {
-        console.error(error);
         showEditError("Failed to update duty.");
     }
 };
@@ -449,8 +388,7 @@ function showDutyLogDeleteConfirmation(id) {
             await db.collection("duties").doc(id).delete();
             closeDutyLogDeleteModal();
         } catch(e) {
-            console.error(e);
-            alert("Delete failed");
+            showEditError("Delete failed");
         } finally {
             confirmBtn.disabled = false;
             cancelBtn.disabled = false;

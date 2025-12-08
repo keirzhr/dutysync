@@ -1,5 +1,3 @@
-console.log("🏠 overview.js loaded - COMPLETE REWRITE");
-
 // --- Global Variables ---
 let overviewDuties = [];
 let overviewPayslips = [];
@@ -9,22 +7,82 @@ let deductionMiniChartInstance = null;
 let unsubscribeDutiesOverview = null;
 let unsubscribePayslipsOverview = null;
 let unsubscribeSettingsOverview = null;
+let themeObserver = null;
+let overviewHolidayData = {
+  regularHours: 0,
+  regularMultiplier: 1.0,
+  overtimeHours: 0,
+  overtimeMultiplier: 1.3
+};
 
 // --- Initialize on Auth Change ---
 auth.onAuthStateChanged(user => {
     if (user) {
-        console.log(`👤 Overview: Auth detected for ${user.uid}`);
         setupRealtimeListeners(user.uid);
+        setupThemeObserver();
     } else {
         cleanupListeners();
+        cleanupThemeObserver();
     }
 });
 
+// --- Setup Theme Observer ---
+function setupThemeObserver() {
+    if (themeObserver) {
+        themeObserver.disconnect();
+    }
+    
+    themeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'data-theme') {
+                updateChartColors();
+            }
+        });
+    });
+    
+    themeObserver.observe(document.documentElement, { 
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
+    
+    updateChartColors();
+}
+
+function cleanupThemeObserver() {
+    if (themeObserver) {
+        themeObserver.disconnect();
+        themeObserver = null;
+    }
+}
+
+// --- Update Chart Colors Based on Theme ---
+function updateChartColors() {
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDarkMode ? '#ffffff' : '#1a1a1a';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const tooltipBg = isDarkMode ? 'rgba(30, 30, 30, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+    
+    if (last7DaysChartInstance) {
+        last7DaysChartInstance.options.scales.y.ticks.color = textColor;
+        last7DaysChartInstance.options.scales.x.ticks.color = textColor;
+        last7DaysChartInstance.options.scales.y.grid.color = gridColor;
+        last7DaysChartInstance.options.plugins.tooltip.backgroundColor = tooltipBg;
+        last7DaysChartInstance.options.plugins.tooltip.titleColor = textColor;
+        last7DaysChartInstance.options.plugins.tooltip.bodyColor = textColor;
+        last7DaysChartInstance.update('none');
+    }
+    
+    if (deductionMiniChartInstance) {
+        deductionMiniChartInstance.options.plugins.legend.labels.color = textColor;
+        deductionMiniChartInstance.options.plugins.tooltip.backgroundColor = tooltipBg;
+        deductionMiniChartInstance.options.plugins.tooltip.titleColor = textColor;
+        deductionMiniChartInstance.options.plugins.tooltip.bodyColor = textColor;
+        deductionMiniChartInstance.update('none');
+    }
+}
+
 // --- Setup Real-time Firestore Listeners ---
 function setupRealtimeListeners(userId) {
-    console.log(`📡 Setting up overview real-time listeners for: ${userId}`);
-
-    // Duties Listener
     if (unsubscribeDutiesOverview) unsubscribeDutiesOverview();
     unsubscribeDutiesOverview = db.collection("duties")
         .where("user", "==", userId)
@@ -33,14 +91,11 @@ function setupRealtimeListeners(userId) {
                 id: doc.id,
                 ...doc.data()
             }));
-            console.log("✅ Overview duties updated:", overviewDuties.length);
             renderOverviewUI();
         }, error => {
-            console.error("❌ Duties listener error:", error);
             showOverviewEmptyState();
         });
 
-    // Payslips Listener
     if (unsubscribePayslipsOverview) unsubscribePayslipsOverview();
     unsubscribePayslipsOverview = db.collection('payslip_history')
         .doc(userId)
@@ -50,24 +105,17 @@ function setupRealtimeListeners(userId) {
                 id: doc.id,
                 ...doc.data()
             }));
-            console.log("✅ Overview payslips updated:", overviewPayslips.length);
             renderOverviewUI();
-        }, error => {
-            console.error("❌ Payslips listener error:", error);
         });
 
-    // Settings Listener (for rates)
     if (unsubscribeSettingsOverview) unsubscribeSettingsOverview();
     unsubscribeSettingsOverview = db.collection('users')
         .doc(userId)
         .onSnapshot(doc => {
             if (doc.exists) {
                 userSettings = doc.data();
-                console.log("✅ User settings loaded for overview");
                 renderOverviewUI();
             }
-        }, error => {
-            console.error("❌ Settings listener error:", error);
         });
 }
 
@@ -79,8 +127,6 @@ function cleanupListeners() {
 
 // --- Main Render Function ---
 function renderOverviewUI() {
-    console.log("📊 Rendering Overview UI - Duties:", overviewDuties.length, "Payslips:", overviewPayslips.length);
-
     if (overviewDuties.length === 0 && overviewPayslips.length === 0) {
         showOverviewEmptyState();
         return;
@@ -93,16 +139,13 @@ function renderOverviewUI() {
     updateRecentLogs();
 }
 
-// ========================================
 // HERO STATS SECTION
-// ========================================
 
 function updateHeroStats() {
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
-    // THIS MONTH HOURS
     const thisMonthDuties = overviewDuties.filter(duty => {
         const [y, m] = duty.date.split("-").map(Number);
         return y === currentYear && m === currentMonth;
@@ -110,7 +153,6 @@ function updateHeroStats() {
     const thisMonthHours = thisMonthDuties.reduce((sum, d) => sum + (parseFloat(d.totalHours) || 0), 0);
     setText('heroThisMonthHours', thisMonthHours.toFixed(2));
 
-    // HOURS CHANGE VS PREVIOUS MONTH
     const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
     const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
     const prevMonthDuties = overviewDuties.filter(duty => {
@@ -120,14 +162,9 @@ function updateHeroStats() {
     const prevMonthHours = prevMonthDuties.reduce((sum, d) => sum + (parseFloat(d.totalHours) || 0), 0);
     const hoursChange = prevMonthHours > 0 ? ((thisMonthHours - prevMonthHours) / prevMonthHours * 100).toFixed(1) : 0;
 
-    console.log("✅ This Month Hours:", thisMonthHours.toFixed(2), "Change:", hoursChange + "%");
-
-    // CURRENT NET PAY (Estimated for current period)
     const currentEstimate = calculateCurrentPeriodEstimate();
     setText('heroCurrentNetPay', formatCurrency(currentEstimate.netPay));
 
-    // NET PAY CHANGE vs previous payslip
-    let netPayChange = 0;
     if (overviewPayslips.length > 0) {
         const sortedPayslips = [...overviewPayslips].sort((a, b) => {
             if (a.year !== b.year) return b.year - a.year;
@@ -136,32 +173,25 @@ function updateHeroStats() {
         });
 
         const latestPayslip = sortedPayslips[0];
-        netPayChange = latestPayslip.netPay > 0 
+        const netPayChange = latestPayslip.netPay > 0 
             ? ((currentEstimate.netPay - latestPayslip.netPay) / latestPayslip.netPay * 100).toFixed(1)
             : 0;
 
         setText('heroLastPayslip', formatCurrency(latestPayslip.netPay || 0));
         const dateStr = `${getMonthNameShort(latestPayslip.month)} ${latestPayslip.cutoff === 1 ? '1-15' : '16-30'}`;
         setText('lastPayslipDate', dateStr);
-        console.log("✅ Last Payslip:", formatCurrency(latestPayslip.netPay));
     } else {
         setText('heroLastPayslip', '₱0.00');
         setText('lastPayslipDate', 'No record');
     }
 
-    console.log("✅ Net Pay Change:", netPayChange + "%");
-
-    // YTD EARNINGS
     const ytdPayslips = overviewPayslips.filter(p => p.year === currentYear);
     const ytdTotal = ytdPayslips.reduce((sum, p) => sum + (parseFloat(p.netPay) || 0), 0);
     setText('heroYTDEarnings', formatCurrency(ytdTotal));
     setText('ytdCount', `${ytdPayslips.length} ${ytdPayslips.length === 1 ? 'period' : 'periods'}`);
-    console.log("✅ YTD Earnings:", formatCurrency(ytdTotal), "Periods:", ytdPayslips.length);
 }
 
-// ========================================
 // LAST 7 DAYS CHART
-// ========================================
 
 function updateLast7DaysChart() {
     const ctx = document.getElementById('last7DaysChart');
@@ -175,6 +205,11 @@ function updateLast7DaysChart() {
     setText('last7Avg', avgHours + ' hrs');
 
     if (last7DaysChartInstance) last7DaysChartInstance.destroy();
+
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDarkMode ? '#ffffff' : '#1a1a1a';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const tooltipBg = isDarkMode ? 'rgba(30, 30, 30, 0.9)' : 'rgba(0, 0, 0, 0.8)';
 
     last7DaysChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -196,9 +231,16 @@ function updateLast7DaysChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: { 
+                    display: false,
+                    labels: {
+                        color: textColor
+                    }
+                },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: tooltipBg,
+                    titleColor: textColor,
+                    bodyColor: textColor,
                     padding: 12,
                     cornerRadius: 8,
                     callbacks: {
@@ -210,18 +252,20 @@ function updateLast7DaysChart() {
                 y: {
                     beginAtZero: true,
                     grid: { 
-                        color: 'rgba(255, 255, 255, 0.05)',
+                        color: gridColor,
                         drawBorder: false
                     },
                     ticks: {
-                        color: 'var(--text-secondary)',
+                        color: textColor,
                         font: { size: 11 }
                     }
                 },
                 x: { 
-                    grid: { display: false },
+                    grid: { 
+                        display: false 
+                    },
                     ticks: {
-                        color: 'var(--text-secondary)',
+                        color: textColor,
                         font: { size: 11 }
                     }
                 }
@@ -249,9 +293,7 @@ function getLast7DaysData() {
     return { dates, hours };
 }
 
-// ========================================
 // DEDUCTION MINI CHART
-// ========================================
 
 function updateDeductionMiniChart() {
     const currentEstimate = calculateCurrentPeriodEstimate();
@@ -271,6 +313,10 @@ function updateDeductionMiniChart() {
     ];
 
     if (deductionMiniChartInstance) deductionMiniChartInstance.destroy();
+
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDarkMode ? '#ffffff' : '#1a1a1a';
+    const tooltipBg = isDarkMode ? 'rgba(30, 30, 30, 0.9)' : 'rgba(0, 0, 0, 0.8)';
 
     deductionMiniChartInstance = new Chart(ctx, {
         type: 'doughnut',
@@ -299,11 +345,13 @@ function updateDeductionMiniChart() {
                         font: { size: 11 },
                         padding: 12,
                         usePointStyle: true,
-                        color: 'var(--text-primary)'
+                        color: textColor
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: tooltipBg,
+                    titleColor: textColor,
+                    bodyColor: textColor,
                     padding: 12,
                     cornerRadius: 8,
                     callbacks: {
@@ -315,9 +363,7 @@ function updateDeductionMiniChart() {
     });
 }
 
-// ========================================
 // RECENT DUTY LOGS
-// ========================================
 
 function updateRecentLogs() {
     const container = document.getElementById('recentLogsContainer');
@@ -348,9 +394,7 @@ function updateRecentLogs() {
     `).join('');
 }
 
-// ========================================
-// CURRENT PERIOD CALCULATION (From Overview)
-// ========================================
+// CURRENT PERIOD CALCULATION
 
 function calculateCurrentPeriodEstimate() {
     const now = new Date();
@@ -382,7 +426,20 @@ function calculateCurrentPeriodEstimate() {
     let regularHoursPayable = 0;
     let overtimeHoursPayable = 0;
     let nightDiffHours = 0;
-    let holidayPayAccumulator = 0;
+
+    // Reset holiday data
+    overviewHolidayData = {
+      regularHours: 0,
+      regularMultiplier: 1.0,
+      overtimeHours: 0,
+      overtimeMultiplier: 1.3
+    };
+
+    const holidayMultipliers = {
+        'Regular': 1.0,
+        'Regular Holiday': 2.0,
+        'Special Non-Working Holiday': 1.3
+    };
 
     currentPeriodDuties.forEach(duty => {
         const regular = parseFloat(duty.regularHours) || 0;
@@ -392,20 +449,28 @@ function calculateCurrentPeriodEstimate() {
         const dayType = duty.dayType || 'Regular';
         const isHoliday = dayType.includes('Holiday') || dayType.includes('Special');
 
+        // Define a proper mapping - parse multiplier from dayType string
+        let multiplier = 1.0;
+        if (dayType.includes('(200%)')) {
+            multiplier = 2.0;
+        } else if (dayType.includes('(130%)')) {
+            multiplier = 1.3;
+        } else if (dayType.includes('Holiday')) {
+            multiplier = 2.0; // default to 200% if no percentage specified
+        }
+
         nightDiffHours += night;
 
         if (isHoliday) {
-            let multiplier = 1.0;
-            if (dayType.includes('130')) multiplier = 1.30;
-            if (dayType.includes('200')) multiplier = 2.00;
-
+            const multiplier = holidayMultipliers[dayType] || 1.0;
             const holidayBaseHours = Math.max(0, totalDuration - overtime);
             const holidayOTHours = overtime;
 
-            holidayPayAccumulator += holidayBaseHours * multiplier;
-            if (holidayOTHours > 0) {
-                holidayPayAccumulator += holidayOTHours * (multiplier * 1.3);
-            }
+            // Store actual hours with their multipliers
+            overviewHolidayData.regularHours += holidayBaseHours;
+            overviewHolidayData.regularMultiplier = multiplier;
+            overviewHolidayData.overtimeHours += holidayOTHours;
+            overviewHolidayData.overtimeMultiplier = multiplier * 1.3;
         } else {
             const basic = Math.max(0, totalDuration - overtime);
             regularHoursPayable += basic;
@@ -416,7 +481,12 @@ function calculateCurrentPeriodEstimate() {
     const basicPay = roundToDecimal(regularHoursPayable * hourlyRate, 2);
     const overtimePay = roundToDecimal(overtimeHoursPayable * hourlyRate * overtimeMultiplier, 2);
     const nightDiffPay = roundToDecimal(nightDiffHours * hourlyRate * nightDiffMultiplier, 2);
-    const holidayPay = roundToDecimal(holidayPayAccumulator * hourlyRate, 2);
+    
+    // FIXED: Apply holiday multipliers correctly
+    const holidayBasePay = roundToDecimal(overviewHolidayData.regularHours * hourlyRate * overviewHolidayData.regularMultiplier, 2);
+    const holidayOTPay = roundToDecimal(overviewHolidayData.overtimeHours * hourlyRate * overviewHolidayData.overtimeMultiplier, 2);
+    const holidayPay = roundToDecimal(holidayBasePay + holidayOTPay, 2);
+    
     const grossPay = roundToDecimal(basicPay + overtimePay + nightDiffPay + holidayPay, 2);
 
     const deductions = calculateEstimatedDeductions(grossPay);
@@ -441,33 +511,92 @@ function calculateEstimatedDeductions(grossPay) {
     return { sss, philhealth, pagibig, birTax, total };
 }
 
-// --- Deduction Calculations (Same as generate.js) ---
 function calculateSSS(monthlyGross) {
-    const brackets = [
-        [4249.99, 180], [4749.99, 202.50], [5249.99, 225], [5749.99, 247.50],
-        [6249.99, 270], [6749.99, 292.50], [7249.99, 315], [7749.99, 337.50],
-        [8249.99, 360], [8749.99, 382.50], [9249.99, 405], [9749.99, 427.50],
-        [10249.99, 450], [10749.99, 472.50], [11249.99, 495], [11749.99, 517.50],
-        [12249.99, 540], [12749.99, 562.50], [13249.99, 585], [13749.99, 607.50],
-        [14249.99, 630], [14749.99, 652.50], [15249.99, 675], [15749.99, 697.50],
-        [16249.99, 720], [16749.99, 742.50], [17249.99, 765], [17749.99, 787.50],
-        [18249.99, 810], [18749.99, 832.50], [19249.99, 855], [19749.99, 877.50],
-        [20249.99, 900], [20749.99, 922.50], [21249.99, 945], [21749.99, 967.50],
-        [22249.99, 990], [22749.99, 1012.50], [23249.99, 1035], [23749.99, 1057.50],
-        [24249.99, 1080], [24749.99, 1102.50], [25249.99, 1125], [25749.99, 1147.50],
-        [26249.99, 1170], [26749.99, 1192.50], [27249.99, 1215], [27749.99, 1237.50],
-        [28249.99, 1260], [28749.99, 1282.50], [29249.99, 1305], [29749.99, 1327.50]
-    ];
-    for (const [max, ee] of brackets) {
-        if (monthlyGross <= max) return ee;
+  const brackets = [
+    { min: 0, max: 4249.99, ee: 180.00 },
+    { min: 4250, max: 4749.99, ee: 202.50 },
+    { min: 4750, max: 5249.99, ee: 225.00 },
+    { min: 5250, max: 5749.99, ee: 247.50 },
+    { min: 5750, max: 6249.99, ee: 270.00 },
+    { min: 6250, max: 6749.99, ee: 292.50 },
+    { min: 6750, max: 7249.99, ee: 315.00 },
+    { min: 7250, max: 7749.99, ee: 337.50 },
+    { min: 7750, max: 8249.99, ee: 360.00 },
+    { min: 8250, max: 8749.99, ee: 382.50 },
+    { min: 8750, max: 9249.99, ee: 405.00 },
+    { min: 9250, max: 9749.99, ee: 427.50 },
+    { min: 9750, max: 10249.99, ee: 450.00 },
+    { min: 10250, max: 10749.99, ee: 472.50 },
+    { min: 10750, max: 11249.99, ee: 495.00 },
+    { min: 11250, max: 11749.99, ee: 517.50 },
+    { min: 11750, max: 12249.99, ee: 540.00 },
+    { min: 12250, max: 12749.99, ee: 562.50 },
+    { min: 12750, max: 13249.99, ee: 585.00 },
+    { min: 13250, max: 13749.99, ee: 607.50 },
+    { min: 13750, max: 14249.99, ee: 630.00 },
+    { min: 14250, max: 14749.99, ee: 652.50 },
+    { min: 14750, max: 15249.99, ee: 675.00 },
+    { min: 15250, max: 15749.99, ee: 697.50 },
+    { min: 15750, max: 16249.99, ee: 720.00 },
+    { min: 16250, max: 16749.99, ee: 742.50 },
+    { min: 16750, max: 17249.99, ee: 765.00 },
+    { min: 17250, max: 17749.99, ee: 787.50 },
+    { min: 17750, max: 18249.99, ee: 810.00 },
+    { min: 18250, max: 18749.99, ee: 832.50 },
+    { min: 18750, max: 19249.99, ee: 855.00 },
+    { min: 19250, max: 19749.99, ee: 877.50 },
+    { min: 19750, max: 20249.99, ee: 900.00 },
+    { min: 20250, max: 20749.99, ee: 922.50 },
+    { min: 20750, max: 21249.99, ee: 945.00 },
+    { min: 21250, max: 21749.99, ee: 967.50 },
+    { min: 21750, max: 22249.99, ee: 990.00 },
+    { min: 22250, max: 22749.99, ee: 1012.50 },
+    { min: 22750, max: 23249.99, ee: 1035.00 },
+    { min: 23250, max: 23749.99, ee: 1057.50 },
+    { min: 23750, max: 24249.99, ee: 1080.00 },
+    { min: 24250, max: 24749.99, ee: 1102.50 },
+    { min: 24750, max: 25249.99, ee: 1125.00 },
+    { min: 25250, max: 25749.99, ee: 1147.50 },
+    { min: 25750, max: 26249.99, ee: 1170.00 },
+    { min: 26250, max: 26749.99, ee: 1192.50 },
+    { min: 26750, max: 27249.99, ee: 1215.00 },
+    { min: 27250, max: 27749.99, ee: 1237.50 },
+    { min: 27750, max: 28249.99, ee: 1260.00 },
+    { min: 28250, max: 28749.99, ee: 1282.50 },
+    { min: 28750, max: 29249.99, ee: 1305.00 },
+    { min: 29250, max: 29749.99, ee: 1327.50 },
+    { min: 29750, max: Infinity, ee: 1350.00 }
+  ];
+  
+  // Find the bracket where monthlyGross falls
+  for (const bracket of brackets) {
+    if (monthlyGross >= bracket.min && monthlyGross <= bracket.max) {
+      return bracket.ee;
     }
-    return 1350;
+  }
+  
+  return 1350.00; // Default maximum
 }
 
-function calculatePhilHealth(monthlyGross) {
-    const rate = 0.05;
-    const basis = Math.max(10000, Math.min(100000, monthlyGross));
-    return roundToDecimal((basis * rate) / 2, 2);
+function calculatePhilHealth(semiMonthlyGross) {
+  // semiMonthlyGross is the semi-monthly gross pay
+  const monthlyGross = semiMonthlyGross * 2; // convert to monthly
+  
+  // PhilHealth formula: Premium = Monthly Basic Salary * 0.045 (total)
+  // Employee share is half of this (2.25%)
+  const employeeShareRate = 0.0225; // 2.25% employee share
+  
+  // Apply minimum floor of ₱10,000 and maximum ceiling of ₱100,000
+  let basis = monthlyGross;
+  if (monthlyGross < 10000) {
+    basis = 10000; // Minimum
+  } else if (monthlyGross > 100000) {
+    basis = 100000; // Maximum
+  }
+  
+  const monthlyEmployeeShare = basis * employeeShareRate;
+  const semiMonthlyDeduction = monthlyEmployeeShare / 2;
+  return roundToDecimal(semiMonthlyDeduction, 2);
 }
 
 function calculatePagibig(monthlyGross) {
@@ -495,10 +624,6 @@ function calculateBIRWithholdingTax(taxableIncomeSemiMonthly) {
     return 0;
 }
 
-// ========================================
-// HELPER FUNCTIONS
-// ========================================
-
 function roundToDecimal(value, decimals) {
     const factor = Math.pow(10, decimals);
     return Math.round(value * factor) / factor;
@@ -507,10 +632,6 @@ function roundToDecimal(value, decimals) {
 function setText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
-}
-
-function updateBadge(id, change) {
-    // Badge function removed - no longer used
 }
 
 function formatCurrency(amount) {
@@ -531,10 +652,6 @@ function getMonthNameShort(month) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[month - 1];
 }
-
-// ========================================
-// EMPTY STATE
-// ========================================
 
 function showOverviewEmptyState() {
     const el = document.getElementById('overviewEmptyState');
@@ -558,8 +675,7 @@ function hideOverviewEmptyState() {
     });
 }
 
-// ========================================
-// CLEANUP
-// ========================================
-
-window.addEventListener('beforeunload', cleanupListeners);
+window.addEventListener('beforeunload', () => {
+    cleanupListeners();
+    cleanupThemeObserver();
+});

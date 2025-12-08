@@ -1,10 +1,8 @@
-console.log("🔥 profile.js loaded");
+// profile.js
 
-// --- Global Variables ---
 let currentUserData = null;
 let isEditMode = false;
 
-// --- Initialize Profile ---
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         await loadUserProfile(user.uid);
@@ -12,7 +10,6 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// --- Load User Profile from Firestore ---
 async function loadUserProfile(userId) {
     try {
         const userDoc = await db.collection('users').doc(userId).get();
@@ -20,9 +17,7 @@ async function loadUserProfile(userId) {
         if (userDoc.exists) {
             currentUserData = { id: userId, ...userDoc.data() };
             displayUserProfile(currentUserData);
-            console.log("✅ Profile loaded successfully");
         } else {
-            console.warn("⚠️ User document not found, creating default profile");
             const defaultProfile = {
                 fullName: auth.currentUser.email.split('@')[0],
                 email: auth.currentUser.email,
@@ -39,22 +34,19 @@ async function loadUserProfile(userId) {
             displayUserProfile(currentUserData);
         }
     } catch (error) {
-        console.error("❌ Error loading profile:", error);
         showToast("Failed to load profile data", "error");
     }
 }
 
-// --- Display User Profile ---
 function displayUserProfile(userData) {
     const profileAvatarLarge = document.getElementById('profileAvatarLarge');
     
     if (profileAvatarLarge) {
-        profileAvatarLarge.innerHTML = ''; // clear old content
-
+        profileAvatarLarge.innerHTML = '';
+        
         if (userData.photoBase64) {
-            // Display uploaded Base64 photo
             const img = document.createElement('img');
-            img.src = userData.photoBase64; // <-- must be Base64 string
+            img.src = userData.photoBase64;
             img.alt = 'Profile Photo';
             img.style.width = '100%';
             img.style.height = '100%';
@@ -62,7 +54,6 @@ function displayUserProfile(userData) {
             img.style.borderRadius = '50%';
             profileAvatarLarge.appendChild(img);
         } else {
-            // Display initials if no photo
             const initials = userData.fullName 
                 ? userData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
                 : userData.email.substring(0, 2).toUpperCase();
@@ -70,7 +61,6 @@ function displayUserProfile(userData) {
         }
     }
     
-    // Update header info
     const profileName = document.getElementById('profileName');
     const profileEmail = document.getElementById('profileEmail');
     const profilePosition = document.getElementById('profilePosition');
@@ -81,7 +71,6 @@ function displayUserProfile(userData) {
     if (profilePosition) profilePosition.textContent = userData.position || 'Manager';
     if (profileStatus) profileStatus.textContent = 'Active';
     
-    // Update form fields
     const profileFullName = document.getElementById('profileFullName');
     const profileEmailInput = document.getElementById('profileEmailInput');
     const profilePhone = document.getElementById('profilePhone');
@@ -96,7 +85,6 @@ function displayUserProfile(userData) {
     if (profileLocation) profileLocation.value = userData.location || '';
     if (profileHireDate) profileHireDate.value = userData.hireDate || '';
 
-    // --- Update Sidebar Footer ---
     const sidebarAvatar = document.getElementById('userAvatar');
     const sidebarName = document.getElementById('userName');
     const sidebarEmail = document.getElementById('userEmail');
@@ -124,10 +112,7 @@ function displayUserProfile(userData) {
     if (sidebarEmail) sidebarEmail.textContent = userData.email || '';
 }
 
-
-// --- Setup Event Listeners ---
 function setupProfileEventListeners() {
-    // Sidebar Footer Click - Navigate to Profile
     const sidebarFooterProfile = document.getElementById('sidebarFooterProfile');
     if (sidebarFooterProfile) {
         sidebarFooterProfile.addEventListener('click', (e) => {
@@ -136,7 +121,6 @@ function setupProfileEventListeners() {
         });
     }
     
-    // Avatar Edit Button
     const avatarEditBtn = document.getElementById('avatarEditBtn');
     if (avatarEditBtn) {
         avatarEditBtn.addEventListener('click', () => {
@@ -144,43 +128,36 @@ function setupProfileEventListeners() {
         });
     }
     
-    // Photo Input Change
     const photoInput = document.getElementById('photoInput');
     if (photoInput) {
         photoInput.addEventListener('change', handlePhotoUpload);
     }
     
-    // Edit Profile Button
     const btnEditProfile = document.getElementById('btnEditProfile');
     if (btnEditProfile) {
         btnEditProfile.addEventListener('click', toggleEditMode);
     }
     
-    // Cancel Button
     const btnCancelProfile = document.getElementById('btnCancelProfile');
     if (btnCancelProfile) {
         btnCancelProfile.addEventListener('click', cancelEditMode);
     }
     
-    // Save Button
     const btnSaveProfile = document.getElementById('btnSaveProfile');
     if (btnSaveProfile) {
         btnSaveProfile.addEventListener('click', saveProfileChanges);
     }
 }
 
-// --- Handle Photo Upload (FIXED) ---
 async function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
         showToast("Please select a valid image file", "error");
         return;
     }
 
-    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
         showToast("Image size must be less than 5MB", "error");
         return;
@@ -199,36 +176,26 @@ async function handlePhotoUpload(e) {
         avatarEditBtn.disabled = true;
         profileAvatarLarge.classList.add('loading');
 
-        // Convert image to Base64
         const reader = new FileReader();
         
         reader.onload = async (event) => {
             try {
-                const base64String = event.target.result; // This includes the data:image/... prefix
+                const base64String = event.target.result;
 
-                // Update Firestore with Base64 image
                 await db.collection('users').doc(user.uid).update({
                     photoBase64: base64String,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Update currentUserData
                 currentUserData.photoBase64 = base64String;
-                
-                // Refresh display
                 displayUserProfile(currentUserData);
 
-                // Re-enable button and remove loading state
                 avatarEditBtn.disabled = false;
                 profileAvatarLarge.classList.remove('loading');
-                
-                // Clear input
                 document.getElementById('photoInput').value = '';
 
                 showToast("Photo uploaded successfully!", "success");
-                console.log("✅ Photo uploaded successfully");
             } catch (error) {
-                console.error("Error saving photo to Firestore:", error);
                 avatarEditBtn.disabled = false;
                 profileAvatarLarge.classList.remove('loading');
                 document.getElementById('photoInput').value = '';
@@ -237,18 +204,14 @@ async function handlePhotoUpload(e) {
         };
 
         reader.onerror = () => {
-            console.error("Error reading file");
             avatarEditBtn.disabled = false;
             profileAvatarLarge.classList.remove('loading');
             document.getElementById('photoInput').value = '';
             showToast("Failed to read image file", "error");
         };
 
-        // Read file as Base64
         reader.readAsDataURL(file);
-
     } catch (error) {
-        console.error("Error uploading photo:", error);
         const avatarEditBtn = document.getElementById('avatarEditBtn');
         const profileAvatarLarge = document.getElementById('profileAvatarLarge');
         avatarEditBtn.disabled = false;
@@ -258,9 +221,6 @@ async function handlePhotoUpload(e) {
     }
 }
 
-
-
-// --- Navigate to Profile Section ---
 function navigateToProfile() {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
@@ -280,11 +240,8 @@ function navigateToProfile() {
     if (window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('open');
     }
-    
-    console.log("Navigated to Profile section");
 }
 
-// --- Toggle Edit Mode ---
 function toggleEditMode() {
     isEditMode = true;
     
@@ -312,11 +269,8 @@ function toggleEditMode() {
     if (profileActionsDefault) {
         profileActionsDefault.style.display = 'none';
     }
-    
-    console.log("Edit mode enabled");
 }
 
-// --- Cancel Edit Mode ---
 function cancelEditMode() {
     isEditMode = false;
     
@@ -335,13 +289,9 @@ function cancelEditMode() {
         profileActionsDefault.style.display = 'flex';
     }
 
-    // Reload display to show original data
     displayUserProfile(currentUserData);
-    
-    console.log("Edit mode cancelled");
 }
 
-// --- Save Profile Changes ---
 async function saveProfileChanges() {
     const user = auth.currentUser;
     if (!user) {
@@ -377,20 +327,14 @@ async function saveProfileChanges() {
         cancelEditMode();
         
         showToast("Profile updated successfully!", "success");
-        console.log("✅ Profile saved successfully");
     } catch (error) {
-        console.error("❌ Error saving profile:", error);
         showToast("Failed to save profile. Please try again.", "error");
     }
 }
 
-// --- Toast Notification ---
 function showToast(message, type = "success") {
     const toastContainer = document.getElementById('toastContainer');
-    if (!toastContainer) {
-        console.warn("Toast container not found");
-        return;
-    }
+    if (!toastContainer) return;
     
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -414,7 +358,6 @@ function showToast(message, type = "success") {
     }, 3000);
 }
 
-// --- Update Breadcrumb Function ---
 if (typeof updateBreadcrumb === 'undefined') {
     function updateBreadcrumb(parentName, currentName) {
         const breadcrumbParent = document.getElementById('breadcrumbParent');

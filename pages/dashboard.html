@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
 
+<body>
   <button class="hamburger" id="hamburger">☰</button>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -82,7 +82,26 @@
           <span class="breadcrumb-separator">/</span>
           <span class="breadcrumb-current" id="breadcrumbCurrent"></span>
         </div>
-        <button class="notification-btn" id="notificationBtn"><i class="fas fa-bell"></i><span class="notification-badge">3</span></button>
+
+        <div class="notification-wrapper">
+          <button class="notification-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+          </button>
+          
+          <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+              <h3>Notifications</h3>
+              <button class="mark-all-read" id="markAllRead">Mark all read</button>
+            </div>
+            <div class="notification-list" id="notificationList">
+              <!-- Notifications will be inserted here -->
+            </div>
+            <div class="notification-footer">
+              <button class="clear-all-btn" id="clearAllBtn">Clear All</button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -290,11 +309,11 @@
               </div>
               <div class="popup-section">
                 <label class="section-label">Day Type</label>
-                <select id="popupDayType" class="select-input">
-                  <option>Regular</option>
-                  <option>Regular Holiday (130%)</option>
-                  <option>Special Non-Working Holiday (200%)</option>
-                </select>
+                  <select id="popupDayType" class="select-input">
+                      <option value="Regular">Regular</option>
+                      <option value="Regular Holiday (200%)">Regular Holiday</option>
+                      <option value="Special Non-Working Holiday (130%)">Special Non-Working Holiday</option>
+                  </select>
               </div>
               <div class="popup-section">
                 <label class="section-label">Automatic Calculation Preview</label>
@@ -423,9 +442,9 @@
               <div class="popup-section">
                 <label class="section-label">Day Type</label>
                 <select id="editDutyDayType" class="select-input">
-                  <option>Regular</option>
-                  <option>Regular Holiday (130%)</option>
-                  <option>Special Non-Working Holiday (200%)</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Regular Holiday">Regular Holiday</option>
+                    <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
                 </select>
               </div>
               <div class="popup-section">
@@ -1511,7 +1530,7 @@
           <!-- FLOATING CONTACT BUBBLE -->
           <div class="contact-bubble" id="contactBubble">
             <div class="bubble-icon">
-              <i class="fas fa-question-circle"></i>
+              <i class="fas fa-headset"></i>
             </div>
             <div class="bubble-tooltip">Need help?</div>
           </div>
@@ -1728,7 +1747,7 @@
               <div class="member-info">
                 <h4>Valida, Keil Rizher R.</h4>
                 <div class="member-role">Full Stack Developer</div>
-                <p class="member-description">Develops the system from a scratch to implementation, writes clean and efficient code, integrates core features, resolves bugs, and collaborates with the team to ensure smooth system performance.</p>
+                <p class="member-description">Develops the system from scratch to implementation, writes clean and efficient code, integrates core features, resolves bugs, and collaborates with the team to ensure smooth system performance.</p>
               </div>
             </div>
 

@@ -1,11 +1,10 @@
-console.log("💰 netpaytrends.js loaded");
+// netpaytrends.js
 
-// --- Global Variables ---
 let netPayData = [];
 let netPayChartInstance = null;
-let currentView = '6months'; // '6months' or '12months'
+let currentView = '6months';
+let netPayListenerUnsubscribe = null;
 
-// --- Initialize on Auth Change ---
 auth.onAuthStateChanged(user => {
     if (user) {
         initializeNetPayFilters();
@@ -14,14 +13,9 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// --- 1. Initialize Filters ---
 function initializeNetPayFilters() {
     const yearSelect = document.getElementById('netpayYear');
-    
-    if (!yearSelect) {
-        console.warn("⚠️ 'netpayYear' element not found in HTML");
-        return;
-    }
+    if (!yearSelect) return;
     
     const currentYear = new Date().getFullYear();
     yearSelect.innerHTML = '<option value="all">All Years</option>';
@@ -33,15 +27,9 @@ function initializeNetPayFilters() {
         if (y === currentYear) opt.selected = true;
         yearSelect.appendChild(opt);
     }
-    console.log("✅ Net Pay Year Filter Populated");
 }
 
-// --- 2. Load Data from Firestore (REAL-TIME LISTENER) ---
-let netPayListenerUnsubscribe = null;
-
 function loadNetPayData(userId) {
-    console.log(`🔥 Setting up real-time net pay listener for: ${userId}`);
-    
     if (netPayListenerUnsubscribe) {
         netPayListenerUnsubscribe();
     }
@@ -51,7 +39,7 @@ function loadNetPayData(userId) {
         .collection('records')
         .onSnapshot(snapshot => {
             netPayData = [];
-        
+            
             snapshot.forEach(doc => {
                 const data = doc.data();
                 netPayData.push({
@@ -65,29 +53,21 @@ function loadNetPayData(userId) {
                 });
             });
             
-            // Sort: Newest first for display, oldest first for charts
             netPayData.sort((a, b) => {
                 if (a.year !== b.year) return a.year - b.year;
                 if (a.month !== b.month) return a.month - b.month;
                 return a.cutoff - b.cutoff;
             });
             
-            console.log(`✅ Real-time update: ${netPayData.length} net pay records loaded`);
-            
             renderNetPayUI();
-            
         }, error => {
-            console.error('❌ Error in net pay listener:', error);
             showNetPayEmptyState();
         });
 }
 
-// --- 3. Render UI (Master Function) ---
 function renderNetPayUI() {
     const yearFilter = document.getElementById('netpayYear')?.value || 'all';
-
-    console.log(`🔍 Filtering Net Pay: Year=${yearFilter}`);
-
+    
     let filteredData = netPayData.filter(item => {
         return yearFilter === 'all' || item.year.toString() === yearFilter;
     });
@@ -98,8 +78,7 @@ function renderNetPayUI() {
     }
     
     hideNetPayEmptyState();
-
-    // Update all sections
+    
     updateComparisonCards(filteredData);
     renderNetPayTrendChart(filteredData);
     updateInsightsCards(filteredData);
@@ -107,23 +86,19 @@ function renderNetPayUI() {
     renderNetPayTable(filteredData);
 }
 
-// --- 4. Update Comparison Cards ---
 function updateComparisonCards(data) {
     if (data.length === 0) return;
 
     const currentPeriod = data[data.length - 1];
     const previousPeriod = data[data.length - 2];
     
-    // Current Period
     setText('currentNetPay', formatCurrency(currentPeriod.netPay));
     setText('currentPeriodLabel', `${getMonthName(currentPeriod.month)} ${currentPeriod.cutoff === 1 ? '1-15' : '16-30'}, ${currentPeriod.year}`);
     
-    // Previous Period
     if (previousPeriod) {
         setText('previousNetPay', formatCurrency(previousPeriod.netPay));
         setText('previousPeriodLabel', `${getMonthName(previousPeriod.month)} ${previousPeriod.cutoff === 1 ? '1-15' : '16-30'}, ${previousPeriod.year}`);
         
-        // Calculate Change
         const change = currentPeriod.netPay - previousPeriod.netPay;
         const changePercent = previousPeriod.netPay > 0 ? ((change / previousPeriod.netPay) * 100).toFixed(1) : 0;
         
@@ -151,11 +126,9 @@ function updateComparisonCards(data) {
         }
     }
     
-    // Average Net Pay
     const avgNetPay = data.reduce((sum, item) => sum + item.netPay, 0) / data.length;
     setText('averageNetPay', formatCurrency(avgNetPay));
     
-    // YTD Total
     const currentYear = new Date().getFullYear();
     const ytdData = data.filter(item => item.year === currentYear);
     const ytdTotal = ytdData.reduce((sum, item) => sum + item.netPay, 0);
@@ -163,7 +136,6 @@ function updateComparisonCards(data) {
     setText('ytdCount', `${ytdData.length} ${ytdData.length === 1 ? 'period' : 'periods'}`);
 }
 
-// --- 5. Render Trend Chart ---
 function renderNetPayTrendChart(data) {
     const ctx = document.getElementById('netPayTrendChart');
     if (!ctx) return;
@@ -277,15 +249,12 @@ function renderNetPayTrendChart(data) {
     });
 }
 
-// --- 6. Update Insights Cards ---
 function updateInsightsCards(data) {
     if (data.length === 0) return;
 
-    // Hours Correlation (Need to fetch from duties - for now use placeholder)
     setText('totalPeriodsWorked', data.length);
-    setText('avgHoursPerPeriod', 'N/A'); // Would need duty data
+    setText('avgHoursPerPeriod', 'N/A');
     
-    // Earnings Breakdown
     const totalNetPay = data.reduce((sum, item) => sum + item.netPay, 0);
     const totalGrossPay = data.reduce((sum, item) => sum + item.grossPay, 0);
     const totalDeductions = data.reduce((sum, item) => sum + item.totalDeductions, 0);
@@ -294,7 +263,6 @@ function updateInsightsCards(data) {
     setText('totalEarningsNet', formatCurrency(totalNetPay));
     setText('totalDeductionsInsight', formatCurrency(totalDeductions));
     
-    // Best & Worst Months
     const sortedByNetPay = [...data].sort((a, b) => b.netPay - a.netPay);
     const bestMonth = sortedByNetPay[0];
     const worstMonth = sortedByNetPay[sortedByNetPay.length - 1];
@@ -305,14 +273,12 @@ function updateInsightsCards(data) {
     setText('worstMonthValue', formatCurrency(worstMonth.netPay));
 }
 
-// --- 7. Update Projection Card ---
 function updateProjectionCard(data) {
     if (data.length < 2) {
         setText('projectedAnnualIncome', '₱0.00');
         return;
     }
 
-    // Simple projection: Average of last 3 periods * 24 (assuming semi-monthly)
     const recentData = data.slice(-3);
     const avgRecent = recentData.reduce((sum, item) => sum + item.netPay, 0) / recentData.length;
     const projected = avgRecent * 24;
@@ -320,7 +286,6 @@ function updateProjectionCard(data) {
     setText('projectedAnnualIncome', formatCurrency(projected));
 }
 
-// --- 8. Render Table ---
 function renderNetPayTable(data) {
     const tbody = document.getElementById('netPayTableBody');
     if (!tbody) return;
@@ -332,14 +297,12 @@ function renderNetPayTable(data) {
         return;
     }
     
-    // Reverse for newest first in table
     const reversedData = [...data].reverse();
     
     reversedData.forEach((item, index) => {
         const row = document.createElement('tr');
         const periodText = `${getMonthName(item.month)} ${item.cutoff === 1 ? '1-15' : '16-30'}, ${item.year}`;
         
-        // Calculate trend vs previous
         let trendHtml = '<span class="trend-indicator neutral"><i class="fas fa-minus"></i> N/A</span>';
         if (index < reversedData.length - 1) {
             const prevItem = reversedData[index + 1];
@@ -366,12 +329,9 @@ function renderNetPayTable(data) {
     });
 }
 
-// --- 9. Event Listeners ---
 function setupNetPayEventListeners() {
-    // Year Filter
     document.getElementById('netpayYear')?.addEventListener('change', renderNetPayUI);
     
-    // View Toggle (6 months vs 12 months)
     const toggle6m = document.getElementById('toggle6months');
     const toggle12m = document.getElementById('toggle12months');
     
@@ -389,14 +349,11 @@ function setupNetPayEventListeners() {
         renderNetPayUI();
     });
     
-    // Export
     document.getElementById('exportNetPayBtn')?.addEventListener('click', exportNetPayData);
 }
 
-// --- 10. Export Data ---
 function exportNetPayData() {
     if (netPayData.length === 0) {
-        alert('No data to export');
         return;
     }
     
@@ -416,7 +373,6 @@ function exportNetPayData() {
     URL.revokeObjectURL(url);
 }
 
-// --- Helper Functions ---
 function setText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
@@ -435,7 +391,6 @@ function showNetPayEmptyState() {
     const el = document.getElementById('netPayEmptyState');
     if (el) el.style.display = 'flex';
     
-    // Hide all content sections
     const sections = [
         'netPayComparisonCards',
         'netPayTrendChartCard',
@@ -454,7 +409,6 @@ function hideNetPayEmptyState() {
     const el = document.getElementById('netPayEmptyState');
     if (el) el.style.display = 'none';
     
-    // Show all content sections
     const sections = [
         'netPayComparisonCards',
         'netPayTrendChartCard',

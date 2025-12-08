@@ -1,4 +1,3 @@
-// --- Firebase Configuration ---
 const firebaseConfig = {
     apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
     authDomain: "dutysync-2025.firebaseapp.com",
@@ -12,7 +11,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// --- DOM Elements ---
 const hamburger = document.getElementById("hamburger");
 const sidebar = document.getElementById("sidebar");
 const navItems = document.querySelectorAll(".nav-item");
@@ -20,19 +18,20 @@ const sections = document.querySelectorAll(".content-section");
 const updatePasswordBtn = document.getElementById('updatePasswordBtn');
 const themeCheckbox = document.getElementById('themeCheckbox');
 
-// --- Check Authentication and Load User Data ---
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        console.log('User logged in:', user.uid);
+        initializeNotifications();
+        setupUserDataListener();
+        setupDutyEntryListener();
         
-        // Fetch user data from Firestore
         try {
             const userDoc = await db.collection('users').doc(user.uid).get();
             
             if (userDoc.exists) {
                 const userData = userDoc.data();
+
+                user.lastKnownData = { ...userData };
                 
-                // Update sidebar footer with user info
                 const userNameElement = document.getElementById('userName');
                 const userEmailElement = document.getElementById('userEmail');
                 const userAvatarElement = document.getElementById('userAvatar');
@@ -46,58 +45,145 @@ auth.onAuthStateChanged(async (user) => {
                 }
                 
                 if (userAvatarElement) {
-                    // Get first two letters of name for avatar
                     const initials = userData.fullName 
                         ? userData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
                         : user.email.substring(0, 2).toUpperCase();
                     userAvatarElement.textContent = initials;
                 }
-                
-                console.log('User data loaded successfully');
             } else {
-                console.log('No user document found in Firestore');
-                // Fallback to auth email if no Firestore document
                 document.getElementById('userEmail').textContent = user.email;
                 document.getElementById('userName').textContent = user.email.split('@')[0];
                 document.getElementById('userAvatar').textContent = user.email.substring(0, 2).toUpperCase();
             }
         } catch (error) {
-            console.error('Error fetching user data:', error);
-            // Fallback to auth email on error
             document.getElementById('userEmail').textContent = user.email;
             document.getElementById('userName').textContent = user.email.split('@')[0];
             document.getElementById('userAvatar').textContent = user.email.substring(0, 2).toUpperCase();
         }
     } else {
-        // No user logged in, redirect to login
-        console.log('No user logged in, redirecting...');
         window.location.href = '../index.html';
     }
 
-    // Auto-select Dashboard -> Overview
-const dashboardParent = document.querySelector('[data-page="dashboard"]');
-const overviewItem = document.querySelector('[data-page="overview"]');
+    const dashboardParent = document.querySelector('[data-page="dashboard"]');
+    const overviewItem = document.querySelector('[data-page="overview"]');
 
-// Expand dashboard menu
-dashboardParent.classList.add('active', 'expanded');
-const dashboardSubMenu = document.getElementById('dashboard-submenu');
-if (dashboardSubMenu) dashboardSubMenu.classList.add('expanded');
+    dashboardParent.classList.add('active', 'expanded');
+    const dashboardSubMenu = document.getElementById('dashboard-submenu');
+    if (dashboardSubMenu) dashboardSubMenu.classList.add('expanded');
 
-// Activate Overview sub-item
-overviewItem.classList.add('active');
+    overviewItem.classList.add('active');
 
-// Show Overview section
-document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-const overviewSection = document.getElementById('overview');
-if (overviewSection) overviewSection.classList.add('active');
+    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+    const overviewSection = document.getElementById('overview');
+    if (overviewSection) overviewSection.classList.add('active');
 
-// Update breadcrumb
-updateBreadcrumb('Dashboard', 'Overview');
-
+    updateBreadcrumb('Dashboard', 'Overview');
 });
 
+function setupUserDataListener() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  // Load last known data from sessionStorage
+  const storedDataKey = `dutysync_lastKnownData_${user.uid}`;
+  let lastKnownData = {};
+  
+  try {
+    const stored = sessionStorage.getItem(storedDataKey);
+    if (stored) {
+      lastKnownData = JSON.parse(stored);
+    }
+  } catch (e) {
+    // If parsing fails, start with empty object
+    lastKnownData = {};
+  }
+  
+  // Listen for user document changes
+  db.collection('users').doc(user.uid).onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      
+      // Check if this is the first load (sessionStorage was empty)
+      const isFirstLoad = Object.keys(lastKnownData).length === 0;
+      
+      // Don't send notifications on first load after login/refresh
+      if (!isFirstLoad) {
+        // Check for profile photo changes
+        if (lastKnownData.photoBase64 !== data.photoBase64) {
+          if (data.photoBase64) {
+            if (!lastKnownData.photoBase64) {
+              addNotification('profile', 'Profile photo added');
+            } else {
+              addNotification('profile', 'Profile photo updated');
+            }
+          } else if (lastKnownData.photoBase64 && !data.photoBase64) {
+            addNotification('profile', 'Profile photo removed');
+          }
+        }
+        
+        // Check for name changes
+        if (lastKnownData.fullName && data.fullName !== lastKnownData.fullName) {
+          addNotification('profile', `Name updated to ${data.fullName}`);
+        }
+        
+        // Check for position changes
+        if (lastKnownData.position && data.position !== lastKnownData.position) {
+          addNotification('profile', `Position updated to ${data.position}`);
+        }
+        
+        // Check for rate changes
+        if (lastKnownData.hourlyRate !== data.hourlyRate) {
+          addNotification('settings', `Hourly rate updated to ₱${data.hourlyRate || 0}`);
+        }
+        
+        if (lastKnownData.dailyRate !== data.dailyRate) {
+          addNotification('settings', `Daily rate updated to ₱${data.dailyRate || 0}`);
+        }
+        
+        if (lastKnownData.overtimeMultiplier !== data.overtimeMultiplier) {
+          addNotification('settings', `Overtime multiplier updated to ${data.overtimeMultiplier}x`);
+        }
+        
+        if (lastKnownData.nightDiffMultiplier !== data.nightDiffMultiplier) {
+          addNotification('settings', `Night differential updated to ${(data.nightDiffMultiplier * 100).toFixed(0)}%`);
+        }
+      }
+      
+      // Update sessionStorage with current data
+      try {
+        sessionStorage.setItem(storedDataKey, JSON.stringify(data));
+      } catch (e) {
+        // If sessionStorage fails, continue without storing
+      }
+      
+      // Update the in-memory reference
+      lastKnownData = { ...data };
+    }
+  });
+}
+
+function setupDutyEntryListener() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  db.collection('duties')
+    .where('user', '==', user.uid)
+    .orderBy('date', 'desc')
+    .limit(1)
+    .onSnapshot((snapshot) => {
+      if (!snapshot.empty) {
+        const latestDuty = snapshot.docs[0].data();
+        const dutyDate = new Date(latestDuty.date);
+        const now = new Date();
+        
+        if (dutyDate.toDateString() === now.toDateString()) {
+          addNotification('reminder', `Duty logged for ${dutyDate.toLocaleDateString()}: ${latestDuty.totalHours || 0} hours`);
+        }
+      }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-    // --- Logout Modal ---
     const logoutBtn = document.getElementById("logoutBtn");
     const logoutModal = document.getElementById("logoutModal");
     const confirmLogout = document.getElementById("confirmLogout");
@@ -118,42 +204,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.removeItem('userSession');
                 window.location.href = "../index.html";
             } catch (error) {
-                console.error("Logout error:", error);
-                alert("Failed to logout: " + error.message);
+                showToast('Failed to logout: ' + error.message, 'error');
             }
         });
     }
 
-    // --- Load and Toggle Theme ---
     const themeCheckboxElement = document.getElementById('themeCheckbox');
 
     if (themeCheckboxElement) {
-        // Always default to dark
         document.documentElement.setAttribute('data-theme', 'dark');
         themeCheckboxElement.checked = true;
 
-        // Toggle theme
         themeCheckboxElement.addEventListener('change', () => {
             const theme = themeCheckboxElement.checked ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', theme);
         });
-    } else {
-        console.error('Theme checkbox NOT found!');
     }
-
 });
 
-// --- Sidebar Toggle ---
 hamburger.addEventListener("click", () => sidebar.classList.toggle("open"));
 
-// --- Close sidebar on click outside ---
 document.addEventListener("click", e => {
     if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
         sidebar.classList.remove("open");
     }
 });
 
-// --- Remove open class on desktop resize ---
 window.addEventListener("resize", () => {
     if (window.innerWidth > 768) sidebar.classList.remove("open");
 });
@@ -162,20 +238,14 @@ function setHeights() {
     const sidebar = document.getElementById('sidebar');
     const main = document.querySelector('.main-content');
 
-    // Set sidebar height
     if (sidebar) sidebar.style.height = window.innerHeight + 'px';
 
-    // Set main content min-height to fill viewport
     if (main) main.style.minHeight = window.innerHeight + 'px';
 }
 
-// Run on page load
 window.addEventListener('load', setHeights);
-
-// Run on window resize
 window.addEventListener('resize', setHeights);
 
-// --- Update Breadcrumb ---
 function updateBreadcrumb(parentName, currentName) {
     const breadcrumbParent = document.getElementById('breadcrumbParent');
     const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
@@ -195,7 +265,6 @@ function updateBreadcrumb(parentName, currentName) {
     }
 }
 
-// --- Navigation ---
 navItems.forEach(item => {
     item.addEventListener("click", e => {
         e.preventDefault();
@@ -204,12 +273,10 @@ navItems.forEach(item => {
         const isSub = item.classList.contains("sub-item");
         const itemText = item.querySelector('.nav-text')?.textContent || pageId;
 
-        // Handle parent menu items with submenus
         if (parentId && !isSub) {
             const submenu = document.getElementById(`${parentId}-submenu`);
             const isExpanded = item.classList.contains('expanded');
 
-            // Close other parent menus
             navItems.forEach(nav => {
                 if (!nav.classList.contains("sub-item") && nav !== item) {
                     nav.classList.remove('active', 'expanded');
@@ -218,16 +285,13 @@ navItems.forEach(item => {
                 }
             });
 
-            // Always expand the submenu
             item.classList.add('expanded');
             if (submenu) submenu.classList.add('expanded');
 
             item.classList.add("active");
             
-            // Remove active from all sub-items
             document.querySelectorAll(".sub-item").forEach(sub => sub.classList.remove("active"));
             
-            // Auto-click the first sub-item if it exists
             const firstSubItem = submenu?.querySelector('.sub-item');
             if (firstSubItem) {
                 firstSubItem.click();
@@ -237,22 +301,18 @@ navItems.forEach(item => {
             return;
         }
 
-        // Handle sub-items
         if (isSub) {
-            // Remove active from all nav items
             navItems.forEach(nav => nav.classList.remove("active"));
             
-            // Add active to both sub-item and parent
             item.classList.add("active");
             const navSection = item.closest('.nav-section');
             const parentItem = navSection?.querySelector('[data-parent]');
-            if (parentItem) parentItem.classList.add("active", "expanded"); // <-- add hover/active effect
+            if (parentItem) parentItem.classList.add("active", "expanded");
             
             const parentText = parentItem?.querySelector('.nav-text')?.textContent || 'Dashboard';
             
             updateBreadcrumb(parentText, itemText);
             
-            // Show section
             sections.forEach(sec => sec.classList.remove("active"));
             if (document.getElementById(pageId)) {
                 document.getElementById(pageId).classList.add("active");
@@ -262,16 +322,12 @@ navItems.forEach(item => {
             return;
         }
 
-
-        // Handle standalone items (Settings, Help, etc.)
         if (!parentId && !isSub) {
-            // Remove active from all nav items
             navItems.forEach(nav => nav.classList.remove("active"));
             item.classList.add("active");
             
             updateBreadcrumb(itemText, '');
             
-            // Show section
             sections.forEach(sec => sec.classList.remove("active"));
             if (document.getElementById(pageId)) {
                 document.getElementById(pageId).classList.add("active");
@@ -283,19 +339,13 @@ navItems.forEach(item => {
     });
 });
 
-// ========================================
-// RATE UPDATE SYSTEM
-// ========================================
-
 let savedRates = { hourly: 0, daily: 0 };
 
-// --- Initialize Rate Settings ---
 function initializeRateSettings() {
   loadSavedRates();
   setupRateEventListeners();
 }
 
-// --- Setup Rate Event Listeners ---
 function setupRateEventListeners() {
   const updateRateBtn = document.getElementById('updateRateBtn');
   if (updateRateBtn) {
@@ -303,7 +353,6 @@ function setupRateEventListeners() {
   }
 }
 
-// --- Load Saved Rates from Firestore ---
 async function loadSavedRates() {
   const user = auth.currentUser;
   if (!user) return;
@@ -315,25 +364,18 @@ async function loadSavedRates() {
       savedRates.hourly = data.hourlyRate || 0;
       savedRates.daily = data.dailyRate || 0;
       
-      // Populate settings inputs
       document.getElementById('hourlyRateInput').value = savedRates.hourly;
       document.getElementById('dailyRateInput').value = savedRates.daily;
       
-      console.log('📊 Rates loaded from Firestore:', savedRates);
-      
-      // Auto-populate generate section
       populateRateInGenerate();
     }
-  } catch (error) {
-    console.error('Error loading rates:', error);
-  }
+  } catch (error) {}
 }
 
-// --- Update and Save Rate ---
 async function updateAndSaveRate() {
   const user = auth.currentUser;
   if (!user) {
-    alert('Please login to update rates');
+    showToast('Please login to update rates', 'error');
     return;
   }
 
@@ -341,7 +383,7 @@ async function updateAndSaveRate() {
   const dailyRate = parseFloat(document.getElementById('dailyRateInput').value) || 0;
 
   if (hourlyRate <= 0 && dailyRate <= 0) {
-    alert('Please enter at least one valid rate');
+    showToast('Please enter at least one valid rate', 'error');
     return;
   }
 
@@ -350,23 +392,19 @@ async function updateAndSaveRate() {
     updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     updateBtn.disabled = true;
 
-    // Save to Firestore
     await db.collection('users').doc(user.uid).update({
       hourlyRate: hourlyRate,
       dailyRate: dailyRate,
       rateUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // Update global variable
     savedRates.hourly = hourlyRate;
     savedRates.daily = dailyRate;
 
-    // Populate generate section
     populateRateInGenerate();
 
-    // Show success message
     const statusMsg = document.getElementById('rateStatusMessage');
-    statusMsg.textContent = '✅ Rates saved successfully!';
+    statusMsg.textContent = 'Rates saved successfully!';
     statusMsg.style.display = 'block';
     statusMsg.style.color = '#10b981';
 
@@ -376,11 +414,8 @@ async function updateAndSaveRate() {
     setTimeout(() => {
       statusMsg.style.display = 'none';
     }, 3000);
-
-    console.log('✅ Rates updated:', { hourlyRate, dailyRate });
   } catch (error) {
-    console.error('Error updating rates:', error);
-    alert('Failed to save rates. Please try again.');
+    showToast('Failed to save rates. Please try again.', 'error');
     
     const updateBtn = document.getElementById('updateRateBtn');
     updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Rate';
@@ -388,22 +423,17 @@ async function updateAndSaveRate() {
   }
 }
 
-// --- Populate Rate in Generate Section (Read-Only) ---
 function populateRateInGenerate() {
   const rateInput = document.getElementById('rateInput');
   if (rateInput) {
-    // Determine which rate to use based on current rateType
     const rateValue = rateType === 'hourly' ? savedRates.hourly : savedRates.daily;
     rateInput.value = rateValue;
-    rateInput.readOnly = true; // Make it read-only
+    rateInput.readOnly = true;
     rateInput.style.cursor = 'not-allowed';
     rateInput.style.opacity = '0.7';
-    
-    console.log(`📌 Rate populated in generate section (${rateType}):`, rateValue);
   }
 }
 
-// --- Setup Listener for Rate Type Change ---
 function setupRateTypeChangeListener() {
   const rateButtons = document.querySelectorAll('.rate-btn');
   rateButtons.forEach(btn => {
@@ -415,39 +445,32 @@ function setupRateTypeChangeListener() {
   });
 }
 
-// --- Hook into existing generate.js initialization ---
-// Call this after loadEmployeeInfo completes
 auth.onAuthStateChanged(async user => {
   if (user) {
     await loadEmployeeInfo(user);
     initializeGeneratePayslip();
-    initializeRateSettings(); // ADD THIS LINE
+    initializeRateSettings();
     initializePremiumRatesSettings();
     setupDutyUpdateListener();
     loadPayslipHistory();
   }
 });
 
-// Add this to setupEventListeners function in generate.js
-// After the existing rate-btn event listeners:
 setupRateTypeChangeListener();
 
-
-// --- Form Submission Placeholder ---
 document.querySelectorAll("form").forEach(form => {
     form.addEventListener("submit", e => {
         e.preventDefault();
-        alert("Form submitted! (Placeholder - integrate with Firebase)");
+        showToast('Form submitted!', 'info');
     });
 });
 
-// --- Update Password ---
 updatePasswordBtn?.addEventListener('click', async () => {
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
 
-    if (!currentPassword || !newPassword) return alert('Please fill in both password fields');
-    if (newPassword.length < 6) return alert('New password must be at least 6 characters');
+    if (!currentPassword || !newPassword) return showToast('Please fill in both password fields', 'error');
+    if (newPassword.length < 6) return showToast('New password must be at least 6 characters', 'error');
 
     try {
         const user = auth.currentUser;
@@ -456,16 +479,14 @@ updatePasswordBtn?.addEventListener('click', async () => {
         await user.reauthenticateWithCredential(credential);
         await user.updatePassword(newPassword);
 
-        alert('Password updated successfully!');
+        showToast('Password updated successfully!', 'success');
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
     } catch (error) {
-        console.error('Password update error:', error);
-        alert(error.code === 'auth/wrong-password' ? 'Current password is incorrect' : 'Failed to update password: ' + error.message);
+        showToast(error.code === 'auth/wrong-password' ? 'Current password is incorrect' : 'Failed to update password', 'error');
     }
 });
 
-// --- About Modal ---
 const aboutBtn = document.getElementById('aboutBtn');
 const aboutModalOverlay = document.getElementById('aboutModalOverlay');
 const aboutCloseBtn = document.getElementById('aboutCloseBtn');
@@ -496,14 +517,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeAboutModal();
 });
 
-// ========================================
-// PREMIUM RATES (OVERTIME & NIGHT DIFF)
-// ========================================
-
-// Default PH Labor Law Standards
 const DEFAULT_RATES = {
-  overtimeMultiplier: 1.25,      // 125% of base rate
-  nightDiffMultiplier: 0.10      // 10% of base rate
+  overtimeMultiplier: 1.25,
+  nightDiffMultiplier: 0.10
 };
 
 let savedPremiumRates = {
@@ -511,13 +527,11 @@ let savedPremiumRates = {
   nightDiffMultiplier: DEFAULT_RATES.nightDiffMultiplier
 };
 
-// --- Initialize Premium Rates Settings ---
 function initializePremiumRatesSettings() {
   loadSavedPremiumRates();
   setupPremiumRatesEventListeners();
 }
 
-// --- Setup Premium Rates Event Listeners ---
 function setupPremiumRatesEventListeners() {
   const savePremiumBtn = document.getElementById('savePremiumRatesBtn');
   const resetPremiumBtn = document.getElementById('resetPremiumRatesBtn');
@@ -531,7 +545,6 @@ function setupPremiumRatesEventListeners() {
   }
 }
 
-// --- Load Saved Premium Rates from Firestore ---
 async function loadSavedPremiumRates() {
   const user = auth.currentUser;
   if (!user) return;
@@ -541,7 +554,6 @@ async function loadSavedPremiumRates() {
     if (userDoc.exists) {
       const data = userDoc.data();
       
-      // Load with fallback to defaults
       savedPremiumRates.overtimeMultiplier = data.overtimeMultiplier !== undefined 
         ? data.overtimeMultiplier 
         : DEFAULT_RATES.overtimeMultiplier;
@@ -550,51 +562,42 @@ async function loadSavedPremiumRates() {
         ? data.nightDiffMultiplier 
         : DEFAULT_RATES.nightDiffMultiplier;
       
-      // Populate settings inputs
       document.getElementById('overtimeRateInput').value = savedPremiumRates.overtimeMultiplier;
       document.getElementById('nightDiffRateInput').value = savedPremiumRates.nightDiffMultiplier;
-      
-      console.log('✅ Premium rates loaded from Firestore:', savedPremiumRates);
     } else {
-      // First time user - use defaults
       document.getElementById('overtimeRateInput').value = DEFAULT_RATES.overtimeMultiplier;
       document.getElementById('nightDiffRateInput').value = DEFAULT_RATES.nightDiffMultiplier;
-      console.log('📊 Using default premium rates for new user');
     }
-  } catch (error) {
-    console.error('Error loading premium rates:', error);
-  }
+  } catch (error) {}
 }
 
-// --- Update and Save Premium Rates ---
 async function updateAndSavePremiumRates() {
   const user = auth.currentUser;
   if (!user) {
-    alert('Please login to update premium rates');
+    showToast('Please login to update premium rates', 'error');
     return;
   }
 
   const overtimeRate = parseFloat(document.getElementById('overtimeRateInput').value);
   const nightDiffRate = parseFloat(document.getElementById('nightDiffRateInput').value);
 
-  // Validation
   if (isNaN(overtimeRate) || overtimeRate <= 0) {
-    alert('Please enter a valid overtime rate (e.g., 1.25)');
+    showToast('Please enter a valid overtime rate (e.g., 1.25)', 'error');
     return;
   }
 
   if (isNaN(nightDiffRate) || nightDiffRate < 0) {
-    alert('Please enter a valid night differential rate (e.g., 0.10)');
+    showToast('Please enter a valid night differential rate (e.g., 0.10)', 'error');
     return;
   }
 
   if (overtimeRate > 5) {
-    alert('Overtime rate seems too high. Please check your input.');
+    showToast('Overtime rate seems too high. Please check your input.', 'error');
     return;
   }
 
   if (nightDiffRate > 1) {
-    alert('Night differential rate seems too high. Please check your input.');
+    showToast('Night differential rate seems too high. Please check your input.', 'error');
     return;
   }
 
@@ -603,20 +606,17 @@ async function updateAndSavePremiumRates() {
     savePremiumBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     savePremiumBtn.disabled = true;
 
-    // Save to Firestore
     await db.collection('users').doc(user.uid).update({
       overtimeMultiplier: overtimeRate,
       nightDiffMultiplier: nightDiffRate,
       premiumRatesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // Update global variable
     savedPremiumRates.overtimeMultiplier = overtimeRate;
     savedPremiumRates.nightDiffMultiplier = nightDiffRate;
 
-    // Show success message
     const statusMsg = document.getElementById('premiumRatesStatusMessage');
-    statusMsg.innerHTML = '✅ Premium rates saved successfully!';
+    statusMsg.innerHTML = 'Premium rates saved successfully!';
     statusMsg.style.display = 'block';
     statusMsg.style.color = '#10b981';
 
@@ -626,11 +626,8 @@ async function updateAndSavePremiumRates() {
     setTimeout(() => {
       statusMsg.style.display = 'none';
     }, 3000);
-
-    console.log('✅ Premium rates updated:', { overtimeRate, nightDiffRate });
   } catch (error) {
-    console.error('Error updating premium rates:', error);
-    alert('Failed to save premium rates. Please try again.');
+    showToast('Failed to save premium rates. Please try again.', 'error');
     
     const savePremiumBtn = document.getElementById('savePremiumRatesBtn');
     savePremiumBtn.innerHTML = '<i class="fas fa-save"></i> Save Premium Rates';
@@ -638,15 +635,10 @@ async function updateAndSavePremiumRates() {
   }
 }
 
-// --- Reset Premium Rates to Defaults ---
 async function resetPremiumRatesToDefaults() {
-  if (!confirm('Are you sure you want to reset premium rates to PH Labor Law defaults?\n\nOvertime: 1.25x\nNight Differential: 0.10x')) {
-    return;
-  }
-
   const user = auth.currentUser;
   if (!user) {
-    alert('Please login to reset premium rates');
+    showToast('Please login to reset premium rates', 'error');
     return;
   }
 
@@ -655,24 +647,20 @@ async function resetPremiumRatesToDefaults() {
     resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
     resetBtn.disabled = true;
 
-    // Reset in Firestore
     await db.collection('users').doc(user.uid).update({
       overtimeMultiplier: DEFAULT_RATES.overtimeMultiplier,
       nightDiffMultiplier: DEFAULT_RATES.nightDiffMultiplier,
       premiumRatesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // Update global variable
     savedPremiumRates.overtimeMultiplier = DEFAULT_RATES.overtimeMultiplier;
     savedPremiumRates.nightDiffMultiplier = DEFAULT_RATES.nightDiffMultiplier;
 
-    // Update inputs
     document.getElementById('overtimeRateInput').value = DEFAULT_RATES.overtimeMultiplier;
     document.getElementById('nightDiffRateInput').value = DEFAULT_RATES.nightDiffMultiplier;
 
-    // Show success message
     const statusMsg = document.getElementById('premiumRatesStatusMessage');
-    statusMsg.innerHTML = '✅ Premium rates reset to PH Labor Law defaults!';
+    statusMsg.innerHTML = 'Premium rates reset to PH Labor Law defaults!';
     statusMsg.style.display = 'block';
     statusMsg.style.color = '#10b981';
 
@@ -682,11 +670,8 @@ async function resetPremiumRatesToDefaults() {
     setTimeout(() => {
       statusMsg.style.display = 'none';
     }, 3000);
-
-    console.log('✅ Premium rates reset to defaults:', DEFAULT_RATES);
   } catch (error) {
-    console.error('Error resetting premium rates:', error);
-    alert('Failed to reset premium rates. Please try again.');
+    showToast('Failed to reset premium rates. Please try again.', 'error');
     
     const resetBtn = document.getElementById('resetPremiumRatesBtn');
     resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset to Defaults';
@@ -694,84 +679,56 @@ async function resetPremiumRatesToDefaults() {
   }
 }
 
-// --- Delete Account Function ---
 async function deleteAccount() {
     const user = auth.currentUser;
     
     if (!user) {
-        alert("No user logged in.");
+        showToast('No user logged in.', 'error');
         return;
     }
 
-    // 1. Confirm Intent
-    const confirmDelete = confirm(
-        "⚠️ WARNING: Are you sure you want to delete your account?\n\n" +
-        "This action is PERMANENT. All your data, settings, and payroll history will be erased forever."
-    );
-
-    if (!confirmDelete) return;
-
-    // 2. Second Confirmation (Safety Check)
     const doubleCheck = prompt("To confirm, please type 'DELETE' below:");
 
     if (doubleCheck !== 'DELETE') {
-        alert("Account deletion cancelled. Text did not match.");
+        showToast('Account deletion cancelled. Text did not match.', 'info');
         return;
     }
 
     try {
         const uid = user.uid;
 
-        // 3. Delete User Data from Firestore
-        // Note: If you have subcollections, you must delete them individually 
-        // or rely on a Cloud Function. This deletes the main user doc.
         await db.collection('users').doc(uid).delete();
-        console.log('User data deleted from Firestore');
 
-        // 4. Delete Auth Account
         await user.delete();
-        console.log('User account deleted');
 
-        // 5. Cleanup and Redirect
         localStorage.clear();
-        alert("Your account has been successfully deleted.");
+        showToast('Your account has been successfully deleted.', 'success');
         window.location.href = "../index.html";
 
     } catch (error) {
-        console.error("Error deleting account:", error);
-
-        // Handle "Requires Recent Login" error from Firebase
         if (error.code === 'auth/requires-recent-login') {
-            alert("Security measure: You must re-login before you can delete your account. Please logout, log back in, and try again.");
-            // Optional: Trigger logout here
+            showToast('Security measure: You must re-login before you can delete your account. Please logout, log back in, and try again.', 'warning');
         } else {
-            alert("Failed to delete account: " + error.message);
+            showToast('Failed to delete account', 'error');
         }
     }
 }
 
-
-// --- Payroll Edit Logic ---
-
-// 1. Enable Edit Mode
 function enableEdit(section) {
     const fieldset = document.getElementById(`field-${section}`);
     fieldset.disabled = false;
     
-    // Show Action Buttons, Hide Edit Button
     document.getElementById(`btns-${section}`).style.display = 'none';
     document.getElementById(`actions-${section}`).style.display = 'flex';
     
-    // Highlight inputs
     const inputs = fieldset.querySelectorAll('input, select');
     inputs.forEach(input => {
         input.style.borderColor = 'var(--primary-color)';
-        input.style.paddingLeft = '10px'; // Restore padding
+        input.style.paddingLeft = '10px';
         input.style.background = 'var(--hover-bg)';
     });
 }
 
-// 2. Cancel Edit Mode
 function cancelEdit(section) {
     const fieldset = document.getElementById(`field-${section}`);
     fieldset.disabled = true;
@@ -779,7 +736,6 @@ function cancelEdit(section) {
     document.getElementById(`btns-${section}`).style.display = 'block';
     document.getElementById(`actions-${section}`).style.display = 'none';
     
-    // Visual reset (optional: you might want to reload values from DB here)
     const inputs = fieldset.querySelectorAll('input, select');
     inputs.forEach(input => {
         input.style.borderColor = 'transparent';
@@ -788,7 +744,6 @@ function cancelEdit(section) {
     });
 }
 
-// 3. Save Section
 async function saveSection(section) {
     const user = auth.currentUser;
     if (!user) return;
@@ -799,7 +754,6 @@ async function saveSection(section) {
 
     let data = {};
 
-    // Gather data based on section
     if (section === 'base') {
         data.hourlyRate = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
         data.dailyRate = parseFloat(document.getElementById('dailyRateInput').value) || 0;
@@ -817,16 +771,276 @@ async function saveSection(section) {
         await db.collection('users').doc(user.uid).update(data);
         
         statusMsg.innerText = "Saved!";
-        statusMsg.style.color = "#10b981"; // Green
+        statusMsg.style.color = "#10b981";
 
-        // Lock inputs
-        cancelEdit(section); 
+        cancelEdit(section);
 
         setTimeout(() => statusMsg.innerText = "", 2000);
 
     } catch (error) {
-        console.error(error);
         statusMsg.innerText = "Error saving.";
         statusMsg.style.color = "#ef4444";
     }
+}
+
+let notifications = [];
+
+function initializeNotifications() {
+  loadNotifications();
+  setupNotificationListeners();
+  checkDailyReminders();
+}
+
+function loadNotifications() {
+  const saved = localStorage.getItem('dutysync_notifications');
+  if (saved) {
+    notifications = JSON.parse(saved);
+    updateNotificationUI();
+  }
+}
+
+function saveNotifications() {
+  localStorage.setItem('dutysync_notifications', JSON.stringify(notifications));
+  updateNotificationUI();
+}
+
+function addNotification(type, message) {
+  const notification = {
+    id: Date.now(),
+    type: type,
+    message: message,
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+  
+  notifications.unshift(notification);
+  
+  if (notifications.length > 20) {
+    notifications = notifications.slice(0, 20);
+  }
+  
+  saveNotifications();
+}
+
+function setupNotificationListeners() {
+  const notifBtn = document.getElementById('notificationBtn');
+  const notifDropdown = document.getElementById('notificationDropdown');
+  const markAllRead = document.getElementById('markAllRead');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  
+  if (notifBtn && notifDropdown) {
+    notifBtn.replaceWith(notifBtn.cloneNode(true));
+    const newNotifBtn = document.getElementById('notificationBtn');
+    
+    newNotifBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      notifDropdown.classList.toggle('active');
+      
+      if (notifDropdown.classList.contains('active')) {
+        notifications.forEach(n => n.read = true);
+        saveNotifications();
+      }
+    });
+    
+    document.addEventListener('click', function(e) {
+      if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+        notifDropdown.classList.remove('active');
+      }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        notifDropdown.classList.remove('active');
+      }
+    });
+  }
+  
+  if (markAllRead) {
+    markAllRead.addEventListener('click', function() {
+      notifications.forEach(n => n.read = true);
+      saveNotifications();
+      notifDropdown.classList.remove('active');
+    });
+  }
+  
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', function() {
+      notifications = [];
+      saveNotifications();
+      notifDropdown.classList.remove('active');
+    });
+  }
+}
+
+function updateNotificationUI() {
+  const badge = document.getElementById('notificationBadge');
+  const list = document.getElementById('notificationList');
+  
+  const unreadCount = notifications.filter(n => !n.read).length;
+  
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  
+  if (list) {
+    if (notifications.length === 0) {
+      list.innerHTML = `
+        <div class="notification-empty">
+          <i class="fas fa-bell-slash"></i>
+          <p>No notifications</p>
+        </div>
+      `;
+    } else {
+      list.innerHTML = notifications.map(notif => {
+        const iconClass = getNotificationIcon(notif.type);
+        const timeAgo = getTimeAgo(notif.timestamp);
+        
+        return `
+          <div class="notification-item ${notif.read ? '' : 'unread'}" onclick="markAsRead(${notif.id})">
+            <div class="notification-icon ${notif.type}">
+              <i class="${iconClass}"></i>
+            </div>
+            <div class="notification-content">
+              <div class="notification-message">${notif.message}</div>
+              <div class="notification-time">${timeAgo}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function getNotificationIcon(type) {
+  const icons = {
+    profile: 'fas fa-user-circle',
+    settings: 'fas fa-cog',
+    warning: 'fas fa-exclamation-triangle',
+    reminder: 'fas fa-clock',
+    cutoff: 'fas fa-calendar-check'
+  };
+  return icons[type] || 'fas fa-bell';
+}
+
+window.markAsRead = function(id) {
+  const notif = notifications.find(n => n.id === id);
+  if (notif) {
+    notif.read = true;
+    saveNotifications();
+  }
+};
+
+function getTimeAgo(timestamp) {
+  const now = new Date();
+  const past = new Date(timestamp);
+  const diffMs = now - past;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return past.toLocaleDateString();
+}
+
+function checkDailyReminders() {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  const today = new Date();
+  const dayOfMonth = today.getDate();
+  
+  if (dayOfMonth === 14) {
+    addNotification('cutoff', 'Cutoff is tomorrow (15th) — make sure all duty logs are complete.');
+  } else if (dayOfMonth === 30 || (dayOfMonth === 29 && today.getMonth() === 1)) {
+    addNotification('cutoff', 'Cutoff is tomorrow — make sure all duty logs are complete.');
+  }
+  
+  const lastCheck = localStorage.getItem('dutysync_last_hour_check');
+  const todayStr = today.toDateString();
+  
+  if (lastCheck !== todayStr) {
+    checkLowHours();
+    localStorage.setItem('dutysync_last_hour_check', todayStr);
+  }
+}
+
+async function checkLowHours() {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  try {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const cutoff = day <= 15 ? 1 : 2;
+    
+    const snapshot = await db.collection('duties')
+      .where('user', '==', user.uid)
+      .get();
+    
+    let totalHours = 0;
+    
+    snapshot.forEach(doc => {
+      const duty = doc.data();
+      const [y, m, d] = duty.date.split('-').map(Number);
+      if (y === year && m === month) {
+        if (cutoff === 1 && d <= 15) {
+          totalHours += duty.totalHours || 0;
+        } else if (cutoff === 2 && d > 15) {
+          totalHours += duty.totalHours || 0;
+        }
+      }
+    });
+    
+    const expectedHours = 88;
+    
+    if (totalHours < expectedHours * 0.6 && day > 10 && day !== 15 && day < 25) {
+      addNotification('warning', `Your total hours this cutoff (${totalHours.toFixed(1)} hrs) are lower than usual. Expected: ~${expectedHours} hrs.`);
+    }
+  } catch (error) {}
+}
+
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    setTimeout(() => {
+      initializeNotifications();
+      
+      const hasWelcome = localStorage.getItem('dutysync_welcome_shown');
+      if (!hasWelcome) {
+        addNotification('reminder', 'Welcome to DutySync! Start by setting your pay rates and logging your work hours.');
+        localStorage.setItem('dutysync_welcome_shown', 'true');
+      }
+    }, 1000);
+    
+    db.collection('users').doc(user.uid).onSnapshot((doc) => {});
+  }
+});
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
 }

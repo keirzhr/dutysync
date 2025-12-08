@@ -1,133 +1,93 @@
-console.log("📊 deduction-breakdown.js loaded");
-
-// --- Global Variables ---
 let breakdownData = [];
 let donutChartInstance = null;
 let trendChartInstance = null;
+let breakdownListenerUnsubscribe = null;
 
-// --- Initialize on Auth Change ---
 auth.onAuthStateChanged(user => {
     if (user) {
-        initializeBreakdownFilters(); // 1. Populate Year Dropdown
-        loadBreakdownData(user.uid);  // 2. Load Data
-        setupBreakdownEventListeners(); // 3. Setup Listeners
+        initializeBreakdownFilters();
+        loadBreakdownData(user.uid);
+        setupBreakdownEventListeners();
     }
 });
 
-// --- 1. Initialize Filters (FIXED ID MATCHING) ---
 function initializeBreakdownFilters() {
-    // FIX: ID changed from 'breakdownYearFilter' to 'breakdownYear' to match your HTML
     const yearSelect = document.getElementById('breakdownYear');
-    
-    if (!yearSelect) {
-        console.warn("⚠️ 'breakdownYear' element not found in HTML");
-        return;
-    }
-    
+    if (!yearSelect) return;
+
     const currentYear = new Date().getFullYear();
     yearSelect.innerHTML = '<option value="all">All Years</option>';
     
-    // Create options for current year and 5 years back
     for (let y = currentYear; y >= currentYear - 5; y--) {
         const opt = document.createElement('option');
         opt.value = y;
         opt.textContent = y;
-        if (y === currentYear) opt.selected = true; // Select current year by default
+        if (y === currentYear) opt.selected = true;
         yearSelect.appendChild(opt);
     }
-    console.log("✅ Breakdown Year Filter Populated");
 }
-
-// --- 2. Load Data from Firestore (REAL-TIME LISTENER) ---
-let breakdownListenerUnsubscribe = null; // Variable to store the listener
 
 function loadBreakdownData(userId) {
-  console.log(`🔥 Setting up real-time breakdown listener for: ${userId}`);
-  
-  // Stop any previous listener to avoid duplicates
-  if (breakdownListenerUnsubscribe) {
-      breakdownListenerUnsubscribe();
-  }
+    if (breakdownListenerUnsubscribe) breakdownListenerUnsubscribe();
 
-  // Start a NEW Real-Time Listener
-  breakdownListenerUnsubscribe = db.collection('payslip_history')
-    .doc(userId)
-    .collection('records')
-    .onSnapshot(snapshot => {
-        // This code runs EVERY TIME the database changes
-        breakdownData = [];
-    
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          breakdownData.push({
-            year: data.year,
-            month: data.month,
-            cutoff: data.cutoff,
-            grossPay: data.grossPay || 0,
-            sss: parseFloat(data.sss) || 0,
-            philhealth: parseFloat(data.philhealth) || 0,
-            pagibig: parseFloat(data.pagibig) || 0,
-            tax: parseFloat(data.withholdingTax) || 0,
-            totalDeductions: parseFloat(data.totalDeductions) || 0,
-            netPay: data.netPay || 0,
-            generatedAt: data.generatedAt
-          });
+    breakdownListenerUnsubscribe = db.collection('payslip_history')
+        .doc(userId)
+        .collection('records')
+        .onSnapshot(snapshot => {
+            breakdownData = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                breakdownData.push({
+                    year: data.year,
+                    month: data.month,
+                    cutoff: data.cutoff,
+                    grossPay: data.grossPay || 0,
+                    sss: parseFloat(data.sss) || 0,
+                    philhealth: parseFloat(data.philhealth) || 0,
+                    pagibig: parseFloat(data.pagibig) || 0,
+                    tax: parseFloat(data.withholdingTax) || 0,
+                    totalDeductions: parseFloat(data.totalDeductions) || 0,
+                    netPay: data.netPay || 0,
+                    generatedAt: data.generatedAt
+                });
+            });
+            
+            breakdownData.sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                if (a.month !== b.month) return b.month - a.month;
+                return b.cutoff - a.cutoff;
+            });
+            
+            renderBreakdownUI();
+        }, error => {
+            showBreakdownEmptyState();
         });
-        
-        // Sort: Newest first
-        breakdownData.sort((a, b) => {
-          if (a.year !== b.year) return b.year - a.year;
-          if (a.month !== b.month) return b.month - a.month;
-          return b.cutoff - a.cutoff;
-        });
-        
-        console.log(`✅ Real-time update: ${breakdownData.length} records loaded`);
-        
-        // Refresh the UI immediately
-        renderBreakdownUI();
-        
-    }, error => {
-        console.error('❌ Error in breakdown listener:', error);
-        showBreakdownEmptyState();
-    });
 }
 
-// --- 3. Render UI (Master Function - FIXED) ---
 function renderBreakdownUI() {
-    // 1. Get Filter Values
     const yearFilter = document.getElementById('breakdownYear')?.value || 'all';
     const monthFilter = document.getElementById('breakdownMonth')?.value || 'all';
 
-    console.log(`🔍 Filtering: Year=${yearFilter}, Month=${monthFilter}`);
-
-    // 2. Filter Data (THE FIX IS HERE)
     let filteredData = breakdownData.filter(item => {
         const matchYear = yearFilter === 'all' || item.year.toString() === yearFilter;
         const matchMonth = monthFilter === 'all' || item.month.toString() === monthFilter;
-        
-        // 🔥 FIX: Now checking BOTH Year AND Month
-        return matchYear && matchMonth; 
+        return matchYear && matchMonth;
     });
     
-    // Check if empty
-// Check if empty
-if (filteredData.length === 0) {
-    updateSummaryCardsToZero();
-    updateRatioCard(0, 0); // ✅ ADD THIS LINE
-    renderDonutChart(0, 0, 0, 0);
-    renderBreakdownTable([]); 
-    
-    // Also render empty trend chart
-    const yearOnlyData = breakdownData.filter(item => 
-        yearFilter === 'all' || item.year.toString() === yearFilter
-    );
-    renderTrendChart(yearOnlyData);
-    return;
-}
+    if (filteredData.length === 0) {
+        updateSummaryCardsToZero();
+        updateRatioCard(0, 0);
+        renderDonutChart(0, 0, 0, 0);
+        renderBreakdownTable([]);
+        const yearOnlyData = breakdownData.filter(item => 
+            yearFilter === 'all' || item.year.toString() === yearFilter
+        );
+        renderTrendChart(yearOnlyData);
+        return;
+    }
     
     hideBreakdownEmptyState();
 
-    // 3. Calculate Totals based on filtered data
     let totalSSS = 0, totalPhil = 0, totalPag = 0, totalTax = 0, totalDed = 0, totalGross = 0, totalNet = 0;
 
     filteredData.forEach(item => {
@@ -140,35 +100,25 @@ if (filteredData.length === 0) {
         totalNet += item.netPay;
     });
 
-    // 4. Update Summary Cards
     setText('totalDeductions', formatCurrency(totalDed));
     setText('sssDeduction', formatCurrency(totalSSS));
     setText('philhealthDeduction', formatCurrency(totalPhil));
     setText('pagibigDeduction', formatCurrency(totalPag));
     setText('taxDeduction', formatCurrency(totalTax));
 
-    // Calculate Percentages
     setPercent('sssPercent', totalSSS, totalDed);
     setPercent('philhealthPercent', totalPhil, totalDed);
     setPercent('pagibigPercent', totalPag, totalDed);
     setPercent('taxPercent', totalTax, totalDed);
 
-    // 5. Update Ratio Card
     updateRatioCard(totalGross, totalNet);
-
-    // 6. Render Charts
     renderDonutChart(totalSSS, totalPhil, totalPag, totalTax);
     
-    // Note: Trend Chart always shows the Full Year context for better UX
-    // We filter the trend chart ONLY by Year, ignoring the Month filter
     const yearOnlyData = breakdownData.filter(item => yearFilter === 'all' || item.year.toString() === yearFilter);
-    renderTrendChart(yearOnlyData); 
-    
-    // 7. Render Table
+    renderTrendChart(yearOnlyData);
     renderBreakdownTable(filteredData);
 }
 
-// Helper to reset cards if no data found
 function updateSummaryCardsToZero() {
     setText('totalDeductions', '₱0.00');
     setText('sssDeduction', '₱0.00');
@@ -182,7 +132,6 @@ function updateSummaryCardsToZero() {
     setText('taxPercent', '0%');
 }
 
-// --- Ratio Card Logic ---
 function updateRatioCard(gross, net) {
     setText('grossPayDisplay', formatCurrency(gross));
     setText('netPayDisplay', formatCurrency(net));
@@ -193,14 +142,12 @@ function updateRatioCard(gross, net) {
     const bar = document.getElementById('ratioBar');
     if (bar) {
         bar.style.width = `${ratio}%`;
-        // Color coding based on ratio
-        if (ratio > 80) bar.style.backgroundColor = '#10B981'; // Green
-        else if (ratio > 60) bar.style.backgroundColor = '#F59E0B'; // Orange
-        else bar.style.backgroundColor = '#EF4444'; // Red
+        if (ratio > 80) bar.style.backgroundColor = '#10B981';
+        else if (ratio > 60) bar.style.backgroundColor = '#F59E0B';
+        else bar.style.backgroundColor = '#EF4444';
     }
 }
 
-// --- Donut Chart ---
 function renderDonutChart(sss, phil, pag, tax) {
     const ctx = document.getElementById('deductionDonutChart');
     if (!ctx) return;
@@ -228,24 +175,18 @@ function renderDonutChart(sss, phil, pag, tax) {
     });
 }
 
-// --- Trend Chart (Line Chart) ---
 function renderTrendChart(data) {
     const ctx = document.getElementById('deductionTrendChart');
     if (!ctx) return;
 
-    // 1. Prepare Data (Group by Month for the last 6 months)
-    // Sort oldest to newest for the chart
     const sortedData = [...data].sort((a, b) => {
-         if (a.year !== b.year) return a.year - b.year;
-         return a.month - b.month;
+        if (a.year !== b.year) return a.year - b.year;
+        return a.month - b.month;
     });
 
-    // Extract last 6 entries (or aggregate by month)
+    const recentData = sortedData.slice(-6);
     const labels = [];
     const values = [];
-    
-    // Simplified: Just taking the last 6 payslips for trend
-    const recentData = sortedData.slice(-6); 
 
     recentData.forEach(item => {
         labels.push(`${getMonthName(item.month)} ${item.cutoff === 1 ? '1st' : '2nd'}`);
@@ -281,7 +222,6 @@ function renderTrendChart(data) {
     });
 }
 
-// --- Render Table ---
 function renderBreakdownTable(data) {
     const tbody = document.getElementById('breakdownTableBody');
     if (!tbody) return;
@@ -311,18 +251,15 @@ function renderBreakdownTable(data) {
     });
 }
 
-// --- Event Listeners ---
 function setupBreakdownEventListeners() {
     document.getElementById('breakdownYear')?.addEventListener('change', renderBreakdownUI);
     document.getElementById('breakdownMonth')?.addEventListener('change', renderBreakdownUI);
-    
     document.getElementById('exportBreakdownBtn')?.addEventListener('click', exportBreakdownData);
 }
 
-// --- Export Logic ---
 function exportBreakdownData() {
     if (breakdownData.length === 0) {
-        alert('No data to export');
+        showToast('No data to export', 'warning');
         return;
     }
     
@@ -342,7 +279,6 @@ function exportBreakdownData() {
     URL.revokeObjectURL(url);
 }
 
-// --- Helpers ---
 function setText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
@@ -370,4 +306,20 @@ function showBreakdownEmptyState() {
 function hideBreakdownEmptyState() {
     const el = document.getElementById('breakdownEmptyState');
     if (el) el.style.display = 'none';
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    const container = document.getElementById('toastContainer') || document.body;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
