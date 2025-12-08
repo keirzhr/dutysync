@@ -792,7 +792,10 @@ function initializeNotifications() {
 }
 
 function loadNotifications() {
-  const saved = localStorage.getItem('dutysync_notifications');
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  const saved = localStorage.getItem(`dutysync_notifications_${user.uid}`);
   if (saved) {
     notifications = JSON.parse(saved);
     updateNotificationUI();
@@ -800,7 +803,10 @@ function loadNotifications() {
 }
 
 function saveNotifications() {
-  localStorage.setItem('dutysync_notifications', JSON.stringify(notifications));
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  localStorage.setItem(`dutysync_notifications_${user.uid}`, JSON.stringify(notifications));
   updateNotificationUI();
 }
 
@@ -965,12 +971,12 @@ function checkDailyReminders() {
     addNotification('cutoff', 'Cutoff is tomorrow — make sure all duty logs are complete.');
   }
   
-  const lastCheck = localStorage.getItem('dutysync_last_hour_check');
   const todayStr = today.toDateString();
+  const lastCheck = localStorage.getItem(`dutysync_last_hour_check_${user.uid}`);
   
   if (lastCheck !== todayStr) {
     checkLowHours();
-    localStorage.setItem('dutysync_last_hour_check', todayStr);
+    localStorage.setItem(`dutysync_last_hour_check_${user.uid}`, todayStr);
   }
 }
 
@@ -1019,7 +1025,7 @@ auth.onAuthStateChanged(async user => {
       const hasWelcome = localStorage.getItem('dutysync_welcome_shown');
       if (!hasWelcome) {
         addNotification('reminder', 'Welcome to DutySync! Start by setting your pay rates and logging your work hours.');
-        localStorage.setItem('dutysync_welcome_shown', 'true');
+        localStorage.setItem(`dutysync_welcome_shown_${user.uid}`, 'true');
       }
     }, 1000);
     

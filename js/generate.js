@@ -103,17 +103,11 @@ function setupDutyUpdateListener() {
     }
   });
 
-  // REMOVE this duplicate listener or modify it
-  // Remove this entire block or modify it to NOT call calculatePayslip automatically
   db.collection('users').doc(user.uid).onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
       currentPremiumRates.overtimeMultiplier = data.overtimeMultiplier ? parseFloat(data.overtimeMultiplier) : 1.25;
       currentPremiumRates.nightDiffMultiplier = data.nightDiffMultiplier ? parseFloat(data.nightDiffMultiplier) : 0.10;
-      // Remove this automatic calculation - only update the rates
-      // if(window.fetchedHours) {
-      //   calculatePayslip(); 
-      // }
     }
   });
 }
@@ -244,24 +238,17 @@ async function fetchAndCalculateHours() {
 
       nightDiffHours += night;
 
-      // In the fetchAndCalculateHours() function, update the holiday calculation section:
-
       if (isHoliday) {
           let multiplier = 1.0;
-          if (dayType.includes('200')) multiplier = 2.00; // Regular Holiday (200%)
-          else if (dayType.includes('130')) multiplier = 1.30; // Special Non-Working Holiday (130%)
-          // If it's just "Holiday" without a percentage, default to regular holiday (200%)
+          if (dayType.includes('200')) multiplier = 2.00;
+          else if (dayType.includes('130')) multiplier = 1.30;
           
           const holidayBaseHours = Math.max(0, totalDuration - overtime);
           const holidayOTHours = overtime;
           
-          // Base holiday pay calculation
           holidayPayAccumulator += holidayBaseHours * multiplier;
           
-          // Holiday overtime calculation - OT on holidays gets additional premium
           if (holidayOTHours > 0) {
-              // For regular holidays (200%): OT rate = 200% × 130% = 260%
-              // For special non-working holidays (130%): OT rate = 130% × 130% = 169%
               holidayPayAccumulator += holidayOTHours * (multiplier * 1.3);
           }
       } else {
@@ -285,7 +272,9 @@ async function fetchAndCalculateHours() {
       holidayPayAcc: holidayPayAccumulator,
       totalWorked: grandTotalHours
     };
-  } catch (error) {}
+  } catch (error) {
+    showToast('Failed to fetch duty hours', 'error');
+  }
 }
 
 function calculatePayslip() {
@@ -305,11 +294,9 @@ function calculatePayslip() {
   const overtimeMultiplier = currentPremiumRates.overtimeMultiplier;
   const nightDiffMultiplier = currentPremiumRates.nightDiffMultiplier;
 
-  // Calculate basic pay (regular hours excluding night hours)
   const basicRegularHours = Math.max(0, hours.regularHours - hours.nightHours);
   const basicPay = roundToDecimal(basicRegularHours * hourlyRate, 2);
   
-  // Calculate night pay: regular portion + premium portion
   const nightRegularPay = roundToDecimal(hours.nightHours * hourlyRate, 2);
   const nightPremiumPay = roundToDecimal(hours.nightHours * hourlyRate * nightDiffMultiplier, 2);
   const totalNightPay = roundToDecimal(nightRegularPay + nightPremiumPay, 2);
@@ -317,10 +304,8 @@ function calculatePayslip() {
   const overtimePay = roundToDecimal(hours.overtimeHours * hourlyRate * overtimeMultiplier, 2);
   const holidayPay = roundToDecimal(hours.holidayPayAcc * hourlyRate, 2);
   
-  // Calculate total gross pay
   const grossPay = roundToDecimal(basicPay + totalNightPay + overtimePay + holidayPay, 2);
 
-  // Rest of the calculation remains the same...
   const sssDeduction = roundToDecimal(calculateSSS(grossPay * 2) / 2, 2);
   const philhealthDeduction = roundToDecimal(calculatePhilHealth(grossPay * 2), 2);
   const pagibigDeduction = roundToDecimal(calculatePagibig(grossPay * 2) / 2, 2);
@@ -329,10 +314,9 @@ function calculatePayslip() {
   const totalDeductions = roundToDecimal(sssDeduction + philhealthDeduction + pagibigDeduction + withholdingTax, 2);
   const netPay = roundToDecimal(grossPay - totalDeductions, 2);
 
-  // Update display - change night diff to show total night pay
   document.getElementById('previewBasicPay').textContent = formatCurrency(basicPay);
   document.getElementById('previewOvertimePay').textContent = formatCurrency(overtimePay);
-  document.getElementById('previewNightDiff').textContent = formatCurrency(totalNightPay); // Now shows total night pay
+  document.getElementById('previewNightDiff').textContent = formatCurrency(totalNightPay);
   document.getElementById('previewHolidayPay').textContent = formatCurrency(holidayPay);
   document.getElementById('previewGrossPay').textContent = formatCurrency(grossPay);
   document.getElementById('previewSSS').textContent = formatCurrency(sssDeduction);
@@ -345,9 +329,9 @@ function calculatePayslip() {
   calculatedPayslip = {
     basicPay, 
     overtimePay, 
-    nightRegularPay,      // Add this
-    nightPremiumPay,      // Add this
-    totalNightPay,        // Add this
+    nightRegularPay,
+    nightPremiumPay,
+    totalNightPay,
     holidayPay, 
     grossPay,
     sss: sssDeduction, 
@@ -429,30 +413,24 @@ function calculateSSS(monthlyGross) {
     { min: 29750, max: Infinity, ee: 1350.00 }
   ];
   
-  // Find the bracket where monthlyGross falls
   for (const bracket of brackets) {
     if (monthlyGross >= bracket.min && monthlyGross <= bracket.max) {
       return bracket.ee;
     }
   }
   
-  return 1350.00; // Default maximum
+  return 1350.00;
 }
 
 function calculatePhilHealth(semiMonthlyGross) {
-  // semiMonthlyGross is the semi-monthly gross pay
-  const monthlyGross = semiMonthlyGross * 2; // convert to monthly
-  
-  // PhilHealth formula: Premium = Monthly Basic Salary * 0.045 (total)
-  // Employee share is half of this (2.25%)
-  const employeeShareRate = 0.0225; // 2.25% employee share
-  
-  // Apply minimum floor of ₱10,000 and maximum ceiling of ₱100,000
+  const monthlyGross = semiMonthlyGross * 2;
+  const employeeShareRate = 0.0225;
+
   let basis = monthlyGross;
   if (monthlyGross < 10000) {
-    basis = 10000; // Minimum
+    basis = 10000;
   } else if (monthlyGross > 100000) {
-    basis = 100000; // Maximum
+    basis = 100000;
   }
   
   const monthlyEmployeeShare = basis * employeeShareRate;
@@ -471,7 +449,7 @@ function calculateBIRWithholdingTax(taxableIncomeSemiMonthly) {
     { maxIncome: 16666.50, fixed: 0, percent: 15, compensationLevel: 10416.50 },
     { maxIncome: 33332.50, fixed: 1250.00, percent: 20, compensationLevel: 16666.50 },
     { maxIncome: 83332.50, fixed: 5416.67, percent: 25, compensationLevel: 33332.50 },
-    { maxIncome: 333332.50, fixed: 20416.67, percent: 30, compensationLevel: 83332.50 },
+    { maxIncome: 83332.50, fixed: 20416.67, percent: 30, compensationLevel: 83332.50 },
     { maxIncome: Infinity, fixed: 100416.67, percent: 35, compensationLevel: 333332.50 }
   ];
   for (const bracket of semiMonthlyTable) {
@@ -484,7 +462,6 @@ function calculateBIRWithholdingTax(taxableIncomeSemiMonthly) {
   }
   return 0;
 }
-
 
 async function checkPayslipExists(year, month, cutoff) {
   const user = auth.currentUser;
@@ -644,7 +621,10 @@ async function createPdfPayslipBase64(year, month, cutoff, monthName) {
 
 async function savePayslipToHistory(year, month, cutoff, pdfBase64) {
   const user = auth.currentUser;
-  if (!user) throw new Error('User not authenticated');
+  if (!user) {
+    showToast('User not authenticated', 'error');
+    throw new Error('User not authenticated');
+  }
   if (!calculatedPayslip) {
     showToast('Error: Please calculate the payslip again before saving.', 'error');
     return;
@@ -671,6 +651,7 @@ async function savePayslipToHistory(year, month, cutoff, pdfBase64) {
   try {
     await db.collection('payslip_history').doc(user.uid).collection('records').doc(docId).set(payslipData);
   } catch (error) {
+    showToast('Failed to save payslip', 'error');
     throw error;
   }
 }
@@ -686,7 +667,9 @@ async function loadPayslipHistory() {
     }));
     renderPayslipHistory();
     updateHistoryCount();
-  } catch (error) {}
+  } catch (error) {
+    showToast('Failed to load payslip history', 'error');
+  }
 }
 
 function updateHistoryCount() {

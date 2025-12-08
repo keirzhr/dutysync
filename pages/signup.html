@@ -440,7 +440,6 @@ function showToast(message) {
         toast.classList.remove('show');
         toast.classList.add('hide');
         
-        // Remove from DOM after animation
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.parentNode.removeChild(toast);
