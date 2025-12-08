@@ -133,7 +133,7 @@ function resetRatesToDefaults() {
 function performRateReset() {
   document.getElementById('overtimeMultiplierInput').value = 1.25;
   document.getElementById('nightDiffPercentInput').value = 10;
-  showStatusMessage("⚠️ Reset to defaults. Click 'Save Rate Changes' to confirm.", "warning");
+  showStatusMessage(" Reset to defaults. Click 'Save Rate Changes' to confirm.", "warning");
 }
 
 function updateGeneratePayslipRates() {
