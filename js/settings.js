@@ -21,12 +21,14 @@ async function loadUserSettings(userId) {
       currentUserRates.hourly = data.hourlyRate || 0;
       currentUserRates.daily = data.dailyRate || 0;
       currentUserRates.overtime = data.overtimeMultiplier || 1.25;
-      currentUserRates.nightDiff = data.nightDiffPercent || 10;
+      currentUserRates.nightDiff = data.nightDiffPercent || 10; // Stored as 10 (percentage)
       
       document.getElementById('hourlyRateInput').value = currentUserRates.hourly;
       document.getElementById('dailyRateInput').value = currentUserRates.daily;
-      document.getElementById('overtimeMultiplierInput').value = currentUserRates.overtime;
-      document.getElementById('nightDiffPercentInput').value = currentUserRates.nightDiff;
+      
+      // Display as decimal with 2 decimal places
+      document.getElementById('overtimeRateInput').value = parseFloat(currentUserRates.overtime).toFixed(2);
+      document.getElementById('nightDiffRateInput').value = (currentUserRates.nightDiff / 100).toFixed(2); // Convert 10% to 0.10
     } else {
       setDefaultRates();
     }
@@ -43,15 +45,81 @@ function setDefaultRates() {
     nightDiff: 0.10
   };
   
-  document.getElementById('overtimeMultiplierInput').value = 1.25;
-  document.getElementById('nightDiffPercentInput').value = 0.10;
+  // Use strings to preserve trailing zeros
+  document.getElementById('overtimeRateInput').value = "1.25";
+  document.getElementById('nightDiffRateInput').value = "0.10";
+}
+
+function validatePremiumRates() {
+  const overtime = parseFloat(document.getElementById('overtimeRateInput').value) || 1.25;
+  const nightDiff = parseFloat(document.getElementById('nightDiffRateInput').value) || 0.10;
+  
+  if (overtime < 1) {
+    showPremiumStatusMessage("Overtime multiplier must be at least 1.0×", "error");
+    return false;
+  }
+  
+  if (nightDiff < 0 || nightDiff > 1) {
+    showPremiumStatusMessage("Night differential must be between 0-1.0 (0-100%)", "error");
+    return false;
+  }
+  
+  return true;
+}
+
+async function savePremiumRates() {
+  const user = auth.currentUser;
+  if (!user) {
+    showPremiumStatusMessage("Please login to save rates", "error");
+    return;
+  }
+  
+  if (!validatePremiumRates()) return;
+  
+  const overtime = parseFloat(document.getElementById('overtimeRateInput').value) || 1.25;
+  const nightDiff = parseFloat(document.getElementById('nightDiffRateInput').value) || 0.10;
+  
+  try {
+    const saveBtn = document.getElementById('savePremiumRatesBtn');
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+    
+    // Store nightDiff as percentage (0.10 becomes 10)
+    const nightDiffPercent = nightDiff * 100;
+    
+    await db.collection('users').doc(user.uid).update({
+      overtimeMultiplier: overtime,
+      nightDiffPercent: nightDiffPercent,
+      rateUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    currentUserRates.overtime = overtime;
+    currentUserRates.nightDiff = nightDiffPercent; // Store as 10
+    
+    showPremiumStatusMessage("✅ Premium rates saved successfully!", "success");
+    updateGeneratePayslipRates();
+    
+    saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+    saveBtn.disabled = false;
+  } catch (error) {
+    showPremiumStatusMessage("Failed to save premium rates. Please try again.", "error");
+    const saveBtn = document.getElementById('savePremiumRatesBtn');
+    saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+    saveBtn.disabled = false;
+  }
+}
+
+function resetPremiumRates() {
+  document.getElementById('overtimeRateInput').value = "1.25";
+  document.getElementById('nightDiffRateInput').value = "0.10";
+  showPremiumStatusMessage("Reset to defaults. Click 'Save' to confirm.", "warning");
 }
 
 function validateRates() {
   const hourly = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
   const daily = parseFloat(document.getElementById('dailyRateInput').value) || 0;
-  const overtime = parseFloat(document.getElementById('overtimeMultiplierInput').value) || 1.25;
-  const nightDiff = parseFloat(document.getElementById('nightDiffPercentInput').value) || 10;
+  const overtime = parseFloat(document.getElementById('overtimeRateInput').value) || 1.25;
+  const nightDiff = parseFloat(document.getElementById('nightDiffRateInput').value) || 0.10;
   
   if (hourly <= 0 && daily <= 0) {
     showStatusMessage("Please enter at least one base rate (hourly or daily)", "error");
@@ -63,8 +131,8 @@ function validateRates() {
     return false;
   }
   
-  if (nightDiff < 0 || nightDiff > 100) {
-    showStatusMessage("Night differential must be between 0-100%", "error");
+  if (nightDiff < 0 || nightDiff > 1) {
+    showStatusMessage("Night differential must be between 0-1.0 (0-100%)", "error");
     return false;
   }
   
@@ -82,32 +150,40 @@ async function saveRatesToFirestore() {
   
   const hourly = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
   const daily = parseFloat(document.getElementById('dailyRateInput').value) || 0;
-  const overtime = parseFloat(document.getElementById('overtimeMultiplierInput').value) || 1.25;
-  const nightDiff = parseFloat(document.getElementById('nightDiffPercentInput').value) || 10;
+  const overtime = parseFloat(document.getElementById('overtimeRateInput').value) || 1.25;
+  const nightDiff = parseFloat(document.getElementById('nightDiffRateInput').value) || 0.10;
   
   try {
     const updateBtn = document.getElementById('updateRateBtn');
     updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     updateBtn.disabled = true;
     
+    // Store nightDiff as percentage (0.10 becomes 10)
+    const nightDiffPercent = nightDiff * 100;
+    
     await db.collection('users').doc(user.uid).update({
       hourlyRate: hourly,
       dailyRate: daily,
       overtimeMultiplier: overtime,
-      nightDiffPercent: nightDiff,
+      nightDiffPercent: nightDiffPercent,
       rateUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    currentUserRates = { hourly, daily, overtime, nightDiff };
+    currentUserRates = { 
+      hourly, 
+      daily, 
+      overtime, 
+      nightDiff: nightDiffPercent // Store as 10
+    };
     showStatusMessage("✅ Rates saved successfully!", "success");
     updateGeneratePayslipRates();
     
-    updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Rate Changes';
+    updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Base Rates';
     updateBtn.disabled = false;
   } catch (error) {
     showStatusMessage("Failed to save rates. Please try again.", "error");
     const updateBtn = document.getElementById('updateRateBtn');
-    updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Rate Changes';
+    updateBtn.innerHTML = '<i class="fas fa-save"></i> Save Base Rates';
     updateBtn.disabled = false;
   }
 }
@@ -131,9 +207,9 @@ function resetRatesToDefaults() {
 }
 
 function performRateReset() {
-  document.getElementById('overtimeMultiplierInput').value = 1.25;
-  document.getElementById('nightDiffPercentInput').value = 10;
-  showStatusMessage(" Reset to defaults. Click 'Save Rate Changes' to confirm.", "warning");
+  document.getElementById('overtimeRateInput').value = "1.25";
+  document.getElementById('nightDiffRateInput').value = "0.10";
+  showStatusMessage("Reset to defaults. Click 'Save Rate Changes' to confirm.", "warning");
 }
 
 function updateGeneratePayslipRates() {
@@ -151,6 +227,29 @@ function updateGeneratePayslipRates() {
 
 function showStatusMessage(message, type = 'info') {
   const container = document.getElementById('rateStatusMessage');
+  if (!container) return;
+  
+  container.className = `rate-status-message ${type}`;
+  const icon = type === 'success' ? 'check-circle' : 
+               type === 'error' ? 'exclamation-circle' : 
+               'info-circle';
+  
+  container.innerHTML = `
+    <div class="status-content">
+      <i class="fas fa-${icon}"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  
+  container.style.display = 'flex';
+  
+  setTimeout(() => {
+    container.style.display = 'none';
+  }, 4000);
+}
+
+function showPremiumStatusMessage(message, type = 'info') {
+  const container = document.getElementById('premiumRatesStatusMessage');
   if (!container) return;
   
   container.className = `rate-status-message ${type}`;
@@ -193,8 +292,16 @@ confirmLogout.addEventListener('click', async () => {
 });
 
 function setupSettingsEventListeners() {
+  // Base rates button
   const saveBtn = document.getElementById('updateRateBtn');
   if (saveBtn) saveBtn.addEventListener('click', saveRatesToFirestore);
+  
+  // Premium rates buttons
+  const savePremiumBtn = document.getElementById('savePremiumRatesBtn');
+  if (savePremiumBtn) savePremiumBtn.addEventListener('click', savePremiumRates);
+  
+  const resetPremiumBtn = document.getElementById('resetPremiumRatesBtn');
+  if (resetPremiumBtn) resetPremiumBtn.addEventListener('click', resetPremiumRates);
   
   const resetBtn = document.getElementById('resetRatesBtn');
   if (resetBtn) resetBtn.addEventListener('click', resetRatesToDefaults);

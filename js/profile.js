@@ -1,5 +1,4 @@
 // profile.js
-
 let currentUserData = null;
 let isEditMode = false;
 
@@ -22,8 +21,8 @@ async function loadUserProfile(userId) {
                 fullName: auth.currentUser.email.split('@')[0],
                 email: auth.currentUser.email,
                 phone: '',
-                position: 'Manager',
-                location: '',
+                position: '',
+                address: '',
                 hireDate: new Date().toISOString().split('T')[0],
                 photoBase64: null,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -75,14 +74,14 @@ function displayUserProfile(userData) {
     const profileEmailInput = document.getElementById('profileEmailInput');
     const profilePhone = document.getElementById('profilePhone');
     const profilePositionInput = document.getElementById('profilePositionInput');
-    const profileLocation = document.getElementById('profileLocation');
+    const profileAddress = document.getElementById('profileAddress');
     const profileHireDate = document.getElementById('profileHireDate');
     
     if (profileFullName) profileFullName.value = userData.fullName || '';
     if (profileEmailInput) profileEmailInput.value = userData.email || '';
     if (profilePhone) profilePhone.value = userData.phone || '';
     if (profilePositionInput) profilePositionInput.value = userData.position || '';
-    if (profileLocation) profileLocation.value = userData.location || '';
+    if (profileAddress) profileAddress.value = userData.address || '';
     if (profileHireDate) profileHireDate.value = userData.hireDate || '';
 
     const sidebarAvatar = document.getElementById('userAvatar');
@@ -249,7 +248,7 @@ function toggleEditMode() {
         'profileFullName',
         'profilePhone',
         'profilePositionInput',
-        'profileLocation',
+        'profileAddress',
         'profileHireDate'
     ];
     
@@ -302,7 +301,7 @@ async function saveProfileChanges() {
     const fullName = document.getElementById('profileFullName').value.trim();
     const phone = document.getElementById('profilePhone').value.trim();
     const position = document.getElementById('profilePositionInput').value.trim();
-    const location = document.getElementById('profileLocation').value.trim();
+    const address = document.getElementById('profileAddress').value.trim();
     const hireDate = document.getElementById('profileHireDate').value;
     
     if (!fullName) {
@@ -315,7 +314,7 @@ async function saveProfileChanges() {
             fullName,
             phone,
             position,
-            location,
+            address,
             hireDate,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn More - DutySync</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0b1b3a 0%, #081229 50%, #000000 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #ffffff;
+        }
+        .top-logo {
+            position: fixed;
+            top: 20px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+        .top-logo-img {
+            width: 40px;
+            height: 40px;
+            background: url('../images/logo.png') center center no-repeat;
+            background-size: contain;
+        }
+        .top-logo-text {
+            color: #FFFFFF;
+            font-size: 23px;
+            font-weight: 600;
+        }
+        .container {
+            max-width: 900px;
+            margin: 80px auto 40px;
+            background: #0a0e1a;
+            border-radius: 20px;
+            padding: 50px;
+            border: 1px solid rgba(90, 112, 176, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #5A70B0, #A1B5F4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #A1B5F4;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section h2 i {
+            font-size: 28px;
+        }
+        .section p {
+            font-size: 15px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+        }
+        .info-box {
+            background: rgba(90, 112, 176, 0.1);
+            border-left: 4px solid #5A70B0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .info-box h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #A1B5F4;
+        }
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .info-box ul li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .info-box ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        .highlight-box h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #10b981;
+        }
+        .highlight-box p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 32px 0;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #0066FF;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .back-btn:hover {
+            background: #0052CC;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 25px;
+                margin: 70px 10px 30px;
+            }
+            .header h1 {
+                font-size: 28px;
+            }
+            .section h2 {
+                font-size: 20px;
+            }
+            .top-logo {
+                top: 15px;
+                left: 20px;
+            }
+            .top-logo-img {
+                width: 35px;
+                height: 35px;
+            }
+            .top-logo-text {
+                font-size: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 20px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+            .section h2 {
+                font-size: 18px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+</head>
+<body>
+    <div class="top-logo">
+        <div class="top-logo-img"></div>
+        <div class="top-logo-text">DutySync</div> 
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Data Privacy & Your Information</h1>
+            <p>Understanding how your contact information is used in DutySync</p>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-info-circle"></i> How Your Information May Be Shared</h2>
+            <p>
+                When organizations or individuals use DutySync to manage their workforce and payroll, 
+                they may upload or input employee contact information such as names, email addresses, 
+                and phone numbers as part of their duty logging and payroll management process.
+            </p>
+            <p>
+                If you're an employee whose information has been added to the system by your employer 
+                or manager, this is to facilitate:
+            </p>
+            
+            <div class="info-box">
+                <h3>Legitimate Business Purposes:</h3>
+                <ul>
+                    <li>Work hour tracking and attendance management</li>
+                    <li>Payslip generation and salary computation</li>
+                    <li>Employee profile management within the organization</li>
+                    <li>Communication regarding work schedules and compensation</li>
+                    <li>Record-keeping for compliance with labor regulations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2><i class="fas fa-shield-alt"></i> How We Protect Your Data</h2>
+            <p>
+                DutySync is committed to protecting your personal information. Here's how we ensure your data security:
+            </p>
+            
+            <div class="info-box">
+                <h3>Security Measures:</h3>
+                <ul>
+                    <li>End-to-end encryption for all data transmission</li>
+                    <li>Secure Firebase authentication and database structure</li>
+                    <li>Access controls - users only see their own data</li>
+                    <li>No sharing of personal data with third parties for marketing</li>
+                    <li>Regular security audits and updates</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2><i class="fas fa-user-check"></i> Your Rights & Control</h2>
+            <p>
+                You have full rights regarding your personal information in DutySync:
+            </p>
+            
+            <div class="info-box">
+                <h3>What You Can Do:</h3>
+                <ul>
+                    <li>View and update your personal information anytime</li>
+                    <li>Request deletion of your account and associated data</li>
+                    <li>Export your data for personal records</li>
+                    <li>Contact us for any privacy concerns</li>
+                    <li>Opt out of non-essential communications</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <h3><i class="fas fa-lock"></i> Your Data Belongs to You</h3>
+            <p>
+                DutySync does not sell, rent, or share your personal information with external parties 
+                for marketing purposes. Your data is used solely for the payroll and time management 
+                services you or your organization has signed up for. You maintain ownership and control 
+                of your information at all times.
+            </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2><i class="fas fa-question-circle"></i> Questions or Concerns?</h2>
+            <p>
+                If you have questions about how your information is being used, or if you'd like to 
+                request access to or deletion of your data, please contact us at:
+            </p>
+            <p style="margin-top: 12px;">
+                <strong>Email:</strong> <a href="mailto:keilrizherv@gmail.com" style="color: #A1B5F4; text-decoration: none;">keilrizherv@gmail.com</a><br>
+                <strong>Developer:</strong> Keil Rizher R. Valida
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="signup.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Sign Up
+            </a>
+        </div>
+
+        <div class="footer-note">
+            <p>Last updated: December 2025 | DutySync v1.0</p>
+            <p style="margin-top: 8px;">By using DutySync, you agree to our data handling practices as described above.</p>
+        </div>
+    </div>
+</body>
+</html>

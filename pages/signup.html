@@ -219,7 +219,6 @@
             cursor: not-allowed;
         }
 
-        /* Toast Notification Styles */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -228,7 +227,6 @@
         }
         
         .toast {
-            background: #ff3333;
             color: white;
             padding: 12px 20px;
             border-radius: 6px;
@@ -240,6 +238,14 @@
             opacity: 0;
             transition: all 0.3s ease;
             max-width: 300px;
+        }
+        
+        .toast.success {
+            background: #28a745;
+        }
+        
+        .toast.error {
+            background: #ff3333;
         }
         
         .toast.show {
@@ -319,13 +325,11 @@
     </style>
 </head>
 <body>
-    <!-- Top Logo -->
     <div class="top-logo">
         <div class="top-logo-img"></div>
         <div class="top-logo-text">DutySync</div> 
     </div>
     
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
     
     <div class="signup-container">
@@ -334,7 +338,6 @@
         </div>
         <form id="signupForm">
             <div class="form-columns">
-                <!-- Personal Information Section -->
                 <div class="form-section">
                     <div class="section-title">Personal Information</div>
                     
@@ -343,19 +346,18 @@
                         <input type="text" id="fullName" placeholder="firstname" required>
                     </div>
                     <div class="form-group">
-                        <label for="occupation">Occupation</label>
-                        <input type="text" id="occupation" placeholder="occupation" required>
+                        <label for="position">Position</label>
+                        <input type="text" id="position" placeholder="position" required>
                     </div>
                     <div class="form-group">
                         <label for="address">Address</label>
                         <input type="text" id="address" placeholder="address" required>
                     </div>
                     <div class="form-group">
-                        <label for="contactNumber">Contact Number</label>
-                        <input type="tel" id="contactNumber" placeholder="Contact Number" required>
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="tel" id="phoneNumber" placeholder="Phone Number" required>
                     </div>
                 </div>
-                <!-- Account Information Section -->
                 <div class="form-section">
                     <div class="section-title">Account Information</div>
                     
@@ -389,7 +391,7 @@
                     </div>
                     <div class="disclaimer">
                         People who use our services may have uploaded your contact information to <strong>DutySync</strong>. 
-                        <a href="#">Learn More</a>
+                        <a href="learnmore.html">Learn More</a>
                     </div>
        
                     <div class="button-group">
@@ -405,7 +407,6 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyCqCMlZHHwScTBMrJr9QCOKMDYOasKX9JI",
     authDomain: "dutysync-2025.firebaseapp.com",
@@ -416,26 +417,22 @@ const firebaseConfig = {
     measurementId: "G-70X2MGERZC"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Toast notification function
-function showToast(message) {
+function showToast(message, type = 'error') {
     const toastContainer = document.getElementById('toastContainer');
     const toast = document.createElement('div');
-    toast.className = 'toast';
+    toast.className = `toast ${type}`;
     toast.textContent = message;
     
     toastContainer.appendChild(toast);
     
-    // Trigger animation
     setTimeout(() => {
         toast.classList.add('show');
     }, 10);
     
-    // Remove toast after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
         toast.classList.add('hide');
@@ -448,7 +445,6 @@ function showToast(message) {
     }, 4000);
 }
 
-// Toggle password visibility
 document.querySelectorAll('.toggle-password').forEach(button => {
     button.addEventListener('click', function() {
         const targetId = this.getAttribute('data-target');
@@ -464,12 +460,10 @@ document.querySelectorAll('.toggle-password').forEach(button => {
     });
 });
 
-// Back button functionality
 document.getElementById('backBtn').addEventListener('click', function() {
     window.location.href = '../index.html';
 });
 
-// Handle signup form submission
 document.getElementById('signupForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -477,12 +471,11 @@ document.getElementById('signupForm').addEventListener('submit', async function(
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
-    const contactNumber = document.getElementById('contactNumber').value.trim();
-    const occupation = document.getElementById('occupation').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const position = document.getElementById('position').value.trim();
     const address = document.getElementById('address').value.trim();
     const confirmBtn = document.getElementById('confirmBtn');
     
-    // Validation
     if (password !== confirmPassword) {
         showToast('Passwords do not match');
         return;
@@ -493,8 +486,8 @@ document.getElementById('signupForm').addEventListener('submit', async function(
         return;
     }
     
-    if (!contactNumber) {
-        showToast('Contact number is required');
+    if (!phoneNumber) {
+        showToast('Phone number is required');
         return;
     }
     
@@ -502,27 +495,31 @@ document.getElementById('signupForm').addEventListener('submit', async function(
         confirmBtn.disabled = true;
         confirmBtn.textContent = 'Creating...';
         
-        // Create user with email & password
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
         
-        // Save user info to Firestore (don't wait for it to complete)
-        setDoc(doc(db, 'users', uid), {
+        await setDoc(doc(db, 'users', uid), {
             fullName: fullName,
             email: email,
-            contactNumber: contactNumber,
-            occupation: occupation,
+            phone: phoneNumber,
+            position: position,
             address: address,
-            createdAt: new Date()
-        }).catch(err => console.error('Firestore error:', err));
+            createdAt: new Date(),
+            hireDate: new Date().toISOString().split('T')[0],
+            photoBase64: null,
+            hourlyRate: 0,
+            dailyRate: 0,
+            overtimeMultiplier: 1.25,
+            nightDiffMultiplier: 0.10
+        });
         
-        // Redirect immediately after account creation
+        showToast('Account created successfully!', 'success');
+        
         setTimeout(() => {
             window.location.href = '../index.html';
-        }, 500);
+        }, 1500);
         
     } catch (error) {
-        console.error('Signup error:', error);
         let errorMessage = 'An error occurred. Please try again.';
         
         if (error.code === 'auth/email-already-in-use') {

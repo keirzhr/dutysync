@@ -463,16 +463,40 @@ function calculateBIRWithholdingTax(taxableIncomeSemiMonthly) {
   return 0;
 }
 
-async function checkPayslipExists(year, month, cutoff) {
-  const user = auth.currentUser;
-  if (!user) return false;
-  const docId = `${year}_${month}_${cutoff}`;
+async function generateAndSavePayslip() {
+  if (!calculatedPayslip) {
+    showToast('Please calculate payslip first', 'warning');
+    return;
+  }
+
+  const year = document.getElementById('generateYear').value;
+  const month = document.getElementById('generateMonth').value;
+  const cutoff = document.getElementById('generateCutoff').value;
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthName = monthNames[month - 1];
+
   try {
-    const docRef = db.collection('payslip_history').doc(user.uid).collection('records').doc(docId);
-    const doc = await docRef.get();
-    return doc.exists;
+    const genBtn = document.getElementById('generatePdfBtn');
+    const originalText = genBtn.innerHTML;
+    genBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    genBtn.disabled = true;
+
+    await loadJsPDF();
+    const pdfBase64 = await createPdfPayslipBase64(year, month, cutoff, monthName);
+    await savePayslipToHistory(year, month, cutoff, pdfBase64);
+    
+    genBtn.innerHTML = originalText;
+    genBtn.disabled = false;
+    showSuccessModal();
+    await loadPayslipHistory();
+    setTimeout(() => {
+      document.getElementById('payslipHistorySection')?.scrollIntoView({ behavior: 'smooth' });
+    }, 500);
   } catch (error) {
-    return false;
+    showToast('Failed to generate payslip. Please try again.', 'error');
+    const genBtn = document.getElementById('generatePdfBtn');
+    genBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download Payslip';
+    genBtn.disabled = false;
   }
 }
 
@@ -485,13 +509,6 @@ async function generateAndSavePayslip() {
   const year = document.getElementById('generateYear').value;
   const month = document.getElementById('generateMonth').value;
   const cutoff = document.getElementById('generateCutoff').value;
-  const exists = await checkPayslipExists(year, month, cutoff);
-  
-  if (exists) {
-    showToast('Payslip already generated for this period. Check your history below.', 'info');
-    document.getElementById('payslipHistorySection')?.scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
 
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthName = monthNames[month - 1];

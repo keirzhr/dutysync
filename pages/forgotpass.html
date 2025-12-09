@@ -303,7 +303,6 @@
             const email = document.getElementById('email').value.trim();
             const resetBtn = document.getElementById('resetBtn');
             
-            // Validate email
             if (!email) {
                 showError('Please enter your email address');
                 return;
@@ -313,15 +312,12 @@
             resetBtn.textContent = 'Sending...';
             
             try {
-                // Send password reset email using Firebase Auth
                 await auth.sendPasswordResetEmail(email);
                 
                 showSuccess('Password reset link sent! Please check your email inbox.');
                 
-                // Clear the form
                 document.getElementById('email').value = '';
-                
-                // Redirect to login after 3 seconds
+
                 setTimeout(() => {
                     window.location.href = '../index.html';
                 }, 3000);
