@@ -19,26 +19,9 @@
             justify-content: center;
             padding: 20px;
         }
-        .top-logo {
-            position: fixed;
-            top: 20px;
-            left: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 100;
-        }
-        .top-logo-img {
-            width: 40px;
-            height: 40px;
-            background: url('../images/logo.png') center center no-repeat;
-            background-size: contain;
-        }
-        .top-logo-text {
-            color: #FFFFFF;
-            font-size: 23px;
-            font-weight: 600;
-        }
+        
+        /* Removed .top-logo styles since we're moving logo to container */
+        
         .signup-container {
             background: #0a0e1a;
             border-radius: 16px;
@@ -47,11 +30,18 @@
             max-width: 700px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(90, 112, 176, 0.2);
-            margin-top: 20px;
         }
         .header-section {
             text-align: center;
             margin-bottom: 20px;
+        }
+        .logo {
+          width: 70px;
+          height: 70px;
+          margin: 0 auto 8px;
+          background: url('images/logo.png') center center no-repeat;
+          background-size: contain;
+          border-radius: 12px;
         }
         h1 {
             color: #FFFFFF;
@@ -267,17 +257,6 @@
                 padding: 20px 25px;
                 max-width: 450px;
             }
-            .top-logo {
-                top: 15px;
-                left: 20px;
-            }
-            .top-logo-img {
-                width: 35px;
-                height: 35px;
-            }
-            .top-logo-text {
-                font-size: 20px;
-            }
             h1 {
                 font-size: 22px;
                 margin-bottom: 15px;
@@ -310,10 +289,6 @@
                 padding: 20px 22px;
                 margin-top: 10px;
             }
-            .top-logo {
-                top: 10px;
-                left: 15px;
-            }
             h1 {
                 font-size: 20px;
                 margin-bottom: 12px;
@@ -325,15 +300,12 @@
     </style>
 </head>
 <body>
-    <div class="top-logo">
-        <div class="top-logo-img"></div>
-        <div class="top-logo-text">DutySync</div> 
-    </div>
     
     <div class="toast-container" id="toastContainer"></div>
     
     <div class="signup-container">
         <div class="header-section">
+            <img src="../images/logo.png" alt="Logo" class="logo">
             <h1>Sign Up</h1>
         </div>
         <form id="signupForm">
