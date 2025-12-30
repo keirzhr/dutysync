@@ -17,13 +17,17 @@ function initializeBreakdownFilters() {
 
     const currentYear = new Date().getFullYear();
     yearSelect.innerHTML = '<option value="all">All Years</option>';
-    
-    for (let y = currentYear; y >= currentYear - 5; y--) {
+
+    for (let y = 2035; y >= 2025; y--) {
         const opt = document.createElement('option');
         opt.value = y;
         opt.textContent = y;
-        if (y === currentYear) opt.selected = true;
         yearSelect.appendChild(opt);
+    }
+        if (currentYear >= 2025 && currentYear <= 2035) {
+        yearSelect.value = currentYear;
+    } else {
+        yearSelect.value = "all"; 
     }
 }
 

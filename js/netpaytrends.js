@@ -20,7 +20,10 @@ function initializeNetPayFilters() {
     const currentYear = new Date().getFullYear();
     yearSelect.innerHTML = '<option value="all">All Years</option>';
     
-    for (let y = currentYear; y >= currentYear - 5; y--) {
+    const startYear = Math.min(2025, currentYear);
+    const endYear = Math.max(2035, currentYear);
+    
+    for (let y = endYear; y >= startYear; y--) {
         const opt = document.createElement('option');
         opt.value = y;
         opt.textContent = y;

@@ -131,7 +131,9 @@ function renderMobileCards(records) {
         return;
     }
 
-    records.forEach(record => {
+    const sortedRecords = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    sortedRecords.forEach(record => {
         const card = document.createElement('div');
         card.className = 'duty-card';
         const dayTypeClass = (record.dayType || 'regular').toLowerCase().replace(/ /g, '-');

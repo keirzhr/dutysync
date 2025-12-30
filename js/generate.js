@@ -135,10 +135,15 @@ function populateYearDropdown() {
   if (!yearSelect) return;
   const currentYear = new Date().getFullYear();
   yearSelect.innerHTML = '';
-  for (let y = currentYear; y >= currentYear - 5; y--) {
+
+  const startYear = 2025;
+  const endYear = 2035;
+  
+  for (let y = endYear; y >= startYear; y--) {
     const opt = document.createElement('option');
     opt.value = y;
     opt.textContent = y;
+    if (y === currentYear) opt.selected = true;
     yearSelect.appendChild(opt);
   }
 }
